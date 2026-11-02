@@ -138,7 +138,7 @@ function initCanvas(id,data){
 }
 function persistCanvas(id,c){S.ans[id]={drawing:c.toDataURL('image/jpeg',.68)};saveDraft()}
 function setTool(id,tool){S.tools[id]=S.tools[id]||{size:5};S.tools[id].mode=tool;S.tools[id]=tool;$('#pen-'+id)?.classList.toggle('active',tool==='pen');$('#erase-'+id)?.classList.toggle('active',tool==='erase')}
-function setPenSize(id,v){S.tools[id]={mode:'pen',size:+v||5}}
+function setPenSize(id,v){S.tools[id]={mode:'pen',size:+v||3}}
 function undoStroke(id){const c=$('#cv-'+id),ctx=c?.getContext('2d'),stack=S.strokes[id];if(!c||!stack?.length)return;ctx.putImageData(stack.pop(),0,0);persistCanvas(id,c)}
 function clearCanvas(id){const c=$('#cv-'+id);if(!c)return;if(!confirm('Hapus seluruh tulisan tangan pada soal ini?'))return;const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);S.strokes[id]=[];persistCanvas(id,c)}
 const empty=v=>v===undefined||v===null||v===''||(Array.isArray(v)&&!v.length);
