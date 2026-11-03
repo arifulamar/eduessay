@@ -10,7 +10,7 @@ const app=express();
 app.disable('x-powered-by');
 app.use(express.json({limit:'15kb'}));
 const origins=(process.env.ALLOWED_ORIGINS||'https://educonnect.my.id').split(',').map(x=>x.trim()).filter(Boolean);
-app.use(cors({origin:(origin,cb)=>cb(null,!origin||origins.includes(origin)),methods:['GET','POST','PATCH'],allowedHeaders:['Content-Type','Authorization']}));
+app.use(cors({origin:(origin,cb)=>cb(null,!origin||origins.includes(origin)),methods:['GET','POST','PATCH','DELETE'],allowedHeaders:['Content-Type','Authorization']}));
 const types=['aktif','skhun'];
 const clean=(x,max=120)=>typeof x==='string'?x.trim().slice(0,max):'';
 const validDate=x=>/^\d{4}-\d{2}-\d{2}$/.test(x)&&!Number.isNaN(Date.parse(x));
