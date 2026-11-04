@@ -1,0 +1,1 @@
+node_modules/\n.env\nsecrets/\n*.sql.gz\nbackup-*.sql\n
