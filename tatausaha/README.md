@@ -1,20 +1,21 @@
 # Educonnect Tata Usaha — SMA Negeri 1 Sabang
 
-Aplikasi layanan surat keterangan berbasis GitHub Pages + Firebase + Cloud Run.
+Frontend layanan surat tetap di GitHub Pages, sedangkan backend mandiri dijalankan pada VPS.
 
 ## Frontend
 - Publik: https://educonnect.my.id/tatausaha/
 - Dashboard staf: https://educonnect.my.id/tatausaha/admin/
 
-## Konfigurasi
-Edit `config.js` setelah backend Cloud Run tersedia. Isi `API_BASE` dengan URL Cloud Run (tanpa garis miring akhir). Firebase Web config memakai project `eduessay-bd0ae`.
+## Backend mandiri
+- Kode backend: `tatausaha-api/`
+- Runtime: Node.js + Express
+- Database: MySQL 8.4
+- Deployment: Docker Compose pada VPS Ubuntu
+- Panduan: [tatausaha-api/DEPLOY.md](../tatausaha-api/DEPLOY.md)
 
-## Backend
-Sumber backend ada di `tatausaha-api/`. Deploy dari folder tersebut ke Cloud Run:
-```bash
-gcloud run deploy educonnect-tu --source ./tatausaha-api --region asia-southeast2 --allow-unauthenticated --set-env-vars "ALLOWED_ORIGINS=https://educonnect.my.id,ADMIN_EMAILS="
-```
-Tambahkan email staf TU pada `ADMIN_EMAILS` setelah diterima. Jangan memasukkan service-account key ke repository. Gunakan service account Cloud Run dengan akses Firestore.
+## Status konfigurasi
+`config.js` masih menunggu alamat API HTTPS VPS. Setelah VPS siap dan DNS `api.educonnect.my.id` aktif, isi `API_BASE` dengan `https://api.educonnect.my.id`.
 
-## Status
-Frontend dan sumber backend telah ditempatkan pada repository GitHub Pages. Backend perlu dideploy dan URL Cloud Run dimasukkan ke `tatausaha/config.js` sebelum layanan dapat menerima pengajuan.
+Google Sign-In di frontend masih menggunakan Firebase Authentication untuk identitas. Namun, data pengajuan, hak akses staf, dan nomor surat dikelola backend Node.js dan MySQL; backend tidak lagi menggunakan Firestore.
+
+Jangan commit file rahasia `.env` atau `secrets/firebase-service-account.json` ke GitHub.
