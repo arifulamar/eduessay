@@ -1,6 +1,11 @@
-node_modules/\n.env\nsecrets/\n*.sql.gz\nbackup-*.sql\n
+node_modules/
 
 # Environment variables and secrets
 .env
 .env.*
 !.env.example
+secrets/
+
+# Database backups
+*.sql.gz
+backup-*.sql
