@@ -14,7 +14,8 @@ const db = mysql.createPool({
   database: process.env.DB_NAME || 'educonnect_tu',
   waitForConnections: true,
   connectionLimit: Number(process.env.DB_POOL_SIZE || 10),
-  charset: 'utf8mb4'
+  charset: 'utf8mb4',
+  dateStrings: true
 });
 const app = express();
 app.disable('x-powered-by');
