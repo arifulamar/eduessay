@@ -1,32 +1,117 @@
-# Cloud Run deployment
+# Deployment backend Tata Usaha di VPS Ubuntu
 
-Run from the repository root:
+Panduan ini untuk VPS Ubuntu 22.04/24.04 dengan akses sudo. Backend menggunakan Node.js 22, Docker Compose, MySQL 8.4, dan Nginx. Jangan jalankan di GitHub Pages; Pages hanya menyajikan frontend statis.
 
+## 1. DNS dan firewall
+Buat DNS A record `api.educonnect.my.id` menuju IPv4 VPS. Di firewall/provider, izinkan TCP 22 (SSH), 80 dan 443. Jangan buka port 3306 atau 8080 ke internet.
+
+## 2. Pasang Docker
+Di VPS:
 ```bash
-gcloud config set project eduessay-bd0ae
-gcloud services enable run.googleapis.com cloudbuild.googleapis.com firestore.googleapis.com
-gcloud run deploy educonnect-tu --source ./tatausaha-api --region asia-southeast2 --allow-unauthenticated --set-env-vars "ALLOWED_ORIGINS=https://educonnect.my.id,SUPERADMIN_EMAILS=ariful.amar@gmail.com,ADMIN_EMAILS=,KEPALA_NAMA=,KEPALA_NIP="
+sudo apt update
+sudo apt install -y ca-certificates curl git nginx
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo systemctl enable --now docker
 ```
 
-After deployment, copy the HTTPS service URL and replace `API_BASE` in `tatausaha/config.js` with that URL (no trailing slash). Redeploy/recommit the frontend file.
+## 3. Ambil kode dari GitHub
+```bash
+sudo mkdir -p /opt/educonnect
+sudo chown "$USER":"$USER" /opt/educonnect
+git clone https://github.com/Arifulamar/eduessay.git /opt/educonnect/repo
+cd /opt/educonnect/repo/tatausaha-api
+```
+Untuk repository private, gunakan autentikasi GitHub yang aman (SSH deploy key atau token dengan akses minimal); jangan tempel token di perintah yang tersimpan di shell history.
 
-## Required service account
-The Cloud Run runtime service account needs Firestore access (for example, Cloud Datastore User) in project `eduessay-bd0ae`. Do not upload service-account JSON keys to GitHub; use the attached runtime service account.
+## 4. Siapkan konfigurasi rahasia
+```bash
+cp .env.example .env
+mkdir -p secrets
+chmod 700 secrets
+nano .env
+```
+Ganti `DB_PASSWORD` dan `MYSQL_ROOT_PASSWORD` dengan dua password acak yang berbeda. Isi `KEPALA_NAMA` dan `KEPALA_NIP` jika sudah ditetapkan. Pertahankan `SUPERADMIN_EMAILS=ariful.amar@gmail.com`.
+Buat Firebase service account JSON dari project Firebase `eduessay-bd0ae` melalui Google Cloud IAM > Service Accounts. Beri izin minimum untuk memverifikasi Firebase Authentication (Firebase Authentication Admin/Service Account Token Creator sesuai kebutuhan SDK), unduh JSON secara aman, lalu simpan sebagai `secrets/firebase-service-account.json`. File ini tidak boleh masuk GitHub.
+```bash
+chmod 600 .env secrets/firebase-service-account.json
+```
 
-## Before opening to the public
-1. Superadmin utama: `ariful.amar@gmail.com` (configured by `SUPERADMIN_EMAILS`). This account can add/remove TU staff from the admin dashboard.
-2. Sign in to `/tatausaha/admin/` with the Superadmin Google account and add staff emails in **Manajemen akun staf TU**. Staff access is stored in the private Firestore collection `tu_admins`.
-3. Do not add the Superadmin email to the staff list; it has permanent elevated access through the server allowlist.
-4. Set the verified principal's name and NIP with `KEPALA_NAMA` and `KEPALA_NIP`.
-5. Confirm Google sign-in is enabled in Firebase Authentication and `educonnect.my.id` is an authorized domain.
-6. Confirm Firestore is initialized in the same Firebase/GCP project.
-7. Test a request, staff verification, unique letter number, and generated PDF.
-8. Verify letter wording and signature authority with school administration before official use.
+## 5. Jalankan backend dan database
+```bash
+docker compose up -d --build
+docker compose ps
+docker compose logs -f api
+```
+Cek API dari VPS:
+```bash
+curl http://127.0.0.1:8080/health
+```
+Target: `{"ok":true,"database":"connected"}`.
 
-The API uses Firebase Admin SDK and therefore accesses Firestore using the Cloud Run service account. Do not grant public Firestore access to the `tu_pengajuan` or `tu_nomor_surat` collections.
+Catatan: MySQL menjalankan `schema.sql` otomatis hanya saat volume database pertama kali dibuat. Jangan menghapus volume `mysql_data` untuk memperbaiki aplikasi karena itu menghapus data.
 
+## 6. Pasang Nginx reverse proxy
+Buat `/etc/nginx/sites-available/educonnect-tu`:
+```nginx
+server {
+    listen 80;
+    server_name api.educonnect.my.id;
+    client_max_body_size 25k;
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+Aktifkan:
+```bash
+sudo ln -s /etc/nginx/sites-available/educonnect-tu /etc/nginx/sites-enabled/educonnect-tu
+sudo nginx -t
+sudo systemctl reload nginx
+sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d api.educonnect.my.id
+```
+Tes HTTPS:
+```bash
+curl https://api.educonnect.my.id/health
+```
 
-## Superadmin security
-- The backend grants the superadmin role only to verified Google ID tokens whose email matches `SUPERADMIN_EMAILS`.
-- Superadmin-only routes manage staff records. Ordinary staff cannot list, add, or remove staff accounts.
-- Never put admin email authorization only in frontend JavaScript; backend authorization is authoritative.
+## 7. Hubungkan frontend
+Setelah HTTPS health check berhasil, ubah `tatausaha/config.js` di GitHub:
+```js
+export const API_BASE = 'https://api.educonnect.my.id';
+```
+Commit perubahan. Pastikan CORS `ALLOWED_ORIGINS=https://educonnect.my.id`.
+
+## 8. Firebase Auth domain
+Di Firebase Console > Authentication > Settings > Authorized domains, pastikan `educonnect.my.id` ada. Google Sign-In tetap digunakan untuk login; API memeriksa token dan mengecek peran dari tabel MySQL.
+
+## 9. Backup
+Contoh backup database:
+```bash
+docker compose exec -T db sh -c 'mysqldump -u root -p"$MYSQL_ROOT_PASSWORD" educonnect_tu' > backup-$(date +%F).sql
+```
+Simpan backup terenkripsi di lokasi terpisah dari VPS dan uji pemulihan secara berkala.
+
+## 10. Pembaruan versi
+```bash
+cd /opt/educonnect/repo
+git pull origin main
+cd tatausaha-api
+docker compose up -d --build
+```
+
+## Penting sebelum produksi
+- Backend versi MySQL ini belum otomatis memigrasikan data lama yang mungkin ada di Firestore. Jika sudah ada pengajuan nyata, ekspor dan migrasikan sebelum berpindah.
+- File Firebase service account adalah rahasia. Jangan commit, jangan kirim melalui chat, dan batasi izin file.
+- Atur firewall provider dan update OS secara rutin.
+- Lakukan uji pengajuan, status, verifikasi staf, nomor surat duplikat, PDF, backup, dan restore sebelum diumumkan ke publik.
