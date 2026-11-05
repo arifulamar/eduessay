@@ -18,6 +18,7 @@ use uuid::Uuid;
 #[derive(Clone)]
 struct AppState {
     db: MySqlPool,
+    http: reqwest::Client,
 }
 
 #[derive(Serialize)]
