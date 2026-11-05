@@ -28,7 +28,7 @@ jobs:
           workspaces: tatausaha-api-rust
 
       - name: Build release binary
-        run: cargo build --release --locked --manifest-path tatausaha-api-rust/Cargo.toml
+        run: cargo build --release --manifest-path tatausaha-api-rust/Cargo.toml
 
       - name: Upload Linux binary
         uses: actions/upload-artifact@v4
