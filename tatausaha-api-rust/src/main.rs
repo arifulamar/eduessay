@@ -1,7 +1,12 @@
 use actix_cors::Cors;
-use actix_web::{get, middleware, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{delete, get, middleware, patch, post, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
 use chrono::{NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
+use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
+use once_cell::sync::Lazy;
+use sqlx::Row;
+use std::collections::HashMap;
+use tokio::sync::RwLock;
 use sha2::{Digest, Sha256};
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::{MySql, MySqlPool};
@@ -208,6 +213,237 @@ async fn get_status(state: web::Data<AppState>, path: web::Path<String>) -> Http
     }
 }
 
+
+#[derive(Deserialize)]
+struct FirebaseClaims {
+    aud: String,
+    iss: String,
+    exp: usize,
+    sub: String,
+    email: Option<String>,
+    email_verified: Option<bool>,
+}
+
+static FIREBASE_CERTS: Lazy<RwLock<HashMap<String, String>>> =
+    Lazy::new(|| RwLock::new(HashMap::new()));
+
+#[derive(Clone)]
+struct StaffIdentity {
+    email: String,
+    superadmin: bool,
+}
+
+async fn verify_firebase_token(token: &str, project_id: &str, client: &reqwest::Client) -> Result<FirebaseClaims, String> {
+    let header = decode_header(token).map_err(|_| "Token login tidak valid".to_string())?;
+    if header.alg != Algorithm::RS256 {
+        return Err("Algoritma token tidak didukung".to_string());
+    }
+    let kid = header.kid.ok_or_else(|| "Token tidak memiliki key ID".to_string())?;
+    {
+        let cache = FIREBASE_CERTS.read().await;
+        if !cache.contains_key(&kid) {
+            drop(cache);
+            let response = client.get("https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com")
+                .send().await.map_err(|_| "Tidak dapat memverifikasi layanan autentikasi".to_string())?;
+            if !response.status().is_success() {
+                return Err("Sertifikat autentikasi tidak tersedia".to_string());
+            }
+            let certs: HashMap<String, String> = response.json().await
+                .map_err(|_| "Sertifikat autentikasi tidak valid".to_string())?;
+            let mut cache = FIREBASE_CERTS.write().await;
+            *cache = certs;
+        }
+    }
+    let pem = FIREBASE_CERTS.read().await.get(&kid).cloned()
+        .ok_or_else(|| "Kunci verifikasi token tidak ditemukan".to_string())?;
+    let key = DecodingKey::from_rsa_pem(pem.as_bytes())
+        .map_err(|_| "Kunci verifikasi token tidak valid".to_string())?;
+    let mut validation = Validation::new(Algorithm::RS256);
+    validation.set_audience(&[project_id]);
+    validation.set_issuer(&[format!("https://securetoken.google.com/{}", project_id)]);
+    validation.validate_exp = true;
+    let data = decode::<FirebaseClaims>(token, &key, &validation)
+        .map_err(|_| "Sesi tidak valid atau sudah kedaluwarsa".to_string())?;
+    if data.claims.sub.is_empty() || data.claims.email_verified != Some(true) || data.claims.email.is_none() {
+        return Err("Email Google terverifikasi diperlukan".to_string());
+    }
+    Ok(data.claims)
+}
+
+async fn authorize(req: &HttpRequest, state: &AppState) -> Result<StaffIdentity, HttpResponse> {
+    let token = req.headers().get("Authorization")
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| v.strip_prefix("Bearer "))
+        .ok_or_else(|| error_json(actix_web::http::StatusCode::UNAUTHORIZED, "Login diperlukan"))?;
+    let project = env::var("FIREBASE_PROJECT_ID").unwrap_or_else(|_| "eduessay-bd0ae".to_string());
+    let claims = verify_firebase_token(token, &project, &state.http).await
+        .map_err(|e| error_json(actix_web::http::StatusCode::UNAUTHORIZED, &e))?;
+    let email = claims.email.unwrap_or_default().trim().to_lowercase();
+    let superadmins: Vec<String> = env::var("SUPERADMIN_EMAILS")
+        .unwrap_or_else(|_| "ariful.amar@gmail.com".to_string())
+        .split(',').map(|x| x.trim().to_lowercase()).filter(|x| !x.is_empty()).collect();
+    let superadmin = superadmins.contains(&email);
+    if !superadmin {
+        let exists = sqlx::query_scalar::<MySql, i64>("SELECT COUNT(*) FROM tu_admins WHERE email=?")
+            .bind(&email).fetch_one(&state.db).await;
+        match exists {
+            Ok(count) if count > 0 => {},
+            Ok(_) => return Err(error_json(actix_web::http::StatusCode::FORBIDDEN, "Email ini belum diizinkan sebagai staf TU")),
+            Err(err) => {
+                error!("Pemeriksaan hak staf gagal: {}", err);
+                return Err(error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Gagal memeriksa hak akses"));
+            }
+        }
+    }
+    Ok(StaffIdentity { email, superadmin })
+}
+
+#[get("/api/admin/me")]
+async fn admin_me(req: HttpRequest, state: web::Data<AppState>) -> HttpResponse {
+    match authorize(&req, &state).await {
+        Ok(staff) => HttpResponse::Ok().json(serde_json::json!({
+            "email": staff.email,
+            "role": if staff.superadmin { "superadmin" } else { "staf" }
+        })),
+        Err(response) => response,
+    }
+}
+
+#[get("/api/superadmin/staff")]
+async fn list_staff(req: HttpRequest, state: web::Data<AppState>) -> HttpResponse {
+    let staff = match authorize(&req, &state).await {
+        Ok(value) => value,
+        Err(response) => return response,
+    };
+    if !staff.superadmin {
+        return error_json(actix_web::http::StatusCode::FORBIDDEN, "Khusus Superadmin");
+    }
+    let rows = sqlx::query("SELECT email, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS added_at FROM tu_admins ORDER BY email")
+        .fetch_all(&state.db).await;
+    match rows {
+        Ok(rows) => {
+            let data: Vec<serde_json::Value> = rows.into_iter().map(|row| serde_json::json!({
+                "email": row.get::<String, _>("email"),
+                "addedAt": row.get::<String, _>("added_at")
+            })).collect();
+            HttpResponse::Ok().json(data)
+        }
+        Err(err) => {
+            error!("Gagal memuat staf: {}", err);
+            error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Gagal memuat akun staf")
+        }
+    }
+}
+
+#[derive(Deserialize)]
+struct StaffInput { email: String }
+
+fn valid_email(email: &str) -> bool {
+    let mut parts = email.split('@');
+    match (parts.next(), parts.next(), parts.next()) {
+        (Some(local), Some(domain), None) => !local.is_empty() && domain.contains('.') && !domain.starts_with('.') && !domain.ends_with('.'),
+        _ => false
+    }
+}
+
+#[post("/api/superadmin/staff")]
+async fn add_staff(req: HttpRequest, state: web::Data<AppState>, body: web::Json<StaffInput>) -> HttpResponse {
+    let staff = match authorize(&req, &state).await {
+        Ok(value) => value,
+        Err(response) => return response,
+    };
+    if !staff.superadmin {
+        return error_json(actix_web::http::StatusCode::FORBIDDEN, "Khusus Superadmin");
+    }
+    let email = clean(&body.email, 254).to_lowercase();
+    if !valid_email(&email) {
+        return error_json(actix_web::http::StatusCode::BAD_REQUEST, "Alamat email tidak valid");
+    }
+    let superadmins: Vec<String> = env::var("SUPERADMIN_EMAILS")
+        .unwrap_or_else(|_| "ariful.amar@gmail.com".to_string())
+        .split(',').map(|x| x.trim().to_lowercase()).collect();
+    if superadmins.contains(&email) {
+        return error_json(actix_web::http::StatusCode::BAD_REQUEST, "Email Superadmin tidak perlu ditambahkan sebagai staf");
+    }
+    let result = sqlx::query("INSERT INTO tu_admins (email, added_by) VALUES (?,?) ON DUPLICATE KEY UPDATE added_by=VALUES(added_by)")
+        .bind(&email).bind(&staff.email).execute(&state.db).await;
+    match result {
+        Ok(_) => HttpResponse::Created().json(serde_json::json!({"ok":true,"email":email})),
+        Err(err) => {
+            error!("Gagal menambah staf: {}", err);
+            error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Gagal menambahkan staf")
+        }
+    }
+}
+
+#[delete("/api/superadmin/staff/{email}")]
+async fn delete_staff(req: HttpRequest, state: web::Data<AppState>, path: web::Path<String>) -> HttpResponse {
+    let staff = match authorize(&req, &state).await {
+        Ok(value) => value,
+        Err(response) => return response,
+    };
+    if !staff.superadmin {
+        return error_json(actix_web::http::StatusCode::FORBIDDEN, "Khusus Superadmin");
+    }
+    let email = clean(&path.into_inner(), 254).to_lowercase();
+    let superadmins: Vec<String> = env::var("SUPERADMIN_EMAILS")
+        .unwrap_or_else(|_| "ariful.amar@gmail.com".to_string())
+        .split(',').map(|x| x.trim().to_lowercase()).collect();
+    if email.is_empty() || superadmins.contains(&email) {
+        return error_json(actix_web::http::StatusCode::BAD_REQUEST, "Tidak dapat menghapus akun Superadmin");
+    }
+    match sqlx::query("DELETE FROM tu_admins WHERE email=?").bind(email).execute(&state.db).await {
+        Ok(_) => HttpResponse::Ok().json(serde_json::json!({"ok":true})),
+        Err(err) => {
+            error!("Gagal menghapus staf: {}", err);
+            error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Gagal menghapus akses staf")
+        }
+    }
+}
+
+#[get("/api/admin/pengajuan")]
+async fn list_pengajuan(req: HttpRequest, state: web::Data<AppState>) -> HttpResponse {
+    if let Err(response) = authorize(&req, &state).await {
+        return response;
+    }
+    let rows = sqlx::query(
+        "SELECT id,nama,tempat_lahir,DATE_FORMAT(tanggal_lahir,'%Y-%m-%d') AS tanggal_lahir,nisn,DATE_FORMAT(tanggal_pengajuan,'%Y-%m-%d') AS tanggal_pengajuan,kelas,nama_ortu,alamat,tahun_lulus,CAST(surat AS CHAR) AS surat_json FROM tu_pengajuan ORDER BY created_at DESC LIMIT 200"
+    ).fetch_all(&state.db).await;
+    match rows {
+        Ok(rows) => {
+            let mut data = Vec::with_capacity(rows.len());
+            for row in rows {
+                let raw: String = row.get("surat_json");
+                let surat: serde_json::Value = match serde_json::from_str(&raw) {
+                    Ok(value) => value,
+                    Err(err) => {
+                        error!("JSON surat tidak valid: {}", err);
+                        return error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Data surat tidak valid");
+                    }
+                };
+                data.push(serde_json::json!({
+                    "id": row.get::<String,_>("id"),
+                    "nama": row.get::<String,_>("nama"),
+                    "tempatLahir": row.get::<String,_>("tempat_lahir"),
+                    "tanggalLahir": row.get::<String,_>("tanggal_lahir"),
+                    "nisn": row.get::<String,_>("nisn"),
+                    "tanggalPengajuan": row.get::<String,_>("tanggal_pengajuan"),
+                    "kelas": row.try_get::<Option<String>,_>("kelas").ok().flatten().unwrap_or_default(),
+                    "namaOrtu": row.try_get::<Option<String>,_>("nama_ortu").ok().flatten().unwrap_or_default(),
+                    "alamat": row.try_get::<Option<String>,_>("alamat").ok().flatten().unwrap_or_default(),
+                    "tahunLulus": row.try_get::<Option<String>,_>("tahun_lulus").ok().flatten().unwrap_or_default(),
+                    "surat": surat
+                }));
+            }
+            HttpResponse::Ok().json(data)
+        }
+        Err(err) => {
+            error!("Gagal memuat pengajuan: {}", err);
+            error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Gagal memuat pengajuan")
+        }
+    }
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenvy::dotenv().ok();
@@ -229,7 +465,7 @@ async fn main() -> std::io::Result<()> {
         std::io::Error::other("Tes database gagal")
     })?;
 
-    let state = web::Data::new(AppState { db });
+    let state = web::Data::new(AppState { db, http: reqwest::Client::new() });
     let port = env::var("PORT").unwrap_or_else(|_| "8081".to_string())
         .parse::<u16>().map_err(|_| std::io::Error::other("PORT harus berupa angka"))?;
     let origins: Vec<String> = env::var("ALLOWED_ORIGINS")
@@ -246,6 +482,6 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::JsonConfig::default().limit(20 * 1024))
             .wrap(cors).wrap(middleware::Compress::default())
             .wrap(middleware::Logger::default())
-            .service(health).service(create_pengajuan).service(get_status)
+            .service(health).service(create_pengajuan).service(get_status).service(admin_me).service(list_staff).service(add_staff).service(delete_staff).service(list_pengajuan)
     }).bind(("127.0.0.1", port))?.run().await
 }
