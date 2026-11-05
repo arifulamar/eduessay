@@ -14,7 +14,8 @@ use std::collections::HashSet;
 use std::env;
 use tracing::{error, info};
 use uuid::Uuid;
-use printpdf::{BuiltinFont, Mm, PdfDocument};
+use printpdf::{BuiltinFont, Image, ImageTransform, Mm, PdfDocument};
+use base64::Engine;
 use std::io::{BufWriter, Cursor};
 
 #[derive(Clone)]
@@ -623,11 +624,11 @@ fn make_letter_pdf(data: &serde_json::Value, surat: &Surat) -> Result<Vec<u8>, S
     let tanggal_terbit = format_tanggal(&surat.tanggal_terbit);
 
     // Kop surat
-    layer.use_text("PEMERINTAH ACEH", 13.0, Mm(20.0), Mm(281.0), &bold);
-    layer.use_text("DINAS PENDIDIKAN", 13.0, Mm(20.0), Mm(274.0), &bold);
-    layer.use_text("SMA NEGERI 1 SABANG", 15.0, Mm(20.0), Mm(267.0), &bold);
-    layer.use_text("Jalan T. Nyak Arief, Gampong Ie Meulee, Sabang 23521", 9.0, Mm(20.0), Mm(260.0), &regular);
-    layer.use_text("Telp. (0652) 21240 | www.sman1sabang.sch.id | sman1sabang@gmail.com", 8.0, Mm(20.0), Mm(255.0), &regular);
+    layer.use_text("PEMERINTAH ACEH", 13.0, Mm(53.0), Mm(281.0), &bold);
+    layer.use_text("DINAS PENDIDIKAN", 13.0, Mm(53.0), Mm(274.0), &bold);
+    layer.use_text("SMA NEGERI 1 SABANG", 15.0, Mm(53.0), Mm(267.0), &bold);
+    layer.use_text("Jalan T. Nyak Arief, Gampong Ie Meulee, Sabang 23521", 9.0, Mm(53.0), Mm(260.0), &regular);
+    layer.use_text("Telp. (0652) 21240 | www.sman1sabang.sch.id | sman1sabang@gmail.com", 8.0, Mm(53.0), Mm(255.0), &regular);
     layer.set_outline_color(printpdf::Color::Rgb(printpdf::Rgb::new(0.0, 0.0, 0.0, None)));
     layer.add_line(printpdf::Line {
         points: vec![
