@@ -444,6 +444,139 @@ async fn list_pengajuan(req: HttpRequest, state: web::Data<AppState>) -> HttpRes
     }
 }
 
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ProcessLetterInput {
+    status: String,
+    #[serde(default)]
+    nomor: String,
+    #[serde(default)]
+    catatan: String,
+}
+
+#[patch("/api/admin/pengajuan/{id}/surat/{jenis}")]
+async fn process_letter(
+    req: HttpRequest,
+    state: web::Data<AppState>,
+    path: web::Path<(String, String)>,
+    body: web::Json<ProcessLetterInput>,
+) -> HttpResponse {
+    let staff = match authorize(&req, &state).await {
+        Ok(value) => value,
+        Err(response) => return response,
+    };
+
+    let (id, jenis) = path.into_inner();
+    if jenis != "aktif" && jenis != "skhun" {
+        return error_json(actix_web::http::StatusCode::BAD_REQUEST, "Jenis surat tidak valid");
+    }
+
+    let status = clean(&body.status, 20);
+    let nomor = clean(&body.nomor, 100);
+    let catatan = clean(&body.catatan, 500);
+
+    if !["perbaikan", "ditolak", "diterbitkan"].contains(&status.as_str()) {
+        return error_json(actix_web::http::StatusCode::BAD_REQUEST, "Status tidak valid");
+    }
+    if status == "diterbitkan" && nomor.is_empty() {
+        return error_json(actix_web::http::StatusCode::BAD_REQUEST, "Nomor surat wajib diisi");
+    }
+    if status == "perbaikan" && catatan.is_empty() {
+        return error_json(actix_web::http::StatusCode::BAD_REQUEST, "Tuliskan catatan perbaikan");
+    }
+
+    let mut tx = match state.db.begin().await {
+        Ok(tx) => tx,
+        Err(err) => {
+            error!("Gagal memulai transaksi penerbitan: {}", err);
+            return error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Gagal memproses surat");
+        }
+    };
+
+    let row = match sqlx::query("SELECT CAST(surat AS CHAR) AS surat_json FROM tu_pengajuan WHERE id=? FOR UPDATE")
+        .bind(&id).fetch_optional(&mut *tx).await {
+        Ok(Some(row)) => row,
+        Ok(None) => {
+            let _ = tx.rollback().await;
+            return error_json(actix_web::http::StatusCode::NOT_FOUND, "Pengajuan tidak ditemukan");
+        }
+        Err(err) => {
+            error!("Gagal membaca pengajuan untuk diproses: {}", err);
+            let _ = tx.rollback().await;
+            return error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Gagal memproses surat");
+        }
+    };
+
+    let raw: String = row.get("surat_json");
+    let mut surat: Vec<Surat> = match serde_json::from_str(&raw) {
+        Ok(value) => value,
+        Err(err) => {
+            error!("Data surat tidak valid: {}", err);
+            let _ = tx.rollback().await;
+            return error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Data surat tidak valid");
+        }
+    };
+
+    let Some(index) = surat.iter().position(|item| item.jenis == jenis) else {
+        let _ = tx.rollback().await;
+        return error_json(actix_web::http::StatusCode::BAD_REQUEST, "Jenis surat tidak diajukan");
+    };
+
+    if surat[index].status == "diterbitkan" {
+        let _ = tx.rollback().await;
+        return error_json(actix_web::http::StatusCode::CONFLICT, "Surat sudah diterbitkan dan tidak dapat diubah");
+    }
+
+    if status == "diterbitkan" {
+        let result = sqlx::query("INSERT INTO tu_nomor_surat (nomor, request_id) VALUES (?,?)")
+            .bind(nomor.to_lowercase()).bind(&id).execute(&mut *tx).await;
+        if let Err(err) = result {
+            let duplicate = err.as_database_error().map(|db| db.is_unique_violation()).unwrap_or(false);
+            error!("Gagal mencatat nomor surat: {}", err);
+            let _ = tx.rollback().await;
+            if duplicate {
+                return error_json(actix_web::http::StatusCode::CONFLICT, "Nomor surat sudah pernah digunakan");
+            }
+            return error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Gagal mencatat nomor surat");
+        }
+    }
+
+    let tanggal_terbit = if status == "diterbitkan" {
+        chrono::Utc::now().format("%Y-%m-%d").to_string()
+    } else {
+        String::new()
+    };
+
+    surat[index].status = status.clone();
+    surat[index].nomor = if status == "diterbitkan" { nomor } else { String::new() };
+    surat[index].catatan = catatan;
+    surat[index].tanggal_terbit = tanggal_terbit;
+    let updated = match serde_json::to_string(&surat) {
+        Ok(value) => value,
+        Err(err) => {
+            error!("Gagal menyimpan JSON surat: {}", err);
+            let _ = tx.rollback().await;
+            return error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Gagal memproses surat");
+        }
+    };
+
+    if let Err(err) = sqlx::query("UPDATE tu_pengajuan SET surat=?, updated_at=CURRENT_TIMESTAMP WHERE id=?")
+        .bind(updated).bind(&id).execute(&mut *tx).await {
+        error!("Gagal memperbarui status surat: {}", err);
+        let _ = tx.rollback().await;
+        return error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Gagal memperbarui status surat");
+    }
+
+    if let Err(err) = tx.commit().await {
+        error!("Gagal menyelesaikan transaksi penerbitan: {}", err);
+        return error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Gagal menyimpan proses surat");
+    }
+
+    info!("Surat {} untuk pengajuan {} diproses oleh {}", jenis, id, staff.email);
+    HttpResponse::Ok().json(serde_json::json!({ "ok": true }))
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenvy::dotenv().ok();
@@ -482,6 +615,6 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::JsonConfig::default().limit(20 * 1024))
             .wrap(cors).wrap(middleware::Compress::default())
             .wrap(middleware::Logger::default())
-            .service(health).service(create_pengajuan).service(get_status).service(admin_me).service(list_staff).service(add_staff).service(delete_staff).service(list_pengajuan)
+            .service(health).service(create_pengajuan).service(get_status).service(admin_me).service(list_staff).service(add_staff).service(delete_staff).service(list_pengajuan).service(process_letter)
     }).bind(("127.0.0.1", port))?.run().await
 }
