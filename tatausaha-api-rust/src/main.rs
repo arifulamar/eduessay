@@ -1,6 +1,6 @@
 use actix_cors::Cors;
 use actix_web::{delete, get, middleware, patch, post, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
-use chrono::{NaiveDate, Utc};
+use chrono::{Datelike, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
 use once_cell::sync::Lazy;
@@ -14,6 +14,8 @@ use std::collections::HashSet;
 use std::env;
 use tracing::{error, info};
 use uuid::Uuid;
+use printpdf::{BuiltinFont, Mm, PdfDocument};
+use std::io::{BufWriter, Cursor};
 
 #[derive(Clone)]
 struct AppState {
@@ -578,6 +580,171 @@ async fn process_letter(
     HttpResponse::Ok().json(serde_json::json!({ "ok": true }))
 }
 
+
+fn format_tanggal(value: &str) -> String {
+    let months = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+    if let Some(date) = valid_date(value) {
+        format!("{} {} {}", date.day(), months[(date.month() - 1) as usize], date.year())
+    } else {
+        "-".to_string()
+    }
+}
+
+fn school_year(value: &str) -> String {
+    if let Some(date) = valid_date(value) {
+        let year = date.year();
+        if date.month() >= 7 { format!("{}/{}", year, year + 1) }
+        else { format!("{}/{}", year - 1, year) }
+    } else {
+        "-".to_string()
+    }
+}
+
+fn make_letter_pdf(data: &serde_json::Value, surat: &Surat) -> Result<Vec<u8>, String> {
+    let (doc, page, layer) = PdfDocument::new(
+        "Surat Keterangan SMA Negeri 1 Sabang", Mm(210.0), Mm(297.0), "Surat"
+    );
+    let layer = doc.get_page(page).get_layer(layer);
+    let regular = doc.add_builtin_font(BuiltinFont::TimesRoman).map_err(|e| e.to_string())?;
+    let bold = doc.add_builtin_font(BuiltinFont::TimesBold).map_err(|e| e.to_string())?;
+
+    let get = |key: &str| -> String {
+        data.get(key).and_then(|v| v.as_str()).unwrap_or("").to_string()
+    };
+    let nama = get("nama");
+    let tempat = get("tempatLahir");
+    let ttl = format!("{}, {}", tempat, format_tanggal(&get("tanggalLahir")));
+    let nisn = get("nisn");
+    let kelas = get("kelas");
+    let nama_ortu = get("namaOrtu");
+    let alamat = get("alamat");
+    let tahun_lulus = get("tahunLulus");
+    let nomor = surat.nomor.clone();
+    let tanggal_terbit = format_tanggal(&surat.tanggal_terbit);
+
+    // Kop surat
+    layer.use_text("PEMERINTAH ACEH", 13.0, Mm(20.0), Mm(281.0), &bold);
+    layer.use_text("DINAS PENDIDIKAN", 13.0, Mm(20.0), Mm(274.0), &bold);
+    layer.use_text("SMA NEGERI 1 SABANG", 15.0, Mm(20.0), Mm(267.0), &bold);
+    layer.use_text("Jalan T. Nyak Arief, Gampong Ie Meulee, Sabang 23521", 9.0, Mm(20.0), Mm(260.0), &regular);
+    layer.use_text("Telp. (0652) 21240 | www.sman1sabang.sch.id | sman1sabang@gmail.com", 8.0, Mm(20.0), Mm(255.0), &regular);
+    layer.use_line_segment(
+        printpdf::Line { points: vec![
+            (printpdf::Point::new(Mm(20.0), Mm(250.0)), false),
+            (printpdf::Point::new(Mm(190.0), Mm(250.0)), false),
+        ], is_closed: false },
+        printpdf::Color::Rgb(printpdf::Rgb::new(0.0,0.0,0.0,None))
+    );
+
+    layer.use_text("SURAT KETERANGAN", 14.0, Mm(65.0), Mm(230.0), &bold);
+    layer.use_text(format!("Nomor : {}", nomor), 12.0, Mm(60.0), Mm(222.0), &regular);
+
+    layer.use_text("Yang bertanda tangan di bawah ini, Kepala SMA Negeri 1 Sabang, menerangkan bahwa:", 11.0, Mm(20.0), Mm(202.0), &regular);
+    let rows: Vec<(&str, String)> = if surat.jenis == "aktif" {
+        vec![("Nama",nama),("Tempat/Tanggal Lahir",ttl),("NISN",nisn),("Kelas",kelas)]
+    } else {
+        vec![("Nama",nama),("Tempat/Tanggal Lahir",ttl),("NISN",nisn),("Nama Orang Tua",nama_ortu),("Alamat",alamat)]
+    };
+    let mut y = 187.0;
+    for (label, value) in rows {
+        layer.use_text(label, 11.0, Mm(27.0), Mm(y), &regular);
+        layer.use_text(":", 11.0, Mm(75.0), Mm(y), &regular);
+        layer.use_text(value, 11.0, Mm(80.0), Mm(y), &regular);
+        y -= 8.0;
+    }
+    y -= 7.0;
+    if surat.jenis == "aktif" {
+        let text = format!(
+            "Benar bahwa nama tersebut di atas adalah siswa SMA Negeri 1 Sabang Tahun Pelajaran {}, dan saat ini masih duduk di kelas {}.",
+            school_year(&get("tanggalPengajuan")), kelas
+        );
+        layer.use_text(text, 11.0, Mm(20.0), Mm(y), &regular);
+        y -= 18.0;
+    } else {
+        let text = format!(
+            "Benar bahwa nama tersebut di atas adalah lulusan SMA Negeri 1 Sabang Tahun Pelajaran {}, yang pada tahun tersebut pemerintah hanya menerbitkan IJAZAH dan tidak menerbitkan Surat Keterangan Hasil Ujian Nasional (SKHUN).",
+            tahun_lulus
+        );
+        layer.use_text(text, 11.0, Mm(20.0), Mm(y), &regular);
+        y -= 22.0;
+    }
+    layer.use_text("Demikian surat keterangan ini dibuat dengan sebenarnya untuk dipergunakan seperlunya.", 11.0, Mm(20.0), Mm(y), &regular);
+
+    let kepala_nama = env::var("KEPALA_NAMA").unwrap_or_else(|_| "[Nama Kepala Sekolah]".to_string());
+    let kepala_nip = env::var("KEPALA_NIP").unwrap_or_else(|_| "[Isi NIP]".to_string());
+    layer.use_text(format!("Sabang, {}", tanggal_terbit), 11.0, Mm(125.0), Mm(75.0), &regular);
+    layer.use_text("Kepala SMA Negeri 1 Sabang", 11.0, Mm(125.0), Mm(67.0), &regular);
+    layer.use_text(kepala_nama, 11.0, Mm(125.0), Mm(38.0), &bold);
+    layer.use_text(format!("NIP. {}", kepala_nip), 10.0, Mm(125.0), Mm(31.0), &regular);
+
+    let mut writer = BufWriter::new(Cursor::new(Vec::new()));
+    doc.save(&mut writer).map_err(|e| e.to_string())?;
+    let cursor = writer.into_inner().map_err(|e| e.to_string())?;
+    Ok(cursor.into_inner())
+}
+
+#[get("/api/admin/pengajuan/{id}/surat/{jenis}/pdf")]
+async fn download_letter_pdf(
+    req: HttpRequest,
+    state: web::Data<AppState>,
+    path: web::Path<(String, String)>,
+) -> HttpResponse {
+    if let Err(response) = authorize(&req, &state).await {
+        return response;
+    }
+    let (id, jenis) = path.into_inner();
+    if jenis != "aktif" && jenis != "skhun" {
+        return error_json(actix_web::http::StatusCode::BAD_REQUEST, "Jenis surat tidak valid");
+    }
+    let row = sqlx::query(
+        "SELECT id,nama,tempat_lahir,DATE_FORMAT(tanggal_lahir,'%Y-%m-%d') AS tanggal_lahir,nisn,DATE_FORMAT(tanggal_pengajuan,'%Y-%m-%d') AS tanggal_pengajuan,kelas,nama_ortu,alamat,tahun_lulus,CAST(surat AS CHAR) AS surat_json FROM tu_pengajuan WHERE id=? LIMIT 1"
+    ).bind(&id).fetch_optional(&state.db).await;
+    let row = match row {
+        Ok(Some(row)) => row,
+        Ok(None) => return error_json(actix_web::http::StatusCode::NOT_FOUND, "Pengajuan tidak ditemukan"),
+        Err(err) => {
+            error!("Gagal mengambil data surat: {}", err);
+            return error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Gagal mengambil data surat");
+        }
+    };
+    let raw: String = row.get("surat_json");
+    let surat: Vec<Surat> = match serde_json::from_str(&raw) {
+        Ok(value) => value,
+        Err(err) => {
+            error!("Data surat tidak valid: {}", err);
+            return error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Data surat tidak valid");
+        }
+    };
+    let Some(item) = surat.into_iter().find(|s| s.jenis == jenis) else {
+        return error_json(actix_web::http::StatusCode::NOT_FOUND, "Jenis surat tidak diajukan");
+    };
+    if item.status != "diterbitkan" {
+        return error_json(actix_web::http::StatusCode::FORBIDDEN, "Surat belum diterbitkan");
+    }
+    let data = serde_json::json!({
+        "id": row.get::<String,_>("id"),
+        "nama": row.get::<String,_>("nama"),
+        "tempatLahir": row.get::<String,_>("tempat_lahir"),
+        "tanggalLahir": row.get::<String,_>("tanggal_lahir"),
+        "nisn": row.get::<String,_>("nisn"),
+        "tanggalPengajuan": row.get::<String,_>("tanggal_pengajuan"),
+        "kelas": row.try_get::<Option<String>,_>("kelas").ok().flatten().unwrap_or_default(),
+        "namaOrtu": row.try_get::<Option<String>,_>("nama_ortu").ok().flatten().unwrap_or_default(),
+        "alamat": row.try_get::<Option<String>,_>("alamat").ok().flatten().unwrap_or_default(),
+        "tahunLulus": row.try_get::<Option<String>,_>("tahun_lulus").ok().flatten().unwrap_or_default()
+    });
+    match make_letter_pdf(&data, &item) {
+        Ok(bytes) => HttpResponse::Ok()
+            .insert_header(("Content-Type", "application/pdf"))
+            .insert_header(("Content-Disposition", format!("attachment; filename=\"surat-{}-{}.pdf\"", jenis, data["nisn"].as_str().unwrap_or("siswa"))))
+            .body(bytes),
+        Err(err) => {
+            error!("Gagal membuat PDF: {}", err);
+            error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Gagal membuat PDF surat")
+        }
+    }
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenvy::dotenv().ok();
@@ -616,6 +783,6 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::JsonConfig::default().limit(20 * 1024))
             .wrap(cors).wrap(middleware::Compress::default())
             .wrap(middleware::Logger::default())
-            .service(health).service(create_pengajuan).service(get_status).service(admin_me).service(list_staff).service(add_staff).service(delete_staff).service(list_pengajuan).service(process_letter)
+            .service(health).service(create_pengajuan).service(get_status).service(admin_me).service(list_staff).service(add_staff).service(delete_staff).service(list_pengajuan).service(process_letter).service(download_letter_pdf)
     }).bind(("127.0.0.1", port))?.run().await
 }
