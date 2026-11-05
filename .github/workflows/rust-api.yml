@@ -1,0 +1,30 @@
+name: Rust API Check
+
+on:
+  push:
+    paths:
+      - "tatausaha-api-rust/**"
+      - ".github/workflows/rust-api.yml"
+  pull_request:
+    paths:
+      - "tatausaha-api-rust/**"
+      - ".github/workflows/rust-api.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: tatausaha-api-rust
+      - name: Check Rust API
+        run: cargo check --manifest-path tatausaha-api-rust/Cargo.toml
