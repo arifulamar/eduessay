@@ -1,21 +1,23 @@
 # Educonnect Tata Usaha — SMA Negeri 1 Sabang
 
-Frontend layanan surat tetap di GitHub Pages, sedangkan backend mandiri dijalankan pada VPS.
+Frontend layanan surat tetap di GitHub Pages. Backend mandiri dikembangkan menggunakan Rust + Actix Web pada VPS.
 
 ## Frontend
 - Publik: https://educonnect.my.id/tatausaha/
 - Dashboard staf: https://educonnect.my.id/tatausaha/admin/
 
-## Backend mandiri
-- Kode backend: `tatausaha-api/`
-- Runtime: Node.js + Express
-- Database: MySQL 8.4
-- Deployment: Docker Compose pada VPS Ubuntu
-- Panduan: [tatausaha-api/DEPLOY.md](../tatausaha-api/DEPLOY.md)
+## Backend Rust
+- Kode backend: `tatausaha-api-rust/`
+- Runtime: Rust + Actix Web
+- Database: MySQL, database `educonnect_tu`
+- Deployment: VPS Ubuntu dengan systemd dan Nginx
+- Panduan teknis: `tatausaha-api-rust/README.md`
 
-## Status konfigurasi
-`config.js` masih menunggu alamat API HTTPS VPS. Setelah VPS siap dan DNS `api.educonnect.my.id` aktif, isi `API_BASE` dengan `https://api.educonnect.my.id`.
+## Status migrasi
+Backend Node.js lama telah dihapus dari repository. Backend Rust sedang dibangun bertahap. Saat ini tahap awal menyediakan server Actix Web dan pemeriksaan koneksi MySQL melalui `GET /health`.
 
-Google Sign-In di frontend masih menggunakan Firebase Authentication untuk identitas. Namun, data pengajuan, hak akses staf, dan nomor surat dikelola backend Node.js dan MySQL; backend tidak lagi menggunakan Firestore.
+**Penting:** Jangan mengubah `API_BASE` di `tatausaha/config.js` ke alamat produksi sampai seluruh endpoint Rust (pengajuan, status, Firebase auth, administrasi staf, proses surat, dan PDF) selesai dan diuji.
 
-Jangan commit file rahasia `.env` atau `secrets/firebase-service-account.json` ke GitHub.
+Google Sign-In pada frontend tetap menggunakan Firebase Authentication. Backend Rust akan memverifikasi Firebase ID Token dan menggunakan MySQL untuk data pengajuan, hak akses staf, serta nomor surat.
+
+Jangan commit file rahasia `.env` atau Firebase service-account JSON ke GitHub.
