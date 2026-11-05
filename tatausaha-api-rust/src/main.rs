@@ -642,7 +642,7 @@ fn make_letter_pdf(data: &serde_json::Value, surat: &Surat) -> Result<Vec<u8>, S
 
     layer.use_text("Yang bertanda tangan di bawah ini, Kepala SMA Negeri 1 Sabang, menerangkan bahwa:", 11.0, Mm(20.0), Mm(202.0), &regular);
     let rows: Vec<(&str, String)> = if surat.jenis == "aktif" {
-        vec![("Nama",nama),("Tempat/Tanggal Lahir",ttl),("NISN",nisn),("Kelas",kelas)]
+        vec![("Nama",nama),("Tempat/Tanggal Lahir",ttl),("NISN",nisn),("Kelas",kelas.clone())]
     } else {
         vec![("Nama",nama),("Tempat/Tanggal Lahir",ttl),("NISN",nisn),("Nama Orang Tua",nama_ortu),("Alamat",alamat)]
     };
