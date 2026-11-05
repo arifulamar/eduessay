@@ -1,0 +1,39 @@
+name: Rust API Linux Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "tatausaha-api-rust/**"
+      - ".github/workflows/rust-api-build.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: tatausaha-api-rust
+
+      - name: Build release binary
+        run: cargo build --release --locked --manifest-path tatausaha-api-rust/Cargo.toml
+
+      - name: Upload Linux binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: educonnect-tatausaha-api-linux-x86_64
+          path: tatausaha-api-rust/target/release/educonnect-tatausaha-api
+          if-no-files-found: error
+          retention-days: 7
