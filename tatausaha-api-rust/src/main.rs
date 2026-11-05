@@ -628,13 +628,14 @@ fn make_letter_pdf(data: &serde_json::Value, surat: &Surat) -> Result<Vec<u8>, S
     layer.use_text("SMA NEGERI 1 SABANG", 15.0, Mm(20.0), Mm(267.0), &bold);
     layer.use_text("Jalan T. Nyak Arief, Gampong Ie Meulee, Sabang 23521", 9.0, Mm(20.0), Mm(260.0), &regular);
     layer.use_text("Telp. (0652) 21240 | www.sman1sabang.sch.id | sman1sabang@gmail.com", 8.0, Mm(20.0), Mm(255.0), &regular);
-    layer.use_line_segment(
-        printpdf::Line { points: vec![
+    layer.set_outline_color(printpdf::Color::Rgb(printpdf::Rgb::new(0.0, 0.0, 0.0, None)));
+    layer.add_line(printpdf::Line {
+        points: vec![
             (printpdf::Point::new(Mm(20.0), Mm(250.0)), false),
             (printpdf::Point::new(Mm(190.0), Mm(250.0)), false),
-        ], is_closed: false },
-        printpdf::Color::Rgb(printpdf::Rgb::new(0.0,0.0,0.0,None))
-    );
+        ],
+        is_closed: false,
+    });
 
     layer.use_text("SURAT KETERANGAN", 14.0, Mm(65.0), Mm(230.0), &bold);
     layer.use_text(format!("Nomor : {}", nomor), 12.0, Mm(60.0), Mm(222.0), &regular);
