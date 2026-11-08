@@ -738,55 +738,62 @@ fn make_letter_pdf(data: &serde_json::Value, surat: &Surat) -> Result<Vec<u8>, S
     let get = |key: &str| -> String {
         data.get(key).and_then(|v| v.as_str()).unwrap_or("").to_string()
     };
+    let aktif = surat.jenis == "aktif";
     let nama = get("nama");
-    let tempat = get("tempatLahir");
-    let ttl = format!("{}, {}", tempat, format_tanggal(&get("tanggalLahir")));
+    let ttl = format!("{}, {}", get("tempatLahir"), format_tanggal(&get("tanggalLahir")));
     let nisn = get("nisn");
-    let kelas = get("kelas");
-    let nama_ortu = get("namaOrtu");
-    let alamat = get("alamat");
-    let tahun_lulus = get("tahunLulus");
     let nomor = surat.nomor.clone();
     let tanggal_terbit = format_tanggal(&surat.tanggal_terbit);
+    let kepala_nama = env::var("KEPALA_NAMA").unwrap_or_else(|_| "Helmi, S.Pd.I".to_string());
+    let kepala_jabatan = env::var("KEPALA_JABATAN").unwrap_or_else(|_| "Kepala SMA Negeri 1 Sabang".to_string());
+    let kepala_nip = env::var("KEPALA_NIP").unwrap_or_else(|_| "19810120 200504 1 002".to_string());
 
-    // Lambang Pemerintah Aceh di kiri dan logo SMA Negeri 1 Sabang di kanan.
+    // Logo resmi sekolah pada posisi kiri dan kanan seperti template PDF.
     let aceh_bytes = include_bytes!("../../tatausaha/Coat_of_arms_of_Aceh.png");
     let aceh_decoder = PngDecoder::new(Cursor::new(aceh_bytes))
         .map_err(|e| format!("Gagal membaca logo Aceh: {}", e))?;
     Image::try_from(aceh_decoder).map_err(|e| format!("Gagal membuat objek logo Aceh: {}", e))?.add_to_layer(
         layer.clone(),
         ImageTransform {
-            translate_x: Some(Mm(19.0)),
-            translate_y: Some(Mm(255.0)),
+            translate_x: Some(Mm(20.0)),
+            translate_y: Some(Mm(247.0)),
             scale_x: Some(0.25),
             scale_y: Some(0.25),
             ..Default::default()
         },
     );
-
     let school_bytes = include_bytes!("../../tatausaha/logosman1sabang.png");
     let school_decoder = PngDecoder::new(Cursor::new(school_bytes))
-        .map_err(|e| format!("Gagal membaca logo SMA Negeri 1 Sabang: {}", e))?;
+        .map_err(|e| format!("Gagal membaca logo sekolah: {}", e))?;
     Image::try_from(school_decoder).map_err(|e| format!("Gagal membuat objek logo sekolah: {}", e))?.add_to_layer(
         layer.clone(),
         ImageTransform {
             translate_x: Some(Mm(171.0)),
-            translate_y: Some(Mm(255.0)),
+            translate_y: Some(Mm(247.0)),
             scale_x: Some(0.25),
             scale_y: Some(0.25),
             ..Default::default()
         },
     );
 
-    // Kop surat dengan ruang logo di kiri dan kanan.
-    layer.use_text("PEMERINTAH ACEH", 12.0, Mm(66.0), Mm(281.0), &bold);
-    layer.use_text("DINAS PENDIDIKAN", 12.0, Mm(66.0), Mm(275.0), &bold);
-    layer.use_text("SMA NEGERI 1 SABANG", 14.0, Mm(61.0), Mm(268.5), &bold);
-    layer.use_text("Jalan T. Nyak Arief, Gampong Ie Meulee, Kota Sabang 23521", 8.5, Mm(49.0), Mm(261.5), &regular);
-    layer.use_text("Telp. (0652) 21240 | www.sman1sabang.sch.id | sman1sabang@gmail.com", 8.0, Mm(43.0), Mm(256.5), &regular);
+    // Kop aktif dan SKHUN memiliki susunan baris awal yang berbeda pada template.
+    if !aktif {
+        layer.use_text("PEMERINTAH ACEH", 14.0, Mm(72.0), Mm(278.0), &bold);
+        layer.use_text("DINAS PENDIDIKAN", 14.0, Mm(72.0), Mm(271.0), &bold);
+        layer.use_text("SMA NEGERI 1 SABANG", 15.0, Mm(66.0), Mm(264.0), &bold);
+        layer.use_text("Jln T. Nyak Arief Gampong Ie Meulee Kode Pos. 23521", 9.0, Mm(54.0), Mm(258.0), &regular);
+        layer.use_text("Telp/Fax. (0652) 21240", 9.0, Mm(83.0), Mm(253.0), &regular);
+        layer.use_text("Website : www.sman1sabang.sch.id Email : sman1sabang@gmail.com", 9.0, Mm(48.0), Mm(248.0), &regular);
+    } else {
+        layer.use_text("DINAS PENDIDIKAN", 15.0, Mm(75.0), Mm(274.0), &bold);
+        layer.use_text("SMA NEGERI 1 SABANG", 16.0, Mm(69.0), Mm(267.0), &bold);
+        layer.use_text("Jalan T. Nyak Arief Gampong Ie Meulee Kode Pos. 23521", 9.0, Mm(54.0), Mm(261.0), &regular);
+        layer.use_text("Telp: (0652) 21240", 9.0, Mm(87.0), Mm(256.0), &regular);
+        layer.use_text("Website:www.sman1sabang.sch.id Email:sman1sabang@gmail.com", 9.0, Mm(49.0), Mm(251.0), &regular);
+    }
 
     layer.set_outline_color(printpdf::Color::Rgb(printpdf::Rgb::new(0.0, 0.0, 0.0, None)));
-    for y in [251.5, 250.0] {
+    for y in if aktif { [246.5, 245.2] } else { [242.0, 240.7] } {
         layer.add_line(printpdf::Line {
             points: vec![
                 (printpdf::Point::new(Mm(20.0), Mm(y)), false),
@@ -796,93 +803,94 @@ fn make_letter_pdf(data: &serde_json::Value, surat: &Surat) -> Result<Vec<u8>, S
         });
     }
 
-    layer.use_text("SURAT KETERANGAN", 14.0, Mm(70.0), Mm(235.0), &bold);
-    layer.use_text(format!("Nomor : {}", nomor), 11.0, Mm(67.0), Mm(228.5), &regular);
+    let title_y = if aktif { 231.0 } else { 226.0 };
+    layer.use_text("SURAT KETERANGAN", 14.0, Mm(70.0), Mm(title_y), &bold);
+    layer.add_line(printpdf::Line {
+        points: vec![
+            (printpdf::Point::new(Mm(70.0), Mm(title_y - 1.0)), false),
+            (printpdf::Point::new(Mm(140.0), Mm(title_y - 1.0)), false),
+        ],
+        is_closed: false,
+    });
+    layer.use_text(format!("Nomor : {}", nomor), 11.0, Mm(65.0), Mm(title_y - 6.0), &regular);
 
-    // Identitas pejabat yang menandatangani.
-    layer.use_text("Saya yang bertanda tangan di bawah ini :", 11.0, Mm(25.0), Mm(211.0), &regular);
-    let kepala_nama = env::var("KEPALA_NAMA").unwrap_or_else(|_| "Helmi, S.Pd.I".to_string());
-    let kepala_jabatan = env::var("KEPALA_JABATAN").unwrap_or_else(|_| "Kepala SMA Negeri 1 Sabang".to_string());
-    let kepala_nip = env::var("KEPALA_NIP").unwrap_or_else(|_| "19810120 200504 1 002".to_string());
+    let body_top = if aktif { 205.0 } else { 202.0 };
+    layer.use_text("Saya Yang bertanda tangan di bawah ini :", 11.0, Mm(25.0), Mm(body_top), &regular);
+    layer.use_text("Nama", 11.0, Mm(38.0), Mm(body_top - 8.0), &regular);
+    layer.use_text(":", 11.0, Mm(91.0), Mm(body_top - 8.0), &regular);
+    layer.use_text(&kepala_nama, 11.0, Mm(96.0), Mm(body_top - 8.0), &regular);
+    layer.use_text("Jabatan", 11.0, Mm(38.0), Mm(body_top - 15.0), &regular);
+    layer.use_text(":", 11.0, Mm(91.0), Mm(body_top - 15.0), &regular);
+    layer.use_text(&kepala_jabatan, 11.0, Mm(96.0), Mm(body_top - 15.0), &regular);
 
-    layer.use_text("Nama", 11.0, Mm(38.0), Mm(199.0), &regular);
-    layer.use_text(":", 11.0, Mm(78.0), Mm(199.0), &regular);
-    layer.use_text(&kepala_nama, 11.0, Mm(83.0), Mm(199.0), &regular);
-    layer.use_text("Jabatan", 11.0, Mm(38.0), Mm(191.0), &regular);
-    layer.use_text(":", 11.0, Mm(78.0), Mm(191.0), &regular);
-    layer.use_text(&kepala_jabatan, 11.0, Mm(83.0), Mm(191.0), &regular);
-
-    layer.use_text("Dengan ini menerangkan bahwa :", 11.0, Mm(25.0), Mm(177.0), &regular);
-
-    let rows: Vec<(&str, String)> = if surat.jenis == "aktif" {
+    let intro_y = body_top - 29.0;
+    layer.use_text("Dengan ini menerangkan bahwa :", 11.0, Mm(25.0), Mm(intro_y), &regular);
+    let rows: Vec<(&str, String)> = if aktif {
         vec![
             ("Nama", nama),
-            ("Tempat dan Tanggal Lahir", ttl),
+            ("Tempat/Tanggal Lahir", ttl),
             ("NISN", nisn),
-            ("Kelas", kelas.clone()),
+            ("Kelas", get("kelas")),
         ]
     } else {
         vec![
             ("Nama", nama),
             ("Tempat dan Tanggal Lahir", ttl),
             ("NISN", nisn),
-            ("Nama Orang Tua", nama_ortu),
-            ("Alamat", alamat),
+            ("Nama Orang Tua", get("namaOrtu")),
+            ("Alamat", get("alamat")),
         ]
     };
 
-    let mut y = 165.0;
+    let mut y = intro_y - 9.0;
     for (label, value) in rows {
         layer.use_text(label, 11.0, Mm(38.0), Mm(y), &regular);
-        layer.use_text(":", 11.0, Mm(78.0), Mm(y), &regular);
-        let value_lines = wrap_pdf_text(&value, 58);
+        layer.use_text(":", 11.0, Mm(if aktif { 91.0 } else { 96.0 }), Mm(y), &regular);
+        let value_x = if aktif { 96.0 } else { 101.0 };
+        let value_lines = wrap_pdf_text(&value, 53);
         for (idx, line) in value_lines.iter().enumerate() {
-            layer.use_text(line, 11.0, Mm(83.0), Mm(y - (idx as f32 * 6.0)), &regular);
+            layer.use_text(line, 11.0, Mm(value_x), Mm(y - (idx as f32 * 5.5)), &regular);
         }
-        y -= 8.0 + ((value_lines.len().saturating_sub(1)) as f32 * 6.0);
+        y -= 7.0 + ((value_lines.len().saturating_sub(1)) as f32 * 5.5);
     }
 
-    y -= 8.0;
-    let paragraph = if surat.jenis == "aktif" {
+    // Jarak paragraf mengikuti ruang kosong pada masing-masing template.
+    y -= if aktif { 14.0 } else { 17.0 };
+    let paragraph = if aktif {
         format!(
-            "Benar bahwa nama tersebut di atas adalah siswa SMA Negeri 1 Sabang Tahun Pelajaran {}, dan masih Aktif sampai sekarang.",
+            "Benar siswa tersebut adalah siswa SMA Negeri 1 Sabang Tahun Pelajaran {}, dan masih Aktif sampai sekarang.",
             school_year(&get("tanggalPengajuan"))
         )
     } else {
         format!(
-            "Benar nama tersebut di atas adalah lulusan Sekolah Menengah Atas (SMA) Negeri 1 Sabang Tahun Pelajaran {}, yang pada tahun tersebut Pemerintah hanya menerbitkan IJAZAH dan tidak menerbitkan Surat Keterangan Hasil Ujian Nasional (SKHUN).",
-            tahun_lulus
+            "Benar nama tersebut diatas adalah Lulusan Sekolah Menengah Atas (SMA) Negeri 1 Sabang Tahun Pelajaran {}, yang pada tahun tersebut Pemerintah hanya menerbitkan IJAZAH dan tidak menerbitkan Surat Keterangan Hasil Ujian Nasional (SKHUN).",
+            get("tahunLulus")
         )
     };
-
-    for line in wrap_pdf_text(&paragraph, 92) {
+    for line in wrap_pdf_text(&paragraph, 91) {
         layer.use_text(line, 11.0, Mm(25.0), Mm(y), &regular);
-        y -= 6.5;
+        y -= 7.0;
     }
     y -= 3.0;
-
-    let closing = if surat.jenis == "skhun" {
-        "Demikian surat keterangan ini dibuat untuk dipergunakan seperlunya dan atas kerja samanya kami ucapkan terima kasih."
-    } else {
-        "Demikian surat keterangan ini dibuat dengan sebenarnya untuk dipergunakan seperlunya dan atas kerja samanya kami ucapkan terima kasih."
-    };
-    for line in wrap_pdf_text(closing, 92) {
+    let closing = "Demikian surat keterangan ini dibuat untuk dipergunakan seperlunya dan atas kerjasamanya kami ucapkan terima kasih.";
+    for line in wrap_pdf_text(closing, 91) {
         layer.use_text(line, 11.0, Mm(25.0), Mm(y), &regular);
-        y -= 6.5;
+        y -= 7.0;
     }
 
-    // Blok tanggal dan tanda tangan di kanan bawah.
-    layer.use_text(format!("Sabang, {}", tanggal_terbit), 11.0, Mm(126.0), Mm(69.0), &regular);
-    layer.use_text(&kepala_jabatan, 11.0, Mm(126.0), Mm(62.0), &regular);
-    layer.use_text(&kepala_nama, 11.0, Mm(126.0), Mm(32.0), &bold);
-    layer.use_text(format!("NIP. {}", kepala_nip), 10.0, Mm(126.0), Mm(25.0), &regular);
+    let sign_x = if aktif { 112.0 } else { 123.0 };
+    let sign_y = if aktif { 62.0 } else { 57.0 };
+    layer.use_text(format!("Sabang, {}", tanggal_terbit), 11.0, Mm(sign_x), Mm(sign_y), &regular);
+    layer.use_text(&kepala_jabatan, 11.0, Mm(sign_x), Mm(sign_y - 7.0), &regular);
+    layer.use_text(&kepala_nama, 11.0, Mm(sign_x), Mm(sign_y - 36.0), &regular);
+    layer.use_text("Pembina Utama Muda", 10.5, Mm(sign_x), Mm(sign_y - 42.0), &regular);
+    layer.use_text(format!("NIP. {}", kepala_nip), 10.5, Mm(sign_x), Mm(sign_y - 48.0), &regular);
 
     let mut writer = BufWriter::new(Cursor::new(Vec::new()));
     doc.save(&mut writer).map_err(|e| e.to_string())?;
     let cursor = writer.into_inner().map_err(|e| e.to_string())?;
     Ok(cursor.into_inner())
 }
-
 #[get("/api/admin/pengajuan/{id}/surat/{jenis}/pdf")]
 async fn download_letter_pdf(
     req: HttpRequest,
