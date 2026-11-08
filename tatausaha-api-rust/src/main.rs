@@ -709,19 +709,35 @@ fn make_letter_pdf(data: &serde_json::Value, surat: &Surat) -> Result<Vec<u8>, S
     let nomor = surat.nomor.clone();
     let tanggal_terbit = format_tanggal(&surat.tanggal_terbit);
 
-    // Logo resmi sekolah di sisi kanan kop surat.
-    let logo_b64 = include_str!("../assets/logo-sman1-sabang.jpg.base64").trim();
-    let logo_bytes = base64::engine::general_purpose::STANDARD
-        .decode(logo_b64).map_err(|e| format!("Logo sekolah tidak valid: {}", e))?;
-    let logo_image = image::load_from_memory(&logo_bytes)
+    // Lambang Pemerintah Aceh di kiri dan logo SMA Negeri 1 Sabang di kanan.
+    let aceh_b64 = include_str!("../assets/logo-aceh.jpg.base64").trim();
+    let aceh_bytes = base64::engine::general_purpose::STANDARD
+        .decode(aceh_b64).map_err(|e| format!("Logo Aceh tidak valid: {}", e))?;
+    let aceh_image = image::load_from_memory(&aceh_bytes)
+        .map_err(|e| format!("Gagal membaca logo Aceh: {}", e))?;
+    Image::from_dynamic_image(&aceh_image).add_to_layer(
+        layer.clone(),
+        ImageTransform {
+            translate_x: Some(Mm(19.0)),
+            translate_y: Some(Mm(255.0)),
+            scale_x: Some(0.25),
+            scale_y: Some(0.25),
+            ..Default::default()
+        },
+    );
+
+    let school_b64 = include_str!("../assets/logo-sman1.jpg.base64").trim();
+    let school_bytes = base64::engine::general_purpose::STANDARD
+        .decode(school_b64).map_err(|e| format!("Logo sekolah tidak valid: {}", e))?;
+    let school_image = image::load_from_memory(&school_bytes)
         .map_err(|e| format!("Gagal membaca logo sekolah: {}", e))?;
-    Image::from_dynamic_image(&logo_image).add_to_layer(
+    Image::from_dynamic_image(&school_image).add_to_layer(
         layer.clone(),
         ImageTransform {
             translate_x: Some(Mm(171.0)),
             translate_y: Some(Mm(255.0)),
-            scale_x: Some(0.22),
-            scale_y: Some(0.22),
+            scale_x: Some(0.25),
+            scale_y: Some(0.25),
             ..Default::default()
         },
     );
