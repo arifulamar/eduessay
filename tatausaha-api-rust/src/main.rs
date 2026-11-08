@@ -710,10 +710,8 @@ fn make_letter_pdf(data: &serde_json::Value, surat: &Surat) -> Result<Vec<u8>, S
     let tanggal_terbit = format_tanggal(&surat.tanggal_terbit);
 
     // Lambang Pemerintah Aceh di kiri dan logo SMA Negeri 1 Sabang di kanan.
-    let aceh_b64 = include_str!("../assets/logo-aceh.jpg.base64").trim();
-    let aceh_bytes = base64::engine::general_purpose::STANDARD
-        .decode(aceh_b64).map_err(|e| format!("Logo Aceh tidak valid: {}", e))?;
-    let aceh_image = image::load_from_memory(&aceh_bytes)
+    let aceh_bytes = include_bytes!("../../tatausaha/Coat_of_arms_of_Aceh.png");
+    let aceh_image = image::load_from_memory(aceh_bytes)
         .map_err(|e| format!("Gagal membaca logo Aceh: {}", e))?;
     Image::from_dynamic_image(&aceh_image).add_to_layer(
         layer.clone(),
@@ -726,11 +724,9 @@ fn make_letter_pdf(data: &serde_json::Value, surat: &Surat) -> Result<Vec<u8>, S
         },
     );
 
-    let school_b64 = include_str!("../assets/logo-sman1.jpg.base64").trim();
-    let school_bytes = base64::engine::general_purpose::STANDARD
-        .decode(school_b64).map_err(|e| format!("Logo sekolah tidak valid: {}", e))?;
-    let school_image = image::load_from_memory(&school_bytes)
-        .map_err(|e| format!("Gagal membaca logo sekolah: {}", e))?;
+    let school_bytes = include_bytes!("../../tatausaha/logosman1sabang.png");
+    let school_image = image::load_from_memory(school_bytes)
+        .map_err(|e| format!("Gagal membaca logo SMA Negeri 1 Sabang: {}", e))?;
     Image::from_dynamic_image(&school_image).add_to_layer(
         layer.clone(),
         ImageTransform {
