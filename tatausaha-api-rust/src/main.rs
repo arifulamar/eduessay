@@ -713,7 +713,7 @@ fn make_letter_pdf(data: &serde_json::Value, surat: &Surat) -> Result<Vec<u8>, S
     let aceh_bytes = include_bytes!("../../tatausaha/Coat_of_arms_of_Aceh.png");
     let aceh_image = image::load_from_memory(aceh_bytes)
         .map_err(|e| format!("Gagal membaca logo Aceh: {}", e))?;
-    Image::from_dynamic_image(&aceh_image).add_to_layer(
+    Image::try_from(aceh_image).map_err(|e| format!("Gagal membuat objek logo Aceh: {}", e))?.add_to_layer(
         layer.clone(),
         ImageTransform {
             translate_x: Some(Mm(19.0)),
@@ -727,7 +727,7 @@ fn make_letter_pdf(data: &serde_json::Value, surat: &Surat) -> Result<Vec<u8>, S
     let school_bytes = include_bytes!("../../tatausaha/logosman1sabang.png");
     let school_image = image::load_from_memory(school_bytes)
         .map_err(|e| format!("Gagal membaca logo SMA Negeri 1 Sabang: {}", e))?;
-    Image::from_dynamic_image(&school_image).add_to_layer(
+    Image::try_from(school_image).map_err(|e| format!("Gagal membuat objek logo sekolah: {}", e))?.add_to_layer(
         layer.clone(),
         ImageTransform {
             translate_x: Some(Mm(171.0)),
