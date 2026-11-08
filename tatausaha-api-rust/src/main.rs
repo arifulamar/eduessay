@@ -17,6 +17,7 @@ use uuid::Uuid;
 use printpdf::{BuiltinFont, Image, ImageTransform, Mm, PdfDocument};
 use base64::Engine;
 use std::io::{BufWriter, Cursor};
+use image::codecs::png::PngDecoder;
 
 #[derive(Clone)]
 struct AppState {
@@ -711,9 +712,9 @@ fn make_letter_pdf(data: &serde_json::Value, surat: &Surat) -> Result<Vec<u8>, S
 
     // Lambang Pemerintah Aceh di kiri dan logo SMA Negeri 1 Sabang di kanan.
     let aceh_bytes = include_bytes!("../../tatausaha/Coat_of_arms_of_Aceh.png");
-    let aceh_image = image::load_from_memory(aceh_bytes)
+    let aceh_decoder = PngDecoder::new(Cursor::new(aceh_bytes))
         .map_err(|e| format!("Gagal membaca logo Aceh: {}", e))?;
-    Image::try_from(aceh_image).map_err(|e| format!("Gagal membuat objek logo Aceh: {}", e))?.add_to_layer(
+    Image::try_from(aceh_decoder).map_err(|e| format!("Gagal membuat objek logo Aceh: {}", e))?.add_to_layer(
         layer.clone(),
         ImageTransform {
             translate_x: Some(Mm(19.0)),
@@ -725,9 +726,9 @@ fn make_letter_pdf(data: &serde_json::Value, surat: &Surat) -> Result<Vec<u8>, S
     );
 
     let school_bytes = include_bytes!("../../tatausaha/logosman1sabang.png");
-    let school_image = image::load_from_memory(school_bytes)
+    let school_decoder = PngDecoder::new(Cursor::new(school_bytes))
         .map_err(|e| format!("Gagal membaca logo SMA Negeri 1 Sabang: {}", e))?;
-    Image::try_from(school_image).map_err(|e| format!("Gagal membuat objek logo sekolah: {}", e))?.add_to_layer(
+    Image::try_from(school_decoder).map_err(|e| format!("Gagal membuat objek logo sekolah: {}", e))?.add_to_layer(
         layer.clone(),
         ImageTransform {
             translate_x: Some(Mm(171.0)),
