@@ -1,5 +1,5 @@
 // Konfigurasi publik Firebase untuk project Eduessay/Educonnect.
-export const API_BASE = 'https://ISI_URL_CLOUD_RUN';
+export const API_BASE = 'https://api.educonnect.my.id';
 export const FIREBASE_CONFIG = {
   apiKey: 'AIzaSyBpJFEZMUo9f4OoYNL5NR_d53layOogUx8',
   authDomain: 'eduessay-bd0ae.firebaseapp.com',
