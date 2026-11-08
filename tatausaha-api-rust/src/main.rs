@@ -218,6 +218,76 @@ async fn get_status(state: web::Data<AppState>, path: web::Path<String>) -> Http
 }
 
 
+#[get("/api/status/{kode}/surat/{jenis}/pdf")]
+async fn download_public_letter_pdf(
+    state: web::Data<AppState>,
+    path: web::Path<(String, String)>,
+) -> HttpResponse {
+    let (kode, jenis) = path.into_inner();
+    let kode = clean(&kode, 64);
+    if kode.len() != 32 || !kode.chars().all(|c| c.is_ascii_hexdigit() && !c.is_ascii_lowercase()) {
+        return error_json(actix_web::http::StatusCode::BAD_REQUEST, "Kode pelacakan tidak valid");
+    }
+    if jenis != "aktif" && jenis != "skhun" {
+        return error_json(actix_web::http::StatusCode::BAD_REQUEST, "Jenis surat tidak valid");
+    }
+
+    let hash = format!("{:x}", Sha256::digest(kode.as_bytes()));
+    let row = sqlx::query(
+        "SELECT id,nama,tempat_lahir,DATE_FORMAT(tanggal_lahir,'%Y-%m-%d') AS tanggal_lahir,nisn,DATE_FORMAT(tanggal_pengajuan,'%Y-%m-%d') AS tanggal_pengajuan,kelas,nama_ortu,alamat,tahun_lulus,CAST(surat AS CHAR) AS surat_json FROM tu_pengajuan WHERE kode_hash=? LIMIT 1"
+    ).bind(hash).fetch_optional(&state.db).await;
+
+    let row = match row {
+        Ok(Some(row)) => row,
+        Ok(None) => return error_json(actix_web::http::StatusCode::NOT_FOUND, "Pengajuan tidak ditemukan"),
+        Err(err) => {
+            error!("Gagal mengambil data surat publik: {}", err);
+            return error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Gagal mengambil data surat");
+        }
+    };
+
+    let raw: String = row.get("surat_json");
+    let surat: Vec<Surat> = match serde_json::from_str(&raw) {
+        Ok(value) => value,
+        Err(err) => {
+            error!("Data surat publik tidak valid: {}", err);
+            return error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Data surat tidak valid");
+        }
+    };
+    let Some(item) = surat.into_iter().find(|s| s.jenis == jenis) else {
+        return error_json(actix_web::http::StatusCode::NOT_FOUND, "Jenis surat tidak diajukan");
+    };
+    if item.status != "diterbitkan" {
+        return error_json(actix_web::http::StatusCode::FORBIDDEN, "Surat belum diterbitkan");
+    }
+
+    let data = serde_json::json!({
+        "id": row.get::<String,_>("id"),
+        "nama": row.get::<String,_>("nama"),
+        "tempatLahir": row.get::<String,_>("tempat_lahir"),
+        "tanggalLahir": row.get::<String,_>("tanggal_lahir"),
+        "nisn": row.get::<String,_>("nisn"),
+        "tanggalPengajuan": row.get::<String,_>("tanggal_pengajuan"),
+        "kelas": row.try_get::<Option<String>,_>("kelas").ok().flatten().unwrap_or_default(),
+        "namaOrtu": row.try_get::<Option<String>,_>("nama_ortu").ok().flatten().unwrap_or_default(),
+        "alamat": row.try_get::<Option<String>,_>("alamat").ok().flatten().unwrap_or_default(),
+        "tahunLulus": row.try_get::<Option<String>,_>("tahun_lulus").ok().flatten().unwrap_or_default()
+    });
+
+    match make_letter_pdf(&data, &item) {
+        Ok(bytes) => HttpResponse::Ok()
+            .insert_header(("Content-Type", "application/pdf"))
+            .insert_header(("Content-Disposition", format!("attachment; filename=\"surat-{}-{}.pdf\"", jenis, data["nisn"].as_str().unwrap_or("siswa"))))
+            .insert_header(("Cache-Control", "no-store"))
+            .body(bytes),
+        Err(err) => {
+            error!("Gagal membuat PDF publik: {}", err);
+            error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Gagal membuat PDF surat")
+        }
+    }
+}
+
+
 #[derive(Deserialize)]
 struct FirebaseClaims {
     aud: String,
@@ -785,6 +855,6 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::JsonConfig::default().limit(20 * 1024))
             .wrap(cors).wrap(middleware::Compress::default())
             .wrap(middleware::Logger::default())
-            .service(health).service(create_pengajuan).service(get_status).service(admin_me).service(list_staff).service(add_staff).service(delete_staff).service(list_pengajuan).service(process_letter).service(download_letter_pdf)
+            .service(health).service(create_pengajuan).service(get_status).service(download_public_letter_pdf).service(admin_me).service(list_staff).service(add_staff).service(delete_staff).service(list_pengajuan).service(process_letter).service(download_letter_pdf)
     }).bind(("127.0.0.1", port))?.run().await
 }
