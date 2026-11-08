@@ -476,6 +476,44 @@ async fn delete_staff(req: HttpRequest, state: web::Data<AppState>, path: web::P
     }
 }
 
+#[delete("/api/admin/pengajuan/{id}")]
+async fn delete_pengajuan(req: HttpRequest, state: web::Data<AppState>, path: web::Path<String>) -> HttpResponse {
+    if let Err(response) = authorize(&req, &state).await {
+        return response;
+    }
+    let id = clean(&path.into_inner(), 36);
+    let mut tx = match state.db.begin().await {
+        Ok(tx) => tx,
+        Err(err) => {
+            error!("Gagal memulai transaksi hapus pengajuan: {}", err);
+            return error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Gagal menghapus pengajuan");
+        }
+    };
+    if let Err(err) = sqlx::query("DELETE FROM tu_nomor_surat WHERE request_id=?").bind(&id).execute(&mut *tx).await {
+        error!("Gagal menghapus relasi nomor surat: {}", err);
+        let _ = tx.rollback().await;
+        return error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Gagal menghapus riwayat nomor surat");
+    }
+    match sqlx::query("DELETE FROM tu_pengajuan WHERE id=?").bind(&id).execute(&mut *tx).await {
+        Ok(result) if result.rows_affected() == 1 => {
+            if let Err(err) = tx.commit().await {
+                error!("Gagal menyimpan penghapusan pengajuan: {}", err);
+                return error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Penghapusan gagal disimpan");
+            }
+            HttpResponse::Ok().json(serde_json::json!({"ok":true}))
+        }
+        Ok(_) => {
+            let _ = tx.rollback().await;
+            error_json(actix_web::http::StatusCode::NOT_FOUND, "Pengajuan tidak ditemukan")
+        }
+        Err(err) => {
+            error!("Gagal menghapus pengajuan: {}", err);
+            let _ = tx.rollback().await;
+            error_json(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Gagal menghapus pengajuan")
+        }
+    }
+}
+
 #[get("/api/admin/pengajuan")]
 async fn list_pengajuan(req: HttpRequest, state: web::Data<AppState>) -> HttpResponse {
     if let Err(response) = authorize(&req, &state).await {
@@ -945,6 +983,6 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::JsonConfig::default().limit(20 * 1024))
             .wrap(cors).wrap(middleware::Compress::default())
             .wrap(middleware::Logger::default())
-            .service(health).service(create_pengajuan).service(get_status).service(download_public_letter_pdf).service(admin_me).service(list_staff).service(add_staff).service(delete_staff).service(list_pengajuan).service(process_letter).service(download_letter_pdf)
+            .service(health).service(create_pengajuan).service(get_status).service(download_public_letter_pdf).service(admin_me).service(list_staff).service(add_staff).service(delete_staff).service(delete_pengajuan).service(list_pengajuan).service(process_letter).service(download_letter_pdf)
     }).bind(("127.0.0.1", port))?.run().await
 }
