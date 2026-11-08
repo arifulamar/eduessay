@@ -170,10 +170,10 @@ async fn create_pengajuan(state: web::Data<AppState>, body: web::Json<PengajuanI
     };
 
     let result = sqlx::query(
-        "INSERT INTO tu_pengajuan (id,nama,tempat_lahir,tanggal_lahir,nisn,tanggal_pengajuan,kelas,nama_ortu,alamat,tahun_lulus,kode_hash,surat) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
+        "INSERT INTO tu_pengajuan (id,nama,tempat_lahir,tanggal_lahir,nisn,tanggal_pengajuan,kelas,nama_ortu,alamat,tahun_lulus,kode_hash,kode_pengajuan,surat) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"
     )
     .bind(id).bind(nama).bind(tempat_lahir).bind(lahir).bind(nisn).bind(pengajuan)
-    .bind(kelas).bind(nama_ortu).bind(alamat).bind(tahun_lulus).bind(hash).bind(surat_json)
+    .bind(kelas).bind(nama_ortu).bind(alamat).bind(tahun_lulus).bind(hash).bind(&kode).bind(surat_json)
     .execute(&state.db).await;
 
     match result {
@@ -482,7 +482,7 @@ async fn list_pengajuan(req: HttpRequest, state: web::Data<AppState>) -> HttpRes
         return response;
     }
     let rows = sqlx::query(
-        "SELECT id,nama,tempat_lahir,DATE_FORMAT(tanggal_lahir,'%Y-%m-%d') AS tanggal_lahir,nisn,DATE_FORMAT(tanggal_pengajuan,'%Y-%m-%d') AS tanggal_pengajuan,kelas,nama_ortu,alamat,tahun_lulus,CAST(surat AS CHAR) AS surat_json FROM tu_pengajuan ORDER BY created_at DESC LIMIT 200"
+        "SELECT id,nama,tempat_lahir,DATE_FORMAT(tanggal_lahir,'%Y-%m-%d') AS tanggal_lahir,nisn,DATE_FORMAT(tanggal_pengajuan,'%Y-%m-%d') AS tanggal_pengajuan,kelas,nama_ortu,alamat,tahun_lulus,kode_pengajuan,CAST(surat AS CHAR) AS surat_json FROM tu_pengajuan ORDER BY created_at DESC LIMIT 200"
     ).fetch_all(&state.db).await;
     match rows {
         Ok(rows) => {
@@ -507,6 +507,7 @@ async fn list_pengajuan(req: HttpRequest, state: web::Data<AppState>) -> HttpRes
                     "namaOrtu": row.try_get::<Option<String>,_>("nama_ortu").ok().flatten().unwrap_or_default(),
                     "alamat": row.try_get::<Option<String>,_>("alamat").ok().flatten().unwrap_or_default(),
                     "tahunLulus": row.try_get::<Option<String>,_>("tahun_lulus").ok().flatten().unwrap_or_default(),
+                    "kodePengajuan": row.try_get::<Option<String>,_>("kode_pengajuan").ok().flatten().unwrap_or_default(),
                     "surat": surat
                 }));
             }
