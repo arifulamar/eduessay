@@ -891,6 +891,127 @@ fn make_letter_pdf(data: &serde_json::Value, surat: &Surat) -> Result<Vec<u8>, S
     let cursor = writer.into_inner().map_err(|e| e.to_string())?;
     Ok(cursor.into_inner())
 }
+fn escape_html(value: &str) -> String {
+    value
+        .replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
+        .replace('\'', "&#39;")
+}
+
+fn make_letter_pdf_chrome(
+    data: &serde_json::Value,
+    surat: &Surat,
+) -> Result<Vec<u8>, String> {
+    use std::fs;
+    use std::process::Command;
+
+    let template_dir = "/opt/educonnect-tu/templates/html";
+
+    let template_name = match surat.jenis.as_str() {
+        "aktif" => "surat_aktif.html",
+        "skhun" => "surat_skhun.html",
+        _ => return Err("Jenis surat tidak valid".to_string()),
+    };
+
+    let template_path = format!("{}/{}", template_dir, template_name);
+
+    let mut html = fs::read_to_string(&template_path)
+        .map_err(|e| format!("Gagal membaca template: {}", e))?;
+
+    let get = |key: &str| -> String {
+        data.get(key)
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string()
+    };
+
+    let nama = escape_html(&get("nama"));
+    let tempat = escape_html(&get("tempatLahir"));
+    let tanggal_lahir = escape_html(&format_tanggal(&get("tanggalLahir")));
+    let ttl = format!("{}, {}", tempat, tanggal_lahir);
+    let nisn = escape_html(&get("nisn"));
+    let kelas = escape_html(&get("kelas"));
+    let nama_ortu = escape_html(&get("namaOrtu"));
+    let alamat = escape_html(&get("alamat")).replace('\n', "<br>");
+    let tahun_lulus = escape_html(&get("tahunLulus"));
+    let tahun_pelajaran = escape_html(&school_year(&get("tanggalPengajuan")));
+    let nomor = escape_html(&surat.nomor);
+    let tanggal_terbit = escape_html(&format_tanggal(&surat.tanggal_terbit));
+
+    let replacements = [
+        ("{{nomor}}", nomor),
+        ("{{nama}}", nama),
+        ("{{ttl}}", ttl),
+        ("{{nisn}}", nisn),
+        ("{{kelas}}", kelas),
+        ("{{nama_ortu}}", nama_ortu),
+        ("{{alamat}}", alamat),
+        ("{{tahun_lulus}}", tahun_lulus),
+        ("{{tahun_pelajaran}}", tahun_pelajaran),
+        ("{{tanggal_terbit}}", tanggal_terbit),
+    ];
+
+    for (placeholder, value) in replacements {
+        html = html.replace(placeholder, &value);
+    }
+
+    let id = Uuid::new_v4().to_string();
+
+    // HTML sementara berada di folder template agar logo relatif tetap ditemukan.
+    let html_path = format!("{}/render-{}.html", template_dir, id);
+    let pdf_path = format!(
+        "{}/surat-{}.pdf",
+        std::env::temp_dir().display(),
+        id
+    );
+
+    fs::write(&html_path, html)
+        .map_err(|e| format!("Gagal menulis HTML sementara: {}", e))?;
+
+    let chrome = "/opt/chrome-headless/chrome-headless-shell-linux64/chrome-headless-shell";
+    let file_url = format!("file://{}", html_path);
+
+    let result = Command::new(chrome)
+        .arg("--no-sandbox")
+        .arg("--disable-gpu")
+        .arg("--disable-dev-shm-usage")
+        .arg("--no-zygote")
+        .arg("--no-pdf-header-footer")
+        .arg(format!("--print-to-pdf={}", pdf_path))
+        .arg(file_url)
+        .output();
+
+    let _ = fs::remove_file(&html_path);
+
+    let output = match result {
+        Ok(output) => output,
+        Err(e) => {
+            let _ = fs::remove_file(&pdf_path);
+            return Err(format!("Gagal menjalankan Chrome: {}", e));
+        }
+    };
+
+    if !output.status.success() {
+        let _ = fs::remove_file(&pdf_path);
+        return Err(format!(
+            "Chrome gagal membuat PDF: {}",
+            String::from_utf8_lossy(&output.stderr)
+        ));
+    }
+
+    let pdf = fs::read(&pdf_path)
+        .map_err(|e| format!("Gagal membaca hasil PDF: {}", e))?;
+
+    let _ = fs::remove_file(&pdf_path);
+
+    if pdf.is_empty() || !pdf.starts_with(b"%PDF-") {
+        return Err("Hasil PDF tidak valid".to_string());
+    }
+
+    Ok(pdf)
+}
 #[get("/api/admin/pengajuan/{id}/surat/{jenis}/pdf")]
 async fn download_letter_pdf(
     req: HttpRequest,
