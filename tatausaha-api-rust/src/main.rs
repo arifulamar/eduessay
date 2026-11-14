@@ -275,7 +275,7 @@ async fn download_public_letter_pdf(
         "tahunLulus": row.try_get::<Option<String>,_>("tahun_lulus").ok().flatten().unwrap_or_default()
     });
 
-    match make_letter_pdf(&data, &item) {
+    match make_letter_pdf_chrome(&data, &item) {
         Ok(bytes) => HttpResponse::Ok()
             .insert_header(("Content-Type", "application/pdf"))
             .insert_header(("Content-Disposition", format!("attachment; filename=\"surat-{}-{}.pdf\"", jenis, data["nisn"].as_str().unwrap_or("siswa"))))
@@ -1062,7 +1062,7 @@ async fn download_letter_pdf(
         "alamat": row.try_get::<Option<String>,_>("alamat").ok().flatten().unwrap_or_default(),
         "tahunLulus": row.try_get::<Option<String>,_>("tahun_lulus").ok().flatten().unwrap_or_default()
     });
-    match make_letter_pdf(&data, &item) {
+    match make_letter_pdf_chrome(&data, &item) {
         Ok(bytes) => HttpResponse::Ok()
             .insert_header(("Content-Type", "application/pdf"))
             .insert_header(("Content-Disposition", format!("attachment; filename=\"surat-{}-{}.pdf\"", jenis, data["nisn"].as_str().unwrap_or("siswa"))))
