@@ -1,11 +1,3 @@
-
-
-
-
-
-
-
-
 use actix_cors::Cors;
 use actix_web::{delete, get, middleware, patch, post, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
 use chrono::{Datelike, NaiveDate, Utc};
