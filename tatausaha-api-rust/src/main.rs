@@ -145,10 +145,14 @@ async fn create_pengajuan(state: web::Data<AppState>, body: web::Json<PengajuanI
             return error_json(actix_web::http::StatusCode::BAD_REQUEST, "Nama orang tua, alamat, dan tahun pelajaran lulus wajib diisi");
         }
     }
-    let today = Utc::now().date_naive();
-    if lahir > today || pengajuan > today.succ_opt().unwrap_or(today) {
-        return error_json(actix_web::http::StatusCode::BAD_REQUEST, "Tanggal tidak valid");
-    }
+   let today = Utc::now().date_naive();
+
+if lahir > today || pengajuan > today || lahir > pengajuan {
+    return error_json(
+        actix_web::http::StatusCode::BAD_REQUEST,
+        "Tanggal tidak valid"
+    );
+}
 
     let id = Uuid::new_v4().to_string();
     let kode = Uuid::new_v4().simple().to_string().to_uppercase();
@@ -640,7 +644,7 @@ async fn process_letter(
 
     if status == "diterbitkan" {
         let result = sqlx::query("INSERT INTO tu_nomor_surat (nomor, request_id) VALUES (?,?)")
-            .bind(nomor.to_lowercase()).bind(&id).execute(&mut *tx).await;
+            .bind(&nomor).bind(&id).execute(&mut *tx).await;
         if let Err(err) = result {
             let duplicate = err.as_database_error().map(|db| db.is_unique_violation()).unwrap_or(false);
             error!("Gagal mencatat nomor surat: {}", err);
