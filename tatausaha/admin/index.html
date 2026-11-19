@@ -1,1 +1,1619 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboard TU | Educonnect</title><link rel="stylesheet" href="../style.css"><style>.toolbar{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}.item{border:1px solid #e1e9f1;border-radius:12px;padding:18px;margin-top:15px}.item h3{margin:0 0 8px}.item p{color:#586d81;line-height:1.7}.controls,.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}.controls input,.controls textarea{padding:12px;border:1px solid #cad8e4;border-radius:8px;min-width:220px}.pill{display:inline-block;border-radius:20px;background:#eaf4f3;padding:5px 12px;font-size:12px} .pdf-preview{position:fixed;inset:0;z-index:1000;background:rgba(10,20,35,.78);display:flex;align-items:center;justify-content:center;padding:18px}.pdf-preview[hidden]{display:none}.pdf-preview-panel{width:min(1100px,100%);height:min(92vh,900px);background:#fff;border-radius:14px;overflow:hidden;display:flex;flex-direction:column}.pdf-preview-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #dce4ec}.pdf-preview-toolbar div{display:flex;gap:8px}.pdf-preview iframe{border:0;flex:1;width:100%;min-height:0}@media(max-width:600px){.pdf-preview{padding:0}.pdf-preview-panel{height:100vh;border-radius:0}.pdf-preview-toolbar{padding:10px}.pdf-preview-toolbar button{padding:9px 11px}} </style></head><body><header><div class="brand"><span class="mark">TU</span><div><b>EDUCONNECT · TU</b><small>Dashboard SMA Negeri 1 Sabang</small></div></div><nav><a href="../">Formulir</a><a href="#" id="logout" hidden>Keluar</a></nav></header><main><section class="hero"><span class="eyebrow">AKSES KHUSUS STAF TATA USAHA</span><h1>Dashboard Pengajuan Surat</h1><p>Verifikasi data, masukkan nomor surat, dan cetak PDF.</p></section><section class="panel" id="login"><h2>Masuk sebagai staf TU</h2><p>Gunakan akun Google yang sudah didaftarkan pada konfigurasi backend.</p><button id="loginBtn">Masuk dengan Google</button><p id="notice" role="status"></p></section><section class="panel" id="staffPanel" hidden><h2>Manajemen akun staf TU</h2><p>Fitur Superadmin. Tambahkan Gmail staf yang boleh memproses surat. Akun Superadmin utama tidak dapat dihapus dari panel ini.</p><div class="status-form"><input id="staffEmail" type="email" placeholder="nama@gmail.com"><button id="addStaff" type="button">Tambah staf</button></div><div id="staffList"></div></section><section class="panel" id="dashboard" hidden><div class="toolbar"><h2>Daftar pengajuan</h2><select id="filter"><option value="">Semua status</option><option value="menunggu">Menunggu</option><option value="perbaikan">Perlu perbaikan</option><option value="ditolak">Ditolak</option><option value="diterbitkan">Diterbitkan</option></select><button id="refresh" class="secondary">Muat ulang</button></div><p id="who"></p><div id="items"></div></section></main><div id="pdfPreview" class="pdf-preview" hidden role="dialog" aria-modal="true" aria-label="Pratinjau surat PDF"><div class="pdf-preview-panel"><div class="pdf-preview-toolbar"><b>Pratinjau Surat</b><div><button id="downloadPdf" type="button">Unduh PDF</button><button id="closePdf" type="button" class="secondary">Tutup</button></div></div><iframe id="pdfFrame" title="Pratinjau dokumen PDF"></iframe></div></div><footer>SMA Negeri 1 Sabang · Sistem Tata Usaha</footer><script type="module" src="./admin.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel Tata Usaha — SMA Negeri 1 Sabang</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#2563eb',
+                            600: '#1d4ed8',
+                            700: '#1e3a8a',
+                            800: '#172554',
+                            900: '#0f172a',
+                            950: '#090d16',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .bg-grid-pattern {
+            background-image: radial-gradient(rgba(30, 58, 138, 0.14) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .dark .bg-grid-pattern {
+            background-image: radial-gradient(rgba(250, 204, 21, 0.12) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        /* Pengaturan Cetak A4 Resmi */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 14mm 18mm;
+            }
+            body * {
+                visibility: hidden;
+            }
+            #printDocumentArea, #printDocumentArea * {
+                visibility: visible;
+            }
+            #printDocumentArea {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: #ffffff !important;
+                color: #000000 !important;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300 antialiased selection:bg-blue-900 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- ===================================================================== -->
+    <!-- 1. LAYAR LOGIN ADMIN TATA USAHA SMAN 1 SABANG                         -->
+    <!-- ===================================================================== -->
+    <section id="loginScreen" class="min-h-screen flex items-center justify-center p-4 bg-grid-pattern relative overflow-hidden">
+        <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-[680px] h-[320px] bg-gradient-to-tr from-blue-900/20 via-amber-400/15 to-transparent blur-3xl pointer-events-none"></div>
+
+        <div class="relative w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-3xl p-7 sm:p-9 border border-slate-200/90 dark:border-slate-800 shadow-2xl shadow-blue-950/10 space-y-6">
+            <!-- Header Logo SMAN 1 Sabang -->
+            <div class="text-center space-y-3">
+                <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 p-2 flex items-center justify-center shadow-lg border border-amber-400/50">
+                    <img src="../logosman1sabang.png" alt="Logo SMAN 1 Sabang" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <!-- Fallback SVG Presisi Perisai SMAN 1 Sabang -->
+                    <svg style="display:none;" viewBox="0 0 120 132" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M60 4 L112 24 L106 84 C102 106 82 120 60 128 C38 120 18 106 14 84 L8 24 Z" fill="#1e247e" stroke="#ffffff" stroke-width="4"/>
+                        <path d="M60 10 L106 28 L100 82 C96 101 79 114 60 121 C41 114 24 101 20 82 L14 28 Z" fill="none" stroke="#111827" stroke-width="2"/>
+                        <path d="M26 32 L58 36 L58 76 L26 72 Z" fill="#ffffff" stroke="#111827" stroke-width="2"/>
+                        <path d="M94 32 L62 36 L62 76 L94 72 Z" fill="#ffffff" stroke="#111827" stroke-width="2"/>
+                        <path d="M40 42 C48 40 54 48 64 46 C74 44 82 52 78 62 C72 70 58 68 50 60 C44 54 38 48 40 42 Z" fill="#16a34a" stroke="#065f46" stroke-width="1.5"/>
+                        <line x1="82" y1="30" x2="54" y2="68" stroke="#facc15" stroke-width="3.5" stroke-linecap="round"/>
+                        <text x="60" y="90" text-anchor="middle" fill="#ffffff" font-size="7.5" font-weight="bold" font-family="sans-serif">SMA NEGERI 1 SABANG</text>
+                        <circle cx="44" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                        <circle cx="54" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                        <circle cx="64" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                        <circle cx="74" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                        <circle cx="59" cy="105" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-400/20 text-amber-800 dark:text-amber-300 border border-amber-400/40">Portal Staf Tata Usaha</span>
+                    <h1 class="font-display font-extrabold text-xl sm:text-2xl text-slate-900 dark:text-white mt-2">Admin Tata Usaha</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">SMA Negeri 1 Sabang • Dinas Pendidikan Aceh</p>
+                </div>
+            </div>
+
+            <!-- Form Login -->
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4 text-xs sm:text-sm">
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Username Staf TU</label>
+                    <div class="relative">
+                        <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                        <input type="text" id="loginUsername" required placeholder="Masukkan username" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Kata Sandi</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                        <input type="password" id="loginPassword" required placeholder="Masukkan kata sandi" class="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="loginErrorMsg" class="hidden p-3 rounded-xl bg-rose-50 dark:bg-rose-500/15 border border-rose-200 dark:border-rose-500/30 text-xs text-rose-700 dark:text-rose-300 font-medium">
+                    Username atau kata sandi tidak sesuai. Gunakan akun demo di bawah ini.
+                </div>
+
+                <button type="submit" class="w-full py-3.5 rounded-xl bg-blue-950 hover:bg-blue-900 dark:bg-primary-600 dark:hover:bg-primary-500 text-white font-bold shadow-lg flex items-center justify-center gap-2 transition">
+                    <i data-lucide="log-in" class="w-4 h-4 text-amber-400 dark:text-white"></i>
+                    <span>Masuk ke Dasbor Admin</span>
+                </button>
+            </form>
+
+            <!-- Kotak Akun Demo & Masuk Cepat -->
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 space-y-3">
+                <div class="flex items-center justify-between text-xs">
+                    <span class="font-bold text-slate-700 dark:text-slate-200">Akun Demo Staf TU:</span>
+                    <button type="button" onclick="fillDemoCredentials()" class="text-blue-900 dark:text-amber-400 font-semibold hover:underline">Isi Otomatis</button>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-[11px] font-mono bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200/70 dark:border-slate-700">
+                    <div><span class="text-slate-400 block font-sans">Username</span><strong class="text-slate-800 dark:text-slate-200">admin_tu</strong></div>
+                    <div><span class="text-slate-400 block font-sans">Password</span><strong class="text-slate-800 dark:text-slate-200">sman1sabang2026</strong></div>
+                </div>
+                <button type="button" onclick="quickDemoLogin()" class="w-full py-2.5 rounded-xl bg-amber-400/20 hover:bg-amber-400/30 text-amber-900 dark:text-amber-300 border border-amber-400/40 text-xs font-bold flex items-center justify-center gap-1.5 transition">
+                    <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                    <span>Masuk Cepat Demo (1 Klik)</span>
+                </button>
+            </div>
+
+            <div class="flex items-center justify-between pt-1 text-xs text-slate-500">
+                <a href="../index.html" class="inline-flex items-center gap-1.5 hover:text-blue-900 dark:hover:text-amber-400 font-medium">
+                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                    <span>Kembali ke Portal Publik</span>
+                </a>
+                <button type="button" onclick="toggleDarkMode()" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i data-lucide="moon" class="w-3.5 h-3.5 block dark:hidden"></i>
+                    <i data-lucide="sun" class="w-3.5 h-3.5 hidden dark:block text-amber-400"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 2. DASHBOARD UTAMA ADMIN PANEL TATA USAHA SMAN 1 SABANG               -->
+    <!-- ===================================================================== -->
+    <div id="adminDashboard" class="hidden min-h-screen flex flex-col lg:flex-row">
+
+        <!-- Mobile Sidebar Backdrop -->
+        <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 z-30 bg-slate-950/60 backdrop-blur-xs hidden lg:hidden"></div>
+
+        <!-- SIDEBAR NAVIGASI -->
+        <aside id="adminSidebar" class="fixed lg:sticky top-0 left-0 z-40 h-screen w-72 bg-blue-950 text-slate-200 flex flex-col justify-between border-r border-blue-900/80 transition-transform duration-300 -translate-x-full lg:translate-x-0 shrink-0">
+            <div class="p-5 space-y-6 overflow-y-auto">
+                <!-- Brand Identitas Sekolah -->
+                <div class="flex items-center justify-between gap-2 pb-4 border-b border-blue-900">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-2xl bg-white/10 p-1.5 border border-amber-400/50 flex items-center justify-center shrink-0">
+                            <img src="../logosman1sabang.png" alt="Logo SMAN 1 Sabang" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <svg style="display:none;" viewBox="0 0 120 132" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M60 4 L112 24 L106 84 C102 106 82 120 60 128 C38 120 18 106 14 84 L8 24 Z" fill="#1e247e" stroke="#ffffff" stroke-width="4"/>
+                                <path d="M26 32 L58 36 L58 76 L26 72 Z" fill="#ffffff" stroke="#111827" stroke-width="2"/>
+                                <path d="M94 32 L62 36 L62 76 L94 72 Z" fill="#ffffff" stroke="#111827" stroke-width="2"/>
+                                <path d="M40 42 C48 40 54 48 64 46 C74 44 82 52 78 62 C72 70 58 68 50 60 C44 54 38 48 40 42 Z" fill="#16a34a" stroke="#065f46" stroke-width="1.5"/>
+                                <line x1="82" y1="30" x2="54" y2="68" stroke="#facc15" stroke-width="3.5" stroke-linecap="round"/>
+                                <text x="60" y="90" text-anchor="middle" fill="#ffffff" font-size="7.5" font-weight="bold" font-family="sans-serif">SMA NEGERI 1 SABANG</text>
+                                <circle cx="44" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                                <circle cx="54" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                                <circle cx="64" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                                <circle cx="74" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                                <circle cx="59" cy="105" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="font-display font-extrabold text-base text-white block leading-tight">SMAN 1 Sabang</span>
+                            <span class="text-[11px] text-amber-400 font-semibold">Admin Tata Usaha</span>
+                        </div>
+                    </div>
+                    <button onclick="toggleSidebar()" class="lg:hidden p-1.5 rounded-lg text-slate-300 hover:bg-blue-900">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- Menu Navigasi Utama -->
+                <nav class="space-y-1.5 text-xs sm:text-sm font-medium">
+                    <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-blue-300/60 mb-2">Menu Utama</p>
+                    <button onclick="switchAdminTab('overview')" id="nav-overview" class="w-full flex items-center justify-between px-3.5 py-3 rounded-xl bg-amber-400 text-slate-950 font-bold shadow-sm transition">
+                        <span class="flex items-center gap-3"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Ringkasan & Statistik</span>
+                    </button>
+                    <button onclick="switchAdminTab('requests')" id="nav-requests" class="w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-blue-100 hover:bg-blue-900/70 transition">
+                        <span class="flex items-center gap-3"><i data-lucide="inbox" class="w-4 h-4"></i> Antrean Pengajuan</span>
+                        <span id="sidebarPendingBadge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-400 text-slate-950">0</span>
+                    </button>
+                    <button onclick="switchAdminTab('offline-entry')" id="nav-offline-entry" class="w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-blue-100 hover:bg-blue-900/70 transition">
+                        <span class="flex items-center gap-3"><i data-lucide="file-plus-2" class="w-4 h-4"></i> Input Loket Offline</span>
+                    </button>
+                    <button onclick="switchAdminTab('settings')" id="nav-settings" class="w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-blue-100 hover:bg-blue-900/70 transition">
+                        <span class="flex items-center gap-3"><i data-lucide="settings" class="w-4 h-4"></i> Kop & Penandatangan</span>
+                    </button>
+                </nav>
+
+                <!-- Info Sinkronisasi LocalStorage -->
+                <div class="p-4 rounded-2xl bg-blue-900/60 border border-blue-800 space-y-2 text-xs">
+                    <div class="flex items-center gap-2 text-emerald-400 font-bold">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        <span>Sinkron Portal Publik</span>
+                    </div>
+                    <p class="text-[11px] text-blue-200/80 leading-relaxed">
+                        Terhubung dengan penyimpanan <code class="text-amber-300">sman1sabang_tu_requests</code>. Perubahan status langsung terbaca di halaman lacak publik.
+                    </p>
+                    <a href="../index.html" target="_blank" class="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-400 hover:underline pt-1">
+                        <span>Buka Portal Publik</span>
+                        <i data-lucide="external-link" class="w-3 h-3"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Profil Staf TU & Logout -->
+            <div class="p-4 border-t border-blue-900 bg-blue-950/90 space-y-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-amber-400/20 border border-amber-400/40 text-amber-300 flex items-center justify-center font-bold text-xs">
+                        IR
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs font-bold text-white truncate">Ibu Rakhma (Staf TU)</p>
+                        <p class="text-[10px] text-blue-300 truncate">+62 813-6095-1234</p>
+                    </div>
+                </div>
+                <button onclick="handleAdminLogout()" class="w-full py-2 px-3 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-semibold flex items-center justify-center gap-2 transition">
+                    <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                    <span>Keluar Sesi Admin</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- KONTEN UTAMA DASHBOARD -->
+        <div class="flex-1 flex flex-col min-w-0">
+            <!-- Top Header Bar -->
+            <header class="sticky top-0 z-20 h-16 sm:h-20 bg-white/85 dark:bg-slate-950/85 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 px-4 sm:px-8 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSidebar()" class="lg:hidden p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                    <div>
+                        <h2 id="headerPageTitle" class="font-display font-extrabold text-base sm:text-xl text-slate-900 dark:text-white">Ringkasan & Statistik Layanan</h2>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">Jl. T. Nyak Arief Ie Meulee Sukajaya Sabang, Aceh 23511</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2.5">
+                    <span id="adminLiveClock" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-mono font-semibold text-slate-700 dark:text-slate-300">
+                        --:-- WIB
+                    </span>
+                    <button onclick="exportDataCSV()" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 text-xs font-semibold transition" title="Unduh Rekap CSV">
+                        <i data-lucide="download" class="w-4 h-4 text-emerald-600"></i>
+                        <span>Export CSV</span>
+                    </button>
+                    <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition" title="Mode Gelap/Terang">
+                        <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+                        <i data-lucide="sun" class="w-4 h-4 hidden dark:block text-amber-400"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Main Workspace Area -->
+            <main class="flex-1 p-4 sm:p-8 max-w-7xl w-full mx-auto space-y-8">
+
+                <!-- ========================================================= -->
+                <!-- TAB 1: RINGKASAN & STATISTIK                              -->
+                <!-- ========================================================= -->
+                <div id="tab-overview" class="space-y-8">
+                    <!-- 4 KPI Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
+                        <div class="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Pengajuan</p>
+                                <h3 id="kpiTotal" class="font-display font-extrabold text-2xl sm:text-3xl text-slate-900 dark:text-white mt-1">0</h3>
+                                <p class="text-[11px] text-slate-400 mt-1">Semua berkas masuk</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-blue-950/10 dark:bg-primary-500/20 text-blue-900 dark:text-primary-400 flex items-center justify-center">
+                                <i data-lucide="files" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Menunggu Verifikasi</p>
+                                <h3 id="kpiPending" class="font-display font-extrabold text-2xl sm:text-3xl text-amber-600 dark:text-amber-400 mt-1">0</h3>
+                                <p class="text-[11px] text-slate-400 mt-1">Perlu tinjauan staf TU</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-amber-400/20 text-amber-700 dark:text-amber-400 flex items-center justify-center">
+                                <i data-lucide="clock" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Diproses Staf TU</p>
+                                <h3 id="kpiProcessing" class="font-display font-extrabold text-2xl sm:text-3xl text-blue-600 dark:text-sky-400 mt-1">0</h3>
+                                <p class="text-[11px] text-slate-400 mt-1">Penomoran & tanda tangan</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+                                <i data-lucide="loader" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Selesai / Siap Diambil</p>
+                                <h3 id="kpiDone" class="font-display font-extrabold text-2xl sm:text-3xl text-emerald-600 dark:text-emerald-400 mt-1">0</h3>
+                                <p class="text-[11px] text-slate-400 mt-1">Terbit & siap cetak</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                                <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grafik Distribusi Layanan & Aksi Cepat -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <!-- Distribusi 2 Jenis Surat -->
+                        <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white">Distribusi 2 Jenis Layanan Surat</h3>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">Perbandingan permohonan siswa aktif dan alumni SMAN 1 Sabang</p>
+                                </div>
+                                <span class="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300">TA 2026/2027</span>
+                            </div>
+
+                            <div class="space-y-5">
+                                <!-- Bar 1: Surat Keterangan Aktif -->
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between text-xs sm:text-sm">
+                                        <span class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                                            <span class="w-3 h-3 rounded-full bg-blue-900 dark:bg-primary-500"></span>
+                                            Surat Keterangan Aktif Sekolah
+                                        </span>
+                                        <span id="statAktifLabel" class="font-mono font-bold text-blue-900 dark:text-primary-400">0 berkas (0%)</span>
+                                    </div>
+                                    <div class="w-full h-3.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                                        <div id="barAktif" class="h-full rounded-full bg-gradient-to-r from-blue-950 to-primary-600 transition-all duration-500" style="width: 50%"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Bar 2: Surat Tidak Menerbitkan SKHUN -->
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between text-xs sm:text-sm">
+                                        <span class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                                            <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                                            Surat Keterangan Tidak Menerbitkan SKHUN
+                                        </span>
+                                        <span id="statNonSkhunLabel" class="font-mono font-bold text-amber-600 dark:text-amber-400">0 berkas (0%)</span>
+                                    </div>
+                                    <div class="w-full h-3.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                                        <div id="barNonSkhun" class="h-full rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 transition-all duration-500" style="width: 50%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Grafik Tren Harian Sederhana -->
+                            <div class="pt-4 border-t border-slate-100 dark:border-slate-800">
+                                <p class="text-xs font-semibold text-slate-500 mb-3">Aktivitas Pengajuan Minggu Ini</p>
+                                <div class="grid grid-cols-6 gap-2 items-end h-24 pt-2">
+                                    <div class="flex flex-col items-center gap-1.5"><div class="w-full bg-blue-900/20 dark:bg-primary-500/20 rounded-t-lg h-10"></div><span class="text-[10px] text-slate-400">Sen</span></div>
+                                    <div class="flex flex-col items-center gap-1.5"><div class="w-full bg-blue-900/40 dark:bg-primary-500/40 rounded-t-lg h-14"></div><span class="text-[10px] text-slate-400">Sel</span></div>
+                                    <div class="flex flex-col items-center gap-1.5"><div class="w-full bg-blue-900/60 dark:bg-primary-500/60 rounded-t-lg h-16"></div><span class="text-[10px] text-slate-400">Rab</span></div>
+                                    <div class="flex flex-col items-center gap-1.5"><div class="w-full bg-amber-400 rounded-t-lg h-20"></div><span class="text-[10px] font-bold text-slate-700 dark:text-amber-400">Kam</span></div>
+                                    <div class="flex flex-col items-center gap-1.5"><div class="w-full bg-blue-900/30 dark:bg-primary-500/30 rounded-t-lg h-12"></div><span class="text-[10px] text-slate-400">Jum</span></div>
+                                    <div class="flex flex-col items-center gap-1.5"><div class="w-full bg-blue-900/25 dark:bg-primary-500/25 rounded-t-lg h-9"></div><span class="text-[10px] text-slate-400">Sab</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel Aksi Cepat & Status Loket -->
+                        <div class="lg:col-span-5 bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-5">
+                            <div class="space-y-4">
+                                <h3 class="font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white">Aksi Cepat Staf TU</h3>
+                                <div class="space-y-2.5">
+                                    <button onclick="switchAdminTab('requests')" class="w-full p-3.5 rounded-2xl bg-blue-950 hover:bg-blue-900 dark:bg-primary-600 text-white text-xs sm:text-sm font-bold flex items-center justify-between transition">
+                                        <span class="flex items-center gap-2.5"><i data-lucide="check-square" class="w-4 h-4 text-amber-400"></i> Verifikasi Antrean Surat</span>
+                                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                                    </button>
+                                    <button onclick="switchAdminTab('offline-entry')" class="w-full p-3.5 rounded-2xl bg-amber-400/20 hover:bg-amber-400/30 text-amber-900 dark:text-amber-300 border border-amber-400/40 text-xs sm:text-sm font-bold flex items-center justify-between transition">
+                                        <span class="flex items-center gap-2.5"><i data-lucide="user-plus" class="w-4 h-4"></i> Input Pemohon Loket Offline</span>
+                                        <i data-lucide="plus" class="w-4 h-4"></i>
+                                    </button>
+                                    <button onclick="exportDataJSON()" class="w-full p-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-semibold flex items-center justify-between transition">
+                                        <span class="flex items-center gap-2.5"><i data-lucide="database" class="w-4 h-4 text-emerald-600"></i> Backup Arsip JSON</span>
+                                        <i data-lucide="download" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 text-xs space-y-1.5">
+                                <p class="font-bold text-slate-800 dark:text-slate-200">Jadwal Loket TU SMAN 1 Sabang:</p>
+                                <p class="text-slate-500 dark:text-slate-400">• Senin – Kamis & Sabtu: 07.30 – 13.30 WIB</p>
+                                <p class="text-slate-500 dark:text-slate-400">• Jumat: 07.30 – 11.45 WIB</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pengajuan Terbaru Ringkas -->
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white">Permohonan Terbaru Masuk</h3>
+                            <button onclick="switchAdminTab('requests')" class="text-xs font-bold text-blue-900 dark:text-amber-400 hover:underline">Lihat Semua Antrean →</button>
+                        </div>
+                        <div id="recentRequestsPreview" class="divide-y divide-slate-100 dark:divide-slate-800">
+                            <!-- Dirender via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================================= -->
+                <!-- TAB 2: ANTREAN PENGAJUAN SURAT (VERIFIKASI & CETAK)       -->
+                <!-- ========================================================= -->
+                <div id="tab-requests" class="hidden space-y-6">
+                    <!-- Filter & Pencarian Bar -->
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                            <div class="md:col-span-5 relative">
+                                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                                <input type="text" id="filterSearchInput" oninput="renderRequestsTable()" placeholder="Cari Nama, NISN, atau Resi (TU-SMAN1SBG-...)" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs sm:text-sm outline-none focus:border-blue-800">
+                            </div>
+                            <div class="md:col-span-4">
+                                <select id="filterServiceSelect" onchange="renderRequestsTable()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs sm:text-sm outline-none focus:border-blue-800">
+                                    <option value="ALL">Semua Jenis Surat (2 Layanan)</option>
+                                    <option value="surat-aktif">Surat Keterangan Aktif</option>
+                                    <option value="surat-non-skhun">Surat Keterangan Tidak Menerbitkan SKHUN</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-3">
+                                <select id="filterStatusSelect" onchange="renderRequestsTable()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs sm:text-sm outline-none focus:border-blue-800">
+                                    <option value="ALL">Semua Status</option>
+                                    <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+                                    <option value="Diproses Staf TU">Diproses Staf TU</option>
+                                    <option value="Selesai / Siap Diambil">Selesai / Siap Diambil</option>
+                                    <option value="Ditolak">Ditolak</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabel Responsif Antrean Permohonan -->
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                        <th class="py-3.5 px-4">No. Resi & Waktu</th>
+                                        <th class="py-3.5 px-4">Pemohon & NISN</th>
+                                        <th class="py-3.5 px-4">Jenis Surat & Keperluan</th>
+                                        <th class="py-3.5 px-4">No. Surat Resmi</th>
+                                        <th class="py-3.5 px-4">Status</th>
+                                        <th class="py-3.5 px-4 text-right">Aksi Staf TU</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="requestsTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-xs sm:text-sm">
+                                    <!-- Dirender via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================================= -->
+                <!-- TAB 3: INPUT PENGAJUAN MANUAL (LOKET OFFLINE)             -->
+                <!-- ========================================================= -->
+                <div id="tab-offline-entry" class="hidden max-w-3xl mx-auto">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-6">
+                        <div class="border-b border-slate-100 dark:border-slate-800 pb-4">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-400/20 text-amber-800 dark:text-amber-300">Pelayanan Langsung di Loket</span>
+                            <h3 class="font-display font-extrabold text-xl text-slate-900 dark:text-white mt-1.5">Input Permohonan Loket Offline</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Catat permohonan siswa atau alumni yang datang langsung ke ruang Tata Usaha SMAN 1 Sabang. Sistem otomatis menerbitkan nomor resi & nomor agenda surat.</p>
+                        </div>
+
+                        <form onsubmit="handleOfflineSubmit(event)" class="space-y-4 text-xs sm:text-sm">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Jenis Surat</label>
+                                    <select id="offServiceId" onchange="toggleOfflineServiceFields()" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-semibold outline-none focus:border-blue-800">
+                                        <option value="surat-aktif">Surat Keterangan Aktif</option>
+                                        <option value="surat-non-skhun">Surat Keterangan Tidak Menerbitkan SKHUN</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Status Awal</label>
+                                    <select id="offStatus" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-semibold outline-none focus:border-blue-800">
+                                        <option value="Selesai / Siap Diambil">Selesai / Siap Diambil (Langsung Cetak)</option>
+                                        <option value="Diproses Staf TU">Diproses Staf TU</option>
+                                        <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Lengkap Siswa / Alumni</label>
+                                    <input type="text" id="offNama" required placeholder="Nama lengkap sesuai Ijazah" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">NISN</label>
+                                    <input type="text" id="offNisn" required placeholder="Contoh: 0084910231" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono outline-none focus:border-blue-800">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tempat & Tanggal Lahir</label>
+                                    <input type="text" id="offTtl" required placeholder="Contoh: Sabang, 12 Mei 2008" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                                </div>
+                                <div>
+                                    <label id="offLabelKelasTahun" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Kelas / Jurusan</label>
+                                    <input type="text" id="offKelasTahun" required placeholder="Contoh: XII-IPA-1" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                                </div>
+                            </div>
+
+                            <!-- Field Khusus Surat Aktif -->
+                            <div id="offFieldsAktif" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Orang Tua / Wali</label>
+                                    <input type="text" id="offOrtu" placeholder="Nama lengkap Ayah/Ibu/Wali" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Pekerjaan Orang Tua</label>
+                                    <input type="text" id="offPekerjaanOrtu" placeholder="Contoh: PNS / TNI / Polri / Wiraswasta" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                                </div>
+                            </div>
+
+                            <!-- Field Khusus Non-SKHUN -->
+                            <div id="offFieldsNonSkhun" class="hidden">
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nomor Seri Ijazah</label>
+                                <input type="text" id="offNoIjazah" placeholder="Contoh: M-SMA/K13-3/06/0041289" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono outline-none focus:border-blue-800">
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Keperluan Surat</label>
+                                    <input type="text" id="offKeperluan" required placeholder="Contoh: Tunjangan PNS / Melamar Pekerjaan" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">No. WhatsApp Pemohon</label>
+                                    <input type="tel" id="offWhatsapp" required placeholder="Contoh: 081360951234" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                                </div>
+                            </div>
+
+                            <div class="pt-3 flex justify-end">
+                                <button type="submit" class="px-6 py-3.5 rounded-2xl bg-blue-950 hover:bg-blue-900 dark:bg-primary-600 text-white font-bold shadow-lg flex items-center gap-2 transition">
+                                    <i data-lucide="save" class="w-4 h-4 text-amber-400"></i>
+                                    <span>Simpan & Terbitkan Nomor Resi</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- ========================================================= -->
+                <!-- TAB 4: PENGATURAN KOP SURAT & PENANDATANGAN               -->
+                <!-- ========================================================= -->
+                <div id="tab-settings" class="hidden max-w-3xl mx-auto space-y-6">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-6">
+                        <div class="border-b border-slate-100 dark:border-slate-800 pb-4">
+                            <h3 class="font-display font-extrabold text-xl text-slate-900 dark:text-white">Pengaturan Kop & Penandatangan Surat</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Konfigurasi pejabat penandatangan dan nomor agenda otomatis pada lembar cetak A4 SMA Negeri 1 Sabang.</p>
+                        </div>
+
+                        <form onsubmit="saveLetterSettings(event)" class="space-y-4 text-xs sm:text-sm">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Kepala Sekolah</label>
+                                    <input type="text" id="setKepsekName" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">NIP Kepala Sekolah</label>
+                                    <input type="text" id="setKepsekNip" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono outline-none focus:border-blue-800">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Pangkat / Golongan</label>
+                                    <input type="text" id="setKepsekRank" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Koordinator / Kepala Tata Usaha</label>
+                                    <input type="text" id="setKaTuName" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nomor Agenda Terakhir</label>
+                                    <input type="number" id="setLastAgenda" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono outline-none focus:border-blue-800">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tahun Pelajaran Aktif</label>
+                                    <input type="text" id="setAcademicYear" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                                </div>
+                            </div>
+
+                            <div class="pt-3 flex flex-wrap items-center justify-between gap-3">
+                                <button type="button" onclick="resetDemoDatabase()" class="px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30 text-xs font-bold transition">
+                                    Reset Data Demo Awal
+                                </button>
+                                <button type="submit" class="px-6 py-3 rounded-2xl bg-blue-950 hover:bg-blue-900 dark:bg-primary-600 text-white font-bold shadow-md transition">
+                                    Simpan Pengaturan Surat
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL 1: DETAIL, EDIT DATA & UBAH STATUS PERMOHONAN                   -->
+    <!-- ===================================================================== -->
+    <div id="modalManageRequest" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-5 my-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div>
+                    <span id="editModalCode" class="font-mono text-xs font-extrabold text-blue-900 dark:text-amber-400">TU-SMAN1SBG-2026-1042</span>
+                    <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white">Verifikasi & Kelola Permohonan</h3>
+                </div>
+                <button onclick="closeModal('modalManageRequest')" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="saveManagedRequest(event)" class="space-y-4 text-xs sm:text-sm">
+                <input type="hidden" id="editReqCodeHidden">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Permohonan</label>
+                        <select id="editReqStatus" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none focus:border-blue-800">
+                            <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+                            <option value="Diproses Staf TU">Diproses Staf TU</option>
+                            <option value="Selesai / Siap Diambil">Selesai / Siap Diambil</option>
+                            <option value="Ditolak">Ditolak</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Surat Resmi (Agenda)</label>
+                        <input type="text" id="editReqAgendaNo" required placeholder="421.3/148/SMAN1-SBG/2026" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-semibold outline-none focus:border-blue-800">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap Pemohon</label>
+                        <input type="text" id="editReqApplicant" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">NISN</label>
+                        <input type="text" id="editReqNisn" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono outline-none focus:border-blue-800">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tempat, Tanggal Lahir</label>
+                        <input type="text" id="editReqTtl" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kelas / Tahun Lulus</label>
+                        <input type="text" id="editReqKelasTahun" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                    </div>
+                </div>
+
+                <!-- Dinamis Aktif vs Non-SKHUN -->
+                <div id="editFieldsAktif" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Orang Tua / Wali</label>
+                        <input type="text" id="editReqOrtu" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pekerjaan Orang Tua</label>
+                        <input type="text" id="editReqPekerjaanOrtu" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                    </div>
+                </div>
+
+                <div id="editFieldsNonSkhun" class="hidden">
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Seri Ijazah</label>
+                    <input type="text" id="editReqNoIjazah" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono outline-none focus:border-blue-800">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keperluan Surat</label>
+                        <input type="text" id="editReqPurpose" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. WhatsApp Pemohon</label>
+                        <input type="text" id="editReqWhatsapp" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Catatan Staf TU / Alasan Penolakan (Tampil di Tracking Publik)</label>
+                    <textarea id="editReqNotes" rows="2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800"></textarea>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2.5">
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="sendWhatsAppFromModal()" class="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 transition">
+                            <i data-lucide="message-circle" class="w-4 h-4"></i>
+                            <span>Kirim WA</span>
+                        </button>
+                        <button type="button" onclick="previewDocFromModal()" class="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition">
+                            <i data-lucide="printer" class="w-4 h-4"></i>
+                            <span>Pratinjau A4</span>
+                        </button>
+                    </div>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-950 hover:bg-blue-900 dark:bg-primary-600 text-white text-xs sm:text-sm font-bold shadow-md transition">
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL 2: PRATINJAU & CETAK SURAT RESMI A4 SMAN 1 SABANG               -->
+    <!-- ===================================================================== -->
+    <div id="modalDocumentViewer" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-3xl w-full p-6 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 my-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 no-print">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="file-check-2" class="w-5 h-5 text-emerald-600"></i>
+                    <h3 class="font-display font-bold text-base">Pratinjau Cetak A4 — SMA Negeri 1 Sabang</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-blue-950 hover:bg-blue-900 dark:bg-primary-600 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                        <i data-lucide="printer" class="w-4 h-4 text-amber-400 dark:text-white"></i>
+                        <span>Cetak Surat A4</span>
+                    </button>
+                    <button onclick="closeModal('modalDocumentViewer')" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lembar Cetak Resmi A4 -->
+            <div id="printDocumentArea" class="bg-white text-slate-900 p-7 sm:p-10 rounded-2xl border border-slate-300 text-sm leading-relaxed font-serif">
+                <!-- Dirender via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- JAVASCRIPT LOGIC                                                      -->
+    <!-- ===================================================================== -->
+    <script>
+        // --- 1. KONFIGURASI STORAGE SINKRON DENGAN PORTAL PUBLIK ---
+        const STORAGE_KEY = 'sman1sabang_tu_requests';
+        const LEGACY_STORAGE_KEY = 'sman1sabang_tu_tracking_v2';
+        const SETTINGS_KEY = 'sman1sabang_tu_settings';
+        const AUTH_KEY = 'sman1sabang_tu_admin_auth';
+
+        const DEFAULT_SETTINGS = {
+            kepsekName: 'Drs. H. Zulkifli, M.Pd',
+            kepsekNip: '19680514 199412 1 002',
+            kepsekRank: 'Pembina Utama Muda / IV.c',
+            kaTuName: 'Rakhma, S.Sos',
+            lastAgenda: 148,
+            academicYear: '2026/2027'
+        };
+
+        const DEFAULT_REQUESTS = [
+            {
+                code: 'TU-SMAN1SBG-2026-1042',
+                serviceId: 'surat-aktif',
+                serviceName: 'Surat Keterangan Aktif',
+                applicant: 'Cut Meutia Zahra',
+                nisn: '0084910231',
+                kelasOrTahun: 'XII-IPA-1',
+                ttl: 'Sabang, 17 Agustus 2008',
+                ortu: 'Teuku Iskandar, S.E.',
+                pekerjaanOrtu: 'PNS Pemerintah Kota Sabang',
+                noIjazah: '',
+                purpose: 'Tunjangan Orang Tua (PNS / TNI / Polri)',
+                whatsapp: '081269112233',
+                submittedAt: '18 Nov 2026, 09:15 WIB',
+                agendaNo: '421.3/145/SMAN1-SBG/2026',
+                status: 'Selesai / Siap Diambil',
+                step: 4,
+                notes: 'Data siswa terverifikasi aktif di Dapodik SMAN 1 Sabang. Surat telah disahkan dan siap dicetak.'
+            },
+            {
+                code: 'TU-SMAN1SBG-2026-1043',
+                serviceId: 'surat-non-skhun',
+                serviceName: 'Surat Keterangan Tidak Menerbitkan SKHUN',
+                applicant: 'Teuku Muhammad Rizki',
+                nisn: '0051294055',
+                kelasOrTahun: 'Tahun Lulus 2023',
+                ttl: 'Sabang, 22 Maret 2005',
+                ortu: '',
+                pekerjaanOrtu: '',
+                noIjazah: 'M-SMA/K13-3/06/0041289',
+                purpose: 'Pendaftaran Seleksi TNI / Polri',
+                whatsapp: '085277889900',
+                submittedAt: '19 Nov 2026, 08:40 WIB',
+                agendaNo: '421.3/146/SMAN1-SBG/2026',
+                status: 'Selesai / Siap Diambil',
+                step: 4,
+                notes: 'Nomor Seri Ijazah cocok dengan Buku Induk Alumni SMAN 1 Sabang Tahun 2023. Surat siap dicetak.'
+            },
+            {
+                code: 'TU-SMAN1SBG-2026-1044',
+                serviceId: 'surat-aktif',
+                serviceName: 'Surat Keterangan Aktif',
+                applicant: 'Nabila Putri Syahira',
+                nisn: '0093120488',
+                kelasOrTahun: 'XI-IPS-2',
+                ttl: 'Sabang, 05 November 2009',
+                ortu: 'Muhammad Yusuf',
+                pekerjaanOrtu: 'TNI Angkatan Laut',
+                noIjazah: '',
+                purpose: 'Kebutuhan BPJS Kesehatan',
+                whatsapp: '081360958811',
+                submittedAt: '19 Nov 2026, 10:12 WIB',
+                agendaNo: '421.3/147/SMAN1-SBG/2026',
+                status: 'Diproses Staf TU',
+                step: 3,
+                notes: 'Berkas kartu keluarga dan NISN telah sesuai. Menunggu penandatanganan Kepala Sekolah.'
+            },
+            {
+                code: 'TU-SMAN1SBG-2026-1045',
+                serviceId: 'surat-non-skhun',
+                serviceName: 'Surat Keterangan Tidak Menerbitkan SKHUN',
+                applicant: 'Fajar Maulana',
+                nisn: '0048871290',
+                kelasOrTahun: 'Tahun Lulus 2022',
+                ttl: 'Banda Aceh, 11 Januari 2004',
+                ortu: '',
+                pekerjaanOrtu: '',
+                noIjazah: 'M-SMA/K13-3/06/0039812',
+                purpose: 'Melamar Pekerjaan',
+                whatsapp: '082274119022',
+                submittedAt: '19 Nov 2026, 14:20 WIB',
+                agendaNo: '421.3/148/SMAN1-SBG/2026',
+                status: 'Menunggu Verifikasi',
+                step: 1,
+                notes: 'Permohonan baru masuk melalui Portal Online Tata Usaha SMAN 1 Sabang.'
+            }
+        ];
+
+        let requestsList = [];
+        let letterSettings = DEFAULT_SETTINGS;
+
+        // --- 2. SINKRONISASI DATA ANTARA LOCALSTORAGE ARRAY & OBJECT ---
+        function loadSyncedData() {
+            const savedSettings = localStorage.getItem(SETTINGS_KEY);
+            if (savedSettings) {
+                letterSettings = { ...DEFAULT_SETTINGS, ...JSON.parse(savedSettings) };
+            }
+
+            const rawMain = localStorage.getItem(STORAGE_KEY);
+            const rawLegacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+
+            let mapByCode = {};
+
+            // Muat default terlebih dahulu
+            DEFAULT_REQUESTS.forEach(item => {
+                mapByCode[item.code] = item;
+            });
+
+            // Gabungkan dari key utama jika ada
+            if (rawMain) {
+                try {
+                    const parsed = JSON.parse(rawMain);
+                    const arr = Array.isArray(parsed) ? parsed : Object.values(parsed);
+                    arr.forEach(item => {
+                        if (item && item.code) {
+                            mapByCode[item.code] = normalizeRequestItem(item);
+                        }
+                    });
+                } catch (e) {}
+            }
+
+            // Gabungkan dari key portal publik sebelumnya jika ada pengajuan baru dari user
+            if (rawLegacy) {
+                try {
+                    const parsedLegacy = JSON.parse(rawLegacy);
+                    const arrLegacy = Array.isArray(parsedLegacy) ? parsedLegacy : Object.values(parsedLegacy);
+                    arrLegacy.forEach(item => {
+                        if (item && item.code && !mapByCode[item.code]) {
+                            mapByCode[item.code] = normalizeRequestItem(item);
+                        }
+                    });
+                } catch (e) {}
+            }
+
+            requestsList = Object.values(mapByCode).reverse();
+            persistSyncedData();
+        }
+
+        function normalizeRequestItem(item) {
+            let status = item.status;
+            if (!status) {
+                if (item.step >= 4) status = 'Selesai / Siap Diambil';
+                else if (item.step >= 2) status = 'Diproses Staf TU';
+                else status = 'Menunggu Verifikasi';
+            }
+            return {
+                code: item.code,
+                serviceId: item.serviceId || 'surat-aktif',
+                serviceName: item.serviceName || (item.serviceId === 'surat-non-skhun' ? 'Surat Keterangan Tidak Menerbitkan SKHUN' : 'Surat Keterangan Aktif'),
+                applicant: item.applicant || 'Pemohon',
+                nisn: item.nisn || '-',
+                kelasOrTahun: item.kelasOrTahun || '-',
+                ttl: item.ttl || 'Sabang, -',
+                ortu: item.ortu || '-',
+                pekerjaanOrtu: item.pekerjaanOrtu || '-',
+                noIjazah: item.noIjazah || '-',
+                purpose: item.purpose || '-',
+                whatsapp: item.whatsapp || '081360951234',
+                submittedAt: item.submittedAt || '19 Nov 2026',
+                agendaNo: item.agendaNo || '421.3/149/SMAN1-SBG/2026',
+                status: status,
+                step: statusToStep(status),
+                notes: item.notes || ''
+            };
+        }
+
+        function statusToStep(status) {
+            if (status === 'Selesai / Siap Diambil') return 4;
+            if (status === 'Diproses Staf TU') return 3;
+            if (status === 'Ditolak') return 0;
+            return 1;
+        }
+
+        function persistSyncedData() {
+            // Simpan sebagai array di key utama
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(requestsList));
+            // Simpan juga sebagai dictionary object di key portal publik agar langsung terbaca di halaman Lacak Publik
+            const dictObj = {};
+            [...requestsList].reverse().forEach(req => {
+                dictObj[req.code] = req;
+            });
+            localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(dictObj));
+        }
+
+        function resetDemoDatabase() {
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(LEGACY_STORAGE_KEY);
+            localStorage.removeItem(SETTINGS_KEY);
+            letterSettings = { ...DEFAULT_SETTINGS };
+            loadSyncedData();
+            populateSettingsForm();
+            refreshAllViews();
+            showToast('Data & pengaturan demo berhasil direset ke kondisi awal.', 'info');
+        }
+
+        // --- 3. AUTENTIKASI ADMIN TATA USAHA ---
+        function checkAuthState() {
+            const isLoggedIn = sessionStorage.getItem(AUTH_KEY) === 'true';
+            if (isLoggedIn) {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                refreshAllViews();
+            } else {
+                document.getElementById('loginScreen').classList.remove('hidden');
+                document.getElementById('adminDashboard').classList.add('hidden');
+            }
+        }
+
+        function fillDemoCredentials() {
+            document.getElementById('loginUsername').value = 'admin_tu';
+            document.getElementById('loginPassword').value = 'sman1sabang2026';
+            document.getElementById('loginErrorMsg').classList.add('hidden');
+        }
+
+        function quickDemoLogin() {
+            fillDemoCredentials();
+            sessionStorage.setItem(AUTH_KEY, 'true');
+            checkAuthState();
+            showToast('Selamat datang kembali, Staf Tata Usaha SMAN 1 Sabang!', 'success');
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('loginUsername').value.trim();
+            const pass = document.getElementById('loginPassword').value.trim();
+
+            if (user === 'admin_tu' && pass === 'sman1sabang2026') {
+                document.getElementById('loginErrorMsg').classList.add('hidden');
+                sessionStorage.setItem(AUTH_KEY, 'true');
+                checkAuthState();
+                showToast('Login berhasil. Dasbor Tata Usaha SMAN 1 Sabang aktif.', 'success');
+            } else {
+                document.getElementById('loginErrorMsg').classList.remove('hidden');
+            }
+        }
+
+        function handleAdminLogout() {
+            sessionStorage.removeItem(AUTH_KEY);
+            checkAuthState();
+            showToast('Anda telah keluar dari sesi Admin Tata Usaha.', 'info');
+        }
+
+        function togglePasswordVisibility() {
+            const input = document.getElementById('loginPassword');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        // --- 4. NAVIGASI TAB & RESPONSIVE SIDEBAR ---
+        function switchAdminTab(tabName) {
+            const tabs = ['overview', 'requests', 'offline-entry', 'settings'];
+            const titles = {
+                'overview': 'Ringkasan & Statistik Layanan',
+                'requests': 'Antrean Pengajuan Surat',
+                'offline-entry': 'Input Pengajuan Loket Offline',
+                'settings': 'Pengaturan Kop & Penandatangan'
+            };
+
+            tabs.forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                const navBtn = document.getElementById(`nav-${t}`);
+                navBtn.className = 'w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-blue-100 hover:bg-blue-900/70 transition';
+            });
+
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            const activeNav = document.getElementById(`nav-${tabName}`);
+            activeNav.className = 'w-full flex items-center justify-between px-3.5 py-3 rounded-xl bg-amber-400 text-slate-950 font-bold shadow-sm transition';
+            document.getElementById('headerPageTitle').textContent = titles[tabName];
+
+            // Tutup sidebar di mobile setelah memilih menu
+            if (window.innerWidth < 1024) {
+                const sb = document.getElementById('adminSidebar');
+                if (!sb.classList.contains('-translate-x-full')) {
+                    toggleSidebar();
+                }
+            }
+            lucide.createIcons();
+        }
+
+        function toggleSidebar() {
+            const sb = document.getElementById('adminSidebar');
+            const bd = document.getElementById('sidebarBackdrop');
+            sb.classList.toggle('-translate-x-full');
+            bd.classList.toggle('hidden');
+        }
+
+        // --- 5. RENDER KPI, GRAFIK & DAFTAR TERBARU ---
+        function refreshAllViews() {
+            const total = requestsList.length;
+            const pending = requestsList.filter(r => r.status === 'Menunggu Verifikasi').length;
+            const processing = requestsList.filter(r => r.status === 'Diproses Staf TU').length;
+            const done = requestsList.filter(r => r.status === 'Selesai / Siap Diambil').length;
+
+            document.getElementById('kpiTotal').textContent = total;
+            document.getElementById('kpiPending').textContent = pending;
+            document.getElementById('kpiProcessing').textContent = processing;
+            document.getElementById('kpiDone').textContent = done;
+            document.getElementById('sidebarPendingBadge').textContent = pending;
+
+            // Distribusi 2 Jenis Surat
+            const countAktif = requestsList.filter(r => r.serviceId === 'surat-aktif').length;
+            const countNonSkhun = requestsList.filter(r => r.serviceId === 'surat-non-skhun').length;
+            const pctAktif = total ? Math.round((countAktif / total) * 100) : 0;
+            const pctNonSkhun = total ? Math.round((countNonSkhun / total) * 100) : 0;
+
+            document.getElementById('statAktifLabel').textContent = `${countAktif} berkas (${pctAktif}%)`;
+            document.getElementById('barAktif').style.width = `${pctAktif}%`;
+            document.getElementById('statNonSkhunLabel').textContent = `${countNonSkhun} berkas (${pctNonSkhun}%)`;
+            document.getElementById('barNonSkhun').style.width = `${pctNonSkhun}%`;
+
+            // Preview 4 Permohonan Terbaru
+            const recentEl = document.getElementById('recentRequestsPreview');
+            recentEl.innerHTML = requestsList.slice(0, 4).map(r => `
+                <div class="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="space-y-0.5">
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono text-xs font-extrabold text-blue-900 dark:text-amber-400">${r.code}</span>
+                            ${getStatusBadgeHtml(r.status)}
+                        </div>
+                        <p class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">${r.applicant} <span class="font-normal text-slate-500">(${r.kelasOrTahun})</span></p>
+                        <p class="text-xs text-slate-500">${r.serviceName} • ${r.purpose}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="openManageModal('${r.code}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-blue-950 hover:text-white dark:bg-slate-800 dark:hover:bg-primary-600 text-xs font-semibold transition">
+                            Kelola
+                        </button>
+                        <button onclick="openOfficialDoc('${r.code}')" class="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white dark:bg-emerald-500/15 dark:text-emerald-300 text-xs font-semibold transition">
+                            Cetak A4
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            renderRequestsTable();
+            lucide.createIcons();
+        }
+
+        function getStatusBadgeHtml(status) {
+            if (status === 'Selesai / Siap Diambil') {
+                return `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">${status}</span>`;
+            }
+            if (status === 'Diproses Staf TU') {
+                return `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300">${status}</span>`;
+            }
+            if (status === 'Ditolak') {
+                return `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300">${status}</span>`;
+            }
+            return `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">${status}</span>`;
+        }
+
+        // --- 6. RENDER TABEL ANTREAN PENGAJUAN ---
+        function renderRequestsTable() {
+            const q = document.getElementById('filterSearchInput').value.trim().toLowerCase();
+            const serviceFilter = document.getElementById('filterServiceSelect').value;
+            const statusFilter = document.getElementById('filterStatusSelect').value;
+
+            const filtered = requestsList.filter(r => {
+                const matchSearch = !q ||
+                    r.applicant.toLowerCase().includes(q) ||
+                    r.nisn.toLowerCase().includes(q) ||
+                    r.code.toLowerCase().includes(q);
+                const matchService = serviceFilter === 'ALL' || r.serviceId === serviceFilter;
+                const matchStatus = statusFilter === 'ALL' || r.status === statusFilter;
+                return matchSearch && matchService && matchStatus;
+            });
+
+            const tbody = document.getElementById('requestsTableBody');
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="py-10 text-center text-xs text-slate-500">
+                            Tidak ada data permohonan surat yang sesuai dengan filter pencarian.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(r => `
+                <tr class="hover:bg-slate-50/90 dark:hover:bg-slate-800/40 transition">
+                    <td class="py-3.5 px-4 align-top">
+                        <span class="font-mono text-xs font-extrabold text-blue-900 dark:text-amber-400 block">${r.code}</span>
+                        <span class="text-[11px] text-slate-400">${r.submittedAt}</span>
+                    </td>
+                    <td class="py-3.5 px-4 align-top">
+                        <p class="font-bold text-slate-900 dark:text-white">${r.applicant}</p>
+                        <p class="text-[11px] font-mono text-slate-500">NISN: ${r.nisn} • ${r.kelasOrTahun}</p>
+                    </td>
+                    <td class="py-3.5 px-4 align-top">
+                        <span class="inline-block font-semibold text-slate-800 dark:text-slate-200">${r.serviceName}</span>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Keperluan: ${r.purpose}</p>
+                    </td>
+                    <td class="py-3.5 px-4 align-top font-mono text-xs text-slate-700 dark:text-slate-300">
+                        ${r.agendaNo}
+                    </td>
+                    <td class="py-3.5 px-4 align-top">
+                        ${getStatusBadgeHtml(r.status)}
+                    </td>
+                    <td class="py-3.5 px-4 align-top text-right">
+                        <div class="inline-flex items-center gap-1.5 flex-wrap justify-end">
+                            ${r.status !== 'Selesai / Siap Diambil' ? `
+                                <button onclick="quickApproveRequest('${r.code}')" class="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white dark:bg-emerald-500/15 dark:text-emerald-300 transition" title="Setujui & Tandai Selesai">
+                                    <i data-lucide="check" class="w-4 h-4"></i>
+                                </button>
+                            ` : ''}
+                            <button onclick="openManageModal('${r.code}')" class="p-2 rounded-xl bg-blue-950/10 hover:bg-blue-950 text-blue-900 hover:text-white dark:bg-primary-500/20 dark:text-primary-300 transition" title="Detail & Edit Data">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="sendWhatsAppNotification('${r.code}')" class="p-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-600 text-emerald-700 hover:text-white dark:text-emerald-300 transition" title="Kirim Notifikasi WhatsApp">
+                                <i data-lucide="message-circle" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="openOfficialDoc('${r.code}')" class="p-2 rounded-xl bg-amber-400/20 hover:bg-amber-500 text-amber-800 hover:text-slate-950 dark:text-amber-300 transition" title="Pratinjau & Cetak Surat A4">
+                                <i data-lucide="printer" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // --- 7. AKSI KELOLA, VERIFIKASI & NOTIFIKASI WHATSAPP ---
+        function quickApproveRequest(code) {
+            const idx = requestsList.findIndex(r => r.code === code);
+            if (idx === -1) return;
+            requestsList[idx].status = 'Selesai / Siap Diambil';
+            requestsList[idx].step = 4;
+            requestsList[idx].notes = `Diverifikasi dan disahkan oleh Staf Tata Usaha SMAN 1 Sabang. Surat resmi (${requestsList[idx].agendaNo}) siap dicetak/diambil.`;
+            persistSyncedData();
+            refreshAllViews();
+            showToast(`Resi ${code} disetujui & siap dicetak!`, 'success');
+        }
+
+        function openManageModal(code) {
+            const item = requestsList.find(r => r.code === code);
+            if (!item) return;
+
+            document.getElementById('editReqCodeHidden').value = item.code;
+            document.getElementById('editModalCode').textContent = `${item.code} • ${item.serviceName}`;
+            document.getElementById('editReqStatus').value = item.status;
+            document.getElementById('editReqAgendaNo').value = item.agendaNo;
+            document.getElementById('editReqApplicant').value = item.applicant;
+            document.getElementById('editReqNisn').value = item.nisn;
+            document.getElementById('editReqTtl').value = item.ttl;
+            document.getElementById('editReqKelasTahun').value = item.kelasOrTahun;
+            document.getElementById('editReqOrtu').value = item.ortu;
+            document.getElementById('editReqPekerjaanOrtu').value = item.pekerjaanOrtu;
+            document.getElementById('editReqNoIjazah').value = item.noIjazah;
+            document.getElementById('editReqPurpose').value = item.purpose;
+            document.getElementById('editReqWhatsapp').value = item.whatsapp;
+            document.getElementById('editReqNotes').value = item.notes;
+
+            if (item.serviceId === 'surat-aktif') {
+                document.getElementById('editFieldsAktif').classList.remove('hidden');
+                document.getElementById('editFieldsNonSkhun').classList.add('hidden');
+            } else {
+                document.getElementById('editFieldsAktif').classList.add('hidden');
+                document.getElementById('editFieldsNonSkhun').classList.remove('hidden');
+            }
+
+            openModal('modalManageRequest');
+        }
+
+        function saveManagedRequest(e) {
+            e.preventDefault();
+            const code = document.getElementById('editReqCodeHidden').value;
+            const idx = requestsList.findIndex(r => r.code === code);
+            if (idx === -1) return;
+
+            const newStatus = document.getElementById('editReqStatus').value;
+            requestsList[idx] = {
+                ...requestsList[idx],
+                status: newStatus,
+                step: statusToStep(newStatus),
+                agendaNo: document.getElementById('editReqAgendaNo').value.trim(),
+                applicant: document.getElementById('editReqApplicant').value.trim(),
+                nisn: document.getElementById('editReqNisn').value.trim(),
+                ttl: document.getElementById('editReqTtl').value.trim(),
+                kelasOrTahun: document.getElementById('editReqKelasTahun').value.trim(),
+                ortu: document.getElementById('editReqOrtu').value.trim(),
+                pekerjaanOrtu: document.getElementById('editReqPekerjaanOrtu').value.trim(),
+                noIjazah: document.getElementById('editReqNoIjazah').value.trim(),
+                purpose: document.getElementById('editReqPurpose').value.trim(),
+                whatsapp: document.getElementById('editReqWhatsapp').value.trim(),
+                notes: document.getElementById('editReqNotes').value.trim()
+            };
+
+            persistSyncedData();
+            refreshAllViews();
+            closeModal('modalManageRequest');
+            showToast(`Perubahan data & status ${code} berhasil disimpan.`, 'success');
+        }
+
+        function sendWhatsAppNotification(code) {
+            const item = requestsList.find(r => r.code === code);
+            if (!item) return;
+
+            let cleanPhone = item.whatsapp.replace(/\D/g, '');
+            if (cleanPhone.startsWith('0')) {
+                cleanPhone = '62' + cleanPhone.slice(1);
+            } else if (!cleanPhone.startsWith('62')) {
+                cleanPhone = '62' + cleanPhone;
+            }
+
+            const msg = encodeURIComponent(
+                `Assalamu'alaikum Wr. Wb.\n` +
+                `Halo *${item.applicant}*,\n\n` +
+                `Informasi dari *Tata Usaha SMA Negeri 1 Sabang* terkait permohonan administrasi Anda:\n` +
+                `• Nomor Resi: *${item.code}*\n` +
+                `• Jenis Surat: *${item.serviceName}*\n` +
+                `• Nomor Agenda Surat: ${item.agendaNo}\n` +
+                `• Status Terkini: *${item.status}*\n` +
+                `• Catatan TU: ${item.notes || '-'}\n\n` +
+                `Anda dapat melacak & mencetak surat melalui Portal Tata Usaha SMAN 1 Sabang atau mengambil berkas fisik di Loket TU pada jam operasional.\n` +
+                `Terima kasih.\n_Helpdesk TU SMAN 1 Sabang (+62 813-6095-1234)_`
+            );
+
+            window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank', 'noopener,noreferrer');
+        }
+
+        function sendWhatsAppFromModal() {
+            const code = document.getElementById('editReqCodeHidden').value;
+            sendWhatsAppNotification(code);
+        }
+
+        function previewDocFromModal() {
+            const code = document.getElementById('editReqCodeHidden').value;
+            openOfficialDoc(code);
+        }
+
+        // --- 8. INPUT PENGAJUAN MANUAL (LOKET OFFLINE) ---
+        function toggleOfflineServiceFields() {
+            const serviceId = document.getElementById('offServiceId').value;
+            if (serviceId === 'surat-aktif') {
+                document.getElementById('offLabelKelasTahun').textContent = 'Kelas / Jurusan';
+                document.getElementById('offKelasTahun').placeholder = 'Contoh: XII-IPA-1';
+                document.getElementById('offFieldsAktif').classList.remove('hidden');
+                document.getElementById('offFieldsNonSkhun').classList.add('hidden');
+            } else {
+                document.getElementById('offLabelKelasTahun').textContent = 'Tahun Lulus';
+                document.getElementById('offKelasTahun').placeholder = 'Contoh: Tahun Lulus 2023';
+                document.getElementById('offFieldsAktif').classList.add('hidden');
+                document.getElementById('offFieldsNonSkhun').classList.remove('hidden');
+            }
+        }
+
+        function handleOfflineSubmit(e) {
+            e.preventDefault();
+            const serviceId = document.getElementById('offServiceId').value;
+            const status = document.getElementById('offStatus').value;
+            const randomNum = Math.floor(2000 + Math.random() * 7999);
+            const newCode = `TU-SMAN1SBG-2026-${randomNum}`;
+
+            letterSettings.lastAgenda += 1;
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(letterSettings));
+            populateSettingsForm();
+
+            const newItem = {
+                code: newCode,
+                serviceId: serviceId,
+                serviceName: serviceId === 'surat-aktif' ? 'Surat Keterangan Aktif' : 'Surat Keterangan Tidak Menerbitkan SKHUN',
+                applicant: document.getElementById('offNama').value.trim(),
+                nisn: document.getElementById('offNisn').value.trim(),
+                kelasOrTahun: document.getElementById('offKelasTahun').value.trim(),
+                ttl: document.getElementById('offTtl').value.trim(),
+                ortu: document.getElementById('offOrtu').value.trim() || '-',
+                pekerjaanOrtu: document.getElementById('offPekerjaanOrtu').value.trim() || '-',
+                noIjazah: document.getElementById('offNoIjazah').value.trim() || '-',
+                purpose: document.getElementById('offKeperluan').value.trim(),
+                whatsapp: document.getElementById('offWhatsapp').value.trim(),
+                submittedAt: '19 Nov 2026 (Loket TU)',
+                agendaNo: `421.3/${letterSettings.lastAgenda}/SMAN1-SBG/2026`,
+                status: status,
+                step: statusToStep(status),
+                notes: 'Diinput langsung melalui Loket Pelayanan Offline Tata Usaha SMA Negeri 1 Sabang.'
+            };
+
+            requestsList.unshift(newItem);
+            persistSyncedData();
+            refreshAllViews();
+            e.target.reset();
+            toggleOfflineServiceFields();
+
+            showToast(`Permohonan loket berhasil dicatat dengan resi ${newCode}`, 'success');
+            openOfficialDoc(newCode);
+        }
+
+        // --- 9. PENGATURAN KOP & PENANDATANGAN ---
+        function populateSettingsForm() {
+            document.getElementById('setKepsekName').value = letterSettings.kepsekName;
+            document.getElementById('setKepsekNip').value = letterSettings.kepsekNip;
+            document.getElementById('setKepsekRank').value = letterSettings.kepsekRank;
+            document.getElementById('setKaTuName').value = letterSettings.kaTuName;
+            document.getElementById('setLastAgenda').value = letterSettings.lastAgenda;
+            document.getElementById('setAcademicYear').value = letterSettings.academicYear;
+        }
+
+        function saveLetterSettings(e) {
+            e.preventDefault();
+            letterSettings = {
+                kepsekName: document.getElementById('setKepsekName').value.trim(),
+                kepsekNip: document.getElementById('setKepsekNip').value.trim(),
+                kepsekRank: document.getElementById('setKepsekRank').value.trim(),
+                kaTuName: document.getElementById('setKaTuName').value.trim(),
+                lastAgenda: parseInt(document.getElementById('setLastAgenda').value, 10) || 148,
+                academicYear: document.getElementById('setAcademicYear').value.trim()
+            };
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(letterSettings));
+            showToast('Pengaturan kop & penandatangan surat resmi berhasil disimpan.', 'success');
+        }
+
+        // --- 10. PRATINJAU & CETAK SURAT RESMI A4 PEMERINTAH ACEH ---
+        function openOfficialDoc(code) {
+            const data = requestsList.find(r => r.code === code);
+            if (!data) return;
+
+            const isAktif = data.serviceId === 'surat-aktif';
+
+            const bodyHtml = isAktif ? `
+                <div class="text-center mb-6">
+                    <h3 class="text-base font-bold uppercase underline tracking-wide">SURAT KETERANGAN AKTIF SEKOLAH</h3>
+                    <p class="text-xs font-sans mt-1">Nomor : ${data.agendaNo}</p>
+                </div>
+
+                <div class="text-xs sm:text-sm space-y-4 mb-6 text-justify">
+                    <p>Kepala Sekolah Menengah Atas (SMA) Negeri 1 Sabang, Dinas Pendidikan Aceh dengan ini menerangkan bahwa:</p>
+                    <table class="w-full text-left ml-4">
+                        <tr><td class="py-1 w-48">Nama Lengkap</td><td>: <strong>${data.applicant}</strong></td></tr>
+                        <tr><td class="py-1">NISN</td><td>: ${data.nisn}</td></tr>
+                        <tr><td class="py-1">Tempat, Tanggal Lahir</td><td>: ${data.ttl}</td></tr>
+                        <tr><td class="py-1">Kelas / Jurusan</td><td>: ${data.kelasOrTahun}</td></tr>
+                        <tr><td class="py-1">Nama Orang Tua / Wali</td><td>: ${data.ortu}</td></tr>
+                        <tr><td class="py-1">Pekerjaan Orang Tua</td><td>: ${data.pekerjaanOrtu}</td></tr>
+                    </table>
+                    <p>Adalah benar peserta didik yang terdaftar aktif pada SMA Negeri 1 Sabang Tahun Pelajaran ${letterSettings.academicYear} dan berkelakuan baik.</p>
+                    <p>Surat keterangan ini diberikan kepada yang bersangkutan untuk keperluan: <strong>${data.purpose}</strong>.</p>
+                    <p>Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
+                </div>
+            ` : `
+                <div class="text-center mb-6">
+                    <h3 class="text-base font-bold uppercase underline tracking-wide">SURAT KETERANGAN TIDAK MENERBITKAN SKHUN</h3>
+                    <p class="text-xs font-sans mt-1">Nomor : ${data.agendaNo}</p>
+                </div>
+
+                <div class="text-xs sm:text-sm space-y-4 mb-6 text-justify">
+                    <p>Kepala Sekolah Menengah Atas (SMA) Negeri 1 Sabang, Dinas Pendidikan Aceh dengan ini menerangkan bahwa:</p>
+                    <table class="w-full text-left ml-4">
+                        <tr><td class="py-1 w-48">Nama Lengkap</td><td>: <strong>${data.applicant}</strong></td></tr>
+                        <tr><td class="py-1">NISN</td><td>: ${data.nisn}</td></tr>
+                        <tr><td class="py-1">Tempat, Tanggal Lahir</td><td>: ${data.ttl}</td></tr>
+                        <tr><td class="py-1">Status Kelulusan</td><td>: Lulus SMA Negeri 1 Sabang (${data.kelasOrTahun})</td></tr>
+                        <tr><td class="py-1">Nomor Seri Ijazah</td><td>: <strong>${data.noIjazah}</strong></td></tr>
+                    </table>
+                    <p>Berdasarkan kebijakan Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi Republik Indonesia mengenai penghapusan Ujian Nasional (UN) mulai Tahun Pelajaran 2019/2020 (lulusan tahun 2020 ke atas), maka SMA Negeri 1 Sabang <strong>tidak menerbitkan Sertifikat Hasil Ujian Nasional (SKHUN)</strong> bagi lulusan tersebut di atas.</p>
+                    <p>Surat keterangan ini diberikan sebagai pengganti lampiran SKHUN untuk keperluan: <strong>${data.purpose}</strong>.</p>
+                    <p>Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
+                </div>
+            `;
+
+            const area = document.getElementById('printDocumentArea');
+            area.innerHTML = `
+                <!-- KOP SURAT RESMI PEMERINTAH ACEH - DINAS PENDIDIKAN - SMA NEGERI 1 SABANG -->
+                <div class="flex items-center gap-4 border-b-4 border-double border-slate-900 pb-4 mb-6">
+                    <div class="w-20 h-20 shrink-0 flex items-center justify-center">
+                        <img src="../logosman1sabang.png" alt="Logo SMAN 1 Sabang" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <svg style="display:none;" viewBox="0 0 120 132" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M60 4 L112 24 L106 84 C102 106 82 120 60 128 C38 120 18 106 14 84 L8 24 Z" fill="#1e247e" stroke="#111827" stroke-width="3"/>
+                            <path d="M26 32 L58 36 L58 76 L26 72 Z" fill="#ffffff" stroke="#111827" stroke-width="2"/>
+                            <path d="M94 32 L62 36 L62 76 L94 72 Z" fill="#ffffff" stroke="#111827" stroke-width="2"/>
+                            <path d="M40 42 C48 40 54 48 64 46 C74 44 82 52 78 62 C72 70 58 68 50 60 C44 54 38 48 40 42 Z" fill="#16a34a" stroke="#065f46" stroke-width="1.5"/>
+                            <line x1="82" y1="30" x2="54" y2="68" stroke="#facc15" stroke-width="3.5" stroke-linecap="round"/>
+                            <text x="60" y="90" text-anchor="middle" fill="#ffffff" font-size="7.5" font-weight="bold" font-family="sans-serif">SMA NEGERI 1 SABANG</text>
+                            <circle cx="44" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                            <circle cx="54" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                            <circle cx="64" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                            <circle cx="74" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                            <circle cx="59" cy="105" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1 text-center">
+                        <p class="text-sm font-bold uppercase tracking-wider">PEMERINTAH ACEH</p>
+                        <p class="text-sm font-bold uppercase tracking-wider">DINAS PENDIDIKAN</p>
+                        <h2 class="text-xl font-extrabold uppercase tracking-wide mt-0.5">SMA NEGERI 1 SABANG</h2>
+                        <p class="text-[11px] font-sans text-slate-700 mt-0.5">Jl. T. Nyak Arief Ie Meulee Sukajaya Sabang Kota Sabang, Aceh 23511</p>
+                        <p class="text-[11px] font-sans text-slate-700">Helpdesk Tata Usaha: +62 813-6095-1234 (Ibu Rakhma)</p>
+                    </div>
+                </div>
+
+                ${bodyHtml}
+
+                <!-- TANDA TANGAN, STEMPEL DIGITAL & QR VERIFIKASI -->
+                <div class="flex items-end justify-between pt-4 font-sans">
+                    <div class="flex items-center gap-3 p-2.5 border border-slate-300 rounded-xl bg-slate-50 max-w-[270px]">
+                        <svg viewBox="0 0 36 36" class="w-12 h-12 shrink-0 fill-slate-900">
+                            <rect x="2" y="2" width="10" height="10" fill="none" stroke="#0f172a" stroke-width="2"/>
+                            <rect x="5" y="5" width="4" height="4"/>
+                            <rect x="24" y="2" width="10" height="10" fill="none" stroke="#0f172a" stroke-width="2"/>
+                            <rect x="27" y="5" width="4" height="4"/>
+                            <rect x="2" y="24" width="10" height="10" fill="none" stroke="#0f172a" stroke-width="2"/>
+                            <rect x="5" y="27" width="4" height="4"/>
+                            <rect x="15" y="4" width="4" height="4"/>
+                            <rect x="15" y="12" width="6" height="6"/>
+                            <rect x="24" y="16" width="4" height="6"/>
+                            <rect x="16" y="24" width="6" height="4"/>
+                            <rect x="26" y="26" width="6" height="6"/>
+                        </svg>
+                        <div class="text-[10px] text-slate-600 leading-tight">
+                            <p class="font-bold text-slate-900">VERIFIKASI RESMI TU</p>
+                            <p class="font-mono font-bold text-blue-900 mt-0.5">${data.code}</p>
+                            <p class="mt-0.5">Arsip sah Tata Usaha SMA Negeri 1 Sabang.</p>
+                        </div>
+                    </div>
+
+                    <div class="relative text-xs font-serif text-left w-64">
+                        <!-- Stempel Digital Sekolah Halus -->
+                        <div class="absolute -left-10 top-6 w-24 h-24 rounded-full border-2 border-blue-900/35 text-blue-900/35 flex flex-col items-center justify-center text-[7px] font-sans font-extrabold uppercase text-center -rotate-12 pointer-events-none select-none">
+                            <span>PEMERINTAH ACEH</span>
+                            <span class="border-y border-blue-900/35 my-0.5 px-1">SMAN 1 SABANG</span>
+                            <span>DINAS PENDIDIKAN</span>
+                        </div>
+                        <p>Sabang, 19 November 2026</p>
+                        <p class="font-bold mb-14">Kepala SMA Negeri 1 Sabang,</p>
+                        <p class="font-bold underline">${letterSettings.kepsekName}</p>
+                        <p>${letterSettings.kepsekRank}</p>
+                        <p>NIP. ${letterSettings.kepsekNip}</p>
+                    </div>
+                </div>
+            `;
+
+            openModal('modalDocumentViewer');
+        }
+
+        // --- 11. EXPORT CSV & JSON ---
+        function exportDataCSV() {
+            const headers = ['No Resi', 'Tanggal Pengajuan', 'Jenis Surat', 'Nama Pemohon', 'NISN', 'Kelas/Tahun Lulus', 'Keperluan', 'WhatsApp', 'No Surat Resmi', 'Status'];
+            const rows = requestsList.map(r => [
+                r.code, r.submittedAt, r.serviceName, r.applicant, `'${r.nisn}`, r.kelasOrTahun, r.purpose, `'${r.whatsapp}`, r.agendaNo, r.status
+            ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(','));
+
+            const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows].join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', 'rekap_layanan_tu_sman1sabang_2026.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Rekap data CSV berhasil diunduh.', 'success');
+        }
+
+        function exportDataJSON() {
+            const jsonContent = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(requestsList, null, 2));
+            const link = document.createElement('a');
+            link.setAttribute('href', jsonContent);
+            link.setAttribute('download', 'backup_arsip_tu_sman1sabang_2026.json');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Backup JSON arsip TU berhasil diunduh.', 'success');
+        }
+
+        // --- 12. UTILITIES & LIVE CLOCK WIB ---
+        function updateAdminClockWIB() {
+            const now = new Date();
+            const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const wibDate = new Date(utcMs + (7 * 3600000));
+            const pad = n => String(n).padStart(2, '0');
+            const el = document.getElementById('adminLiveClock');
+            if (el) {
+                el.textContent = `${pad(wibDate.getHours())}:${pad(wibDate.getMinutes())} WIB`;
+            }
+        }
+
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('sman1sabang_theme', html.classList.contains('dark') ? 'dark' : 'light');
+        }
+
+        function openModal(id) {
+            const m = document.getElementById(id);
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        function closeModal(id) {
+            const m = document.getElementById(id);
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        function showToast(msg, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const bg = type === 'info' ? 'bg-blue-950 dark:bg-primary-600' : 'bg-emerald-600';
+            const el = document.createElement('div');
+            el.className = `pointer-events-auto px-4 py-3 rounded-2xl shadow-lg text-white text-xs sm:text-sm font-medium flex items-center gap-2 transition-all duration-300 translate-y-2 opacity-0 ${bg}`;
+            el.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i><span>${msg}</span>`;
+            container.appendChild(el);
+            lucide.createIcons();
+            requestAnimationFrame(() => el.classList.remove('translate-y-2', 'opacity-0'));
+            setTimeout(() => {
+                el.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => el.remove(), 300);
+            }, 3000);
+        }
+
+        // --- INIT ---
+        window.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('sman1sabang_theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+            loadSyncedData();
+            populateSettingsForm();
+            checkAuthState();
+            updateAdminClockWIB();
+            setInterval(updateAdminClockWIB, 30000);
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
