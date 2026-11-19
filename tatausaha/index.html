@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="id" class="light scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tata Usaha SMAN 1 Sabang — Portal Layanan Mandiri Administrasi Sekolah</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#2563eb',
+                            600: '#1d4ed8',
+                            700: '#1e3a8a',
+                            800: '#172554',
+                            900: '#0f172a',
+                            950: '#090d16',
+                        },
+                        gold: {
+                            400: '#facc15',
+                            500: '#eab308',
+                            600: '#ca8a04',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Pola latar belakang halus bergaya modern SaaS */
+        .bg-grid-pattern {
+            background-image: radial-gradient(rgba(29, 78, 216, 0.14) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .dark .bg-grid-pattern {
+            background-image: radial-gradient(rgba(250, 204, 21, 0.12) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        @media print {
+            body * { visibility: hidden; }
+            #printDocumentArea, #printDocumentArea * { visibility: visible; }
+            #printDocumentArea {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white !important;
+                color: black !important;
+                padding: 20px 28px;
+                border: none !important;
+            }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300 antialiased selection:bg-primary-700 selection:text-white">
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- ===================================================================== -->
+    <!-- 1. STICKY GLASSMORPHISM NAVBAR                                        -->
+    <!-- ===================================================================== -->
+    <header class="sticky top-0 z-40 bg-white/85 dark:bg-slate-950/85 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
+            <!-- Brand Logo SMAN 1 Sabang -->
+            <a href="#beranda" class="flex items-center gap-3 group">
+                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 p-1.5 flex items-center justify-center shadow-lg shadow-blue-950/20 border border-amber-400/40 group-hover:scale-105 transition-transform shrink-0">
+                    <!-- Inline SVG Akurat Logo SMAN 1 Sabang -->
+                    <svg viewBox="0 0 120 132" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M60 4 L112 24 L106 84 C102 106 82 120 60 128 C38 120 18 106 14 84 L8 24 Z" fill="#1e247e" stroke="#ffffff" stroke-width="4"/>
+                        <path d="M60 10 L106 28 L100 82 C96 101 79 114 60 121 C41 114 24 101 20 82 L14 28 Z" fill="none" stroke="#111827" stroke-width="2"/>
+                        <path d="M26 32 L58 36 L58 76 L26 72 Z" fill="#ffffff" stroke="#111827" stroke-width="2"/>
+                        <path d="M94 32 L62 36 L62 76 L94 72 Z" fill="#ffffff" stroke="#111827" stroke-width="2"/>
+                        <path d="M40 42 C48 40 54 48 64 46 C74 44 82 52 78 62 C72 70 58 68 50 60 C44 54 38 48 40 42 Z" fill="#16a34a" stroke="#065f46" stroke-width="1.5"/>
+                        <line x1="82" y1="30" x2="54" y2="68" stroke="#facc15" stroke-width="3.5" stroke-linecap="round"/>
+                        <text x="60" y="90" text-anchor="middle" fill="#ffffff" font-size="7.5" font-weight="bold" font-family="sans-serif">SMA NEGERI 1 SABANG</text>
+                        <circle cx="44" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                        <circle cx="54" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                        <circle cx="64" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                        <circle cx="74" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                        <circle cx="59" cy="105" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-display font-extrabold text-base sm:text-xl tracking-tight text-slate-900 dark:text-white">SMAN 1 Sabang</span>
+                        <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-amber-400/20 text-amber-700 dark:bg-amber-400/20 dark:text-amber-300 border border-amber-400/30">Tata Usaha</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">Portal Layanan Publik • Dinas Pendidikan Aceh</p>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <nav class="hidden lg:flex items-center gap-7 text-sm font-medium text-slate-600 dark:text-slate-300">
+                <a href="#beranda" class="hover:text-primary-600 dark:hover:text-amber-400 transition">Beranda</a>
+                <a href="#layanan" class="hover:text-primary-600 dark:hover:text-amber-400 transition">Layanan Surat</a>
+                <a href="#pengajuan" class="hover:text-primary-600 dark:hover:text-amber-400 transition">Ajukan Surat</a>
+                <a href="#lacak" class="hover:text-primary-600 dark:hover:text-amber-400 transition">Lacak Status</a>
+                <a href="#info-kontak" class="hover:text-primary-600 dark:hover:text-amber-400 transition">Jam & Kontak</a>
+            </nav>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-2.5">
+                <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition" title="Ubah Tema Tampilan">
+                    <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+                    <i data-lucide="sun" class="w-4 h-4 hidden dark:block text-amber-400"></i>
+                </button>
+                <a href="https://wa.me/6281360951234?text=Assalamu'alaikum%20Ibu%20Rakhma%2C%20saya%20ingin%20bertanya%20terkait%20layanan%20Tata%20Usaha%20SMA%20Negeri%201%20Sabang." target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition">
+                    <i data-lucide="message-circle" class="w-4 h-4"></i>
+                    <span>Helpdesk WA</span>
+                </a>
+                <!-- Mobile Menu Toggle -->
+                <button onclick="toggleMobileMenu()" class="lg:hidden p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Dropdown Navigation -->
+        <div id="mobileMenu" class="hidden lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-4 space-y-2 text-sm font-medium">
+            <a href="#beranda" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900">Beranda</a>
+            <a href="#layanan" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900">Layanan Surat</a>
+            <a href="#pengajuan" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900">Formulir Pengajuan</a>
+            <a href="#lacak" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900">Lacak Status</a>
+            <a href="#info-kontak" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900">Jam Operasional & Kontak</a>
+        </div>
+    </header>
+
+    <!-- ===================================================================== -->
+    <!-- 2. HERO SECTION & SMART SEARCH BAR                                    -->
+    <!-- ===================================================================== -->
+    <section id="beranda" class="relative overflow-hidden bg-grid-pattern pt-12 pb-16 sm:pt-20 sm:pb-24 border-b border-slate-200/70 dark:border-slate-800/80">
+        <!-- Ambient Gradient Orbs -->
+        <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-[720px] h-[340px] bg-gradient-to-tr from-blue-800/20 via-amber-400/15 to-transparent blur-3xl pointer-events-none"></div>
+
+        <div class="relative max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-6">
+            <!-- Hero Badge dengan Logo SMAN 1 Sabang -->
+            <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/95 dark:bg-slate-900/95 border border-slate-200/90 dark:border-slate-800 shadow-sm text-xs font-medium text-slate-700 dark:text-slate-300">
+                <div class="w-6 h-6 rounded-full bg-blue-950 p-0.5 flex items-center justify-center shrink-0">
+                    <svg viewBox="0 0 120 132" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M60 4 L112 24 L106 84 C102 106 82 120 60 128 C38 120 18 106 14 84 L8 24 Z" fill="#1e247e" stroke="#ffffff" stroke-width="5"/>
+                        <path d="M28 34 L58 38 L58 76 L28 72 Z" fill="#ffffff"/>
+                        <path d="M92 34 L62 38 L62 76 L92 72 Z" fill="#ffffff"/>
+                        <circle cx="60" cy="54" r="12" fill="#16a34a"/>
+                        <circle cx="60" cy="100" r="6" fill="#facc15"/>
+                    </svg>
+                </div>
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span>Layanan Mandiri Tata Usaha • <strong>SMA Negeri 1 Sabang</strong></span>
+            </div>
+
+            <!-- Headline -->
+            <h1 class="font-display text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.15]">
+                Pelayanan Surat Menyurat <br class="hidden sm:block">
+                <span class="bg-gradient-to-r from-blue-900 via-primary-600 to-amber-500 dark:from-blue-400 dark:via-sky-400 dark:to-amber-400 bg-clip-text text-transparent">SMAN 1 Sabang Lebih Mudah</span>
+            </h1>
+
+            <!-- Subheadline -->
+            <p class="max-w-2xl mx-auto text-sm sm:text-base lg:text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+                Portal resmi administrasi Tata Usaha SMA Negeri 1 Sabang (Jl. T. Nyak Arief Ie Meulee Sukajaya Sabang). Ajukan <strong>Surat Keterangan Aktif</strong> maupun <strong>Surat Keterangan Tidak Menerbitkan SKHUN</strong> secara daring dan cetak mandiri.
+            </p>
+
+            <!-- Smart Search & Quick Track Bar -->
+            <div class="max-w-2xl mx-auto pt-2">
+                <form onsubmit="handleHeroSearch(event)" class="relative flex items-center bg-white dark:bg-slate-900 rounded-2xl p-2 shadow-xl shadow-blue-950/5 dark:shadow-black/30 border border-slate-200 dark:border-slate-800 focus-within:border-primary-600 transition">
+                    <i data-lucide="search" class="w-5 h-5 text-slate-400 ml-3 shrink-0"></i>
+                    <input type="text" id="heroSearchInput" placeholder="Masukkan Nomor Resi (contoh: TU-SMAN1SBG-2026-1042) atau pilih surat..." class="w-full px-3.5 py-2.5 bg-transparent text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none">
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-950 hover:bg-blue-900 dark:bg-primary-600 dark:hover:bg-primary-500 text-white font-semibold text-xs sm:text-sm shrink-0 shadow-sm transition">
+                        Lacak / Cari
+                    </button>
+                </form>
+                <div class="mt-3 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                    <span>Akses cepat:</span>
+                    <button type="button" onclick="selectServiceAndScroll('surat-aktif')" class="px-3 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-primary-600 hover:text-primary-600 font-medium transition">+ Surat Keterangan Aktif</button>
+                    <button type="button" onclick="selectServiceAndScroll('surat-non-skhun')" class="px-3 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-amber-500 hover:text-amber-600 font-medium transition">+ Surat Tidak Menerbitkan SKHUN</button>
+                    <button type="button" onclick="quickTrackCode('TU-SMAN1SBG-2026-1042')" class="px-3 py-1 rounded-lg bg-amber-400/15 border border-amber-400/40 text-amber-800 dark:text-amber-300 font-mono font-semibold hover:bg-amber-400/25 transition">Resi: TU-SMAN1SBG-2026-1042</button>
+                </div>
+            </div>
+
+            <!-- 3. QUICK STATS / INFO BAR -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pt-8 text-left">
+                <div class="p-4 sm:p-5 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-blue-950/10 dark:bg-primary-500/15 text-blue-900 dark:text-primary-400 flex items-center justify-center shrink-0">
+                        <i data-lucide="file-check-2" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <p class="font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white">2 Layanan Utama</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Siswa Aktif & Alumni</p>
+                    </div>
+                </div>
+
+                <div class="p-4 sm:p-5 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-amber-400/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
+                        <i data-lucide="zap" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <p class="font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white">1 Hari Kerja</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Verifikasi Tata Usaha</p>
+                    </div>
+                </div>
+
+                <div class="p-4 sm:p-5 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        <i data-lucide="badge-check" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <p class="font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white">Rp 0 (Gratis)</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Bebas pungutan biaya</p>
+                    </div>
+                </div>
+
+                <div class="p-4 sm:p-5 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                        <i data-lucide="printer" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <p class="font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white">Kop Resmi Aceh</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Siap cetak / simpan PDF</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 4. KATALOG 2 LAYANAN SURAT UTAMA SMAN 1 SABANG (BENTO GRID)           -->
+    <!-- ===================================================================== -->
+    <section id="layanan" class="py-16 sm:py-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+        <div class="text-center max-w-2xl mx-auto space-y-2.5">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-950/10 text-blue-900 dark:bg-amber-400/15 dark:text-amber-300">
+                Layanan Administrasi Mandiri
+            </span>
+            <h2 class="font-display text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">Pilih Jenis Surat Keterangan</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-400">Klik <strong>Ajukan Sekarang</strong> pada salah satu dari 2 layanan surat resmi SMAN 1 Sabang di bawah ini untuk langsung mengisi formulir pengajuan.</p>
+        </div>
+
+        <!-- Grid 2 Kartu Layanan Besar & Elegan -->
+        <div id="servicesGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+            <!-- Dirender dinamis oleh JavaScript -->
+        </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 5. FORMULIR PENGAJUAN SURAT MANDIRI (ON-PAGE INTERAKTIF)              -->
+    <!-- ===================================================================== -->
+    <section id="pengajuan" class="py-16 sm:py-20 bg-slate-100/80 dark:bg-slate-900/40 border-y border-slate-200/80 dark:border-slate-800">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+            <div class="text-center max-w-2xl mx-auto space-y-2">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+                    <i data-lucide="file-edit" class="w-3.5 h-3.5"></i>
+                    Formulir Pengajuan Online
+                </span>
+                <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Ajukan Permohonan Surat</h2>
+                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Pilih jenis surat di bawah ini, lengkapi biodata dengan benar, dan dapatkan nomor resi otomatis.</p>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xl shadow-blue-950/5 space-y-6">
+                <!-- Tab Pemilih Jenis Surat -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-800/90">
+                    <button type="button" id="tabBtnAktif" onclick="switchFormService('surat-aktif')" class="py-3 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition shadow-sm bg-blue-950 text-white dark:bg-primary-600">
+                        <i data-lucide="graduation-cap" class="w-4 h-4 text-amber-400 dark:text-white"></i>
+                        <span>Surat Keterangan Aktif</span>
+                    </button>
+                    <button type="button" id="tabBtnNonSkhun" onclick="switchFormService('surat-non-skhun')" class="py-3 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
+                        <i data-lucide="file-badge" class="w-4 h-4"></i>
+                        <span>Surat Tidak Menerbitkan SKHUN</span>
+                    </button>
+                </div>
+
+                <!-- Banner Keterangan Layanan Terpilih -->
+                <div id="activeFormBanner" class="p-4 rounded-2xl bg-blue-950/5 dark:bg-primary-500/10 border border-blue-900/15 dark:border-primary-500/20 flex items-start gap-3">
+                    <i data-lucide="info" class="w-5 h-5 text-blue-900 dark:text-primary-400 shrink-0 mt-0.5"></i>
+                    <div class="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                        <p class="font-bold text-slate-900 dark:text-white" id="bannerFormTitle">Surat Keterangan Aktif Sekolah</p>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5" id="bannerFormDesc">Diperuntukkan bagi peserta didik aktif SMAN 1 Sabang untuk kebutuhan BPJS, tunjangan orang tua (PNS/TNI/Polri), beasiswa PIP/KIP, lomba, atau administrasi lainnya.</p>
+                    </div>
+                </div>
+
+                <!-- Form Input Dinamis -->
+                <form id="formPengajuan" onsubmit="submitPengajuan(event)" class="space-y-4 text-xs sm:text-sm">
+                    <input type="hidden" id="selectedServiceId" value="surat-aktif">
+
+                    <!-- Field 1: Nama Lengkap -->
+                    <div>
+                        <label id="labelNama" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Lengkap Siswa</label>
+                        <input type="text" id="reqNama" required placeholder="Nama lengkap sesuai Ijazah / Akta Kelahiran" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-primary-600">
+                    </div>
+
+                    <!-- Field 2 & 3: NISN & Kelas/Jurusan atau Tahun Lulus -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">NISN</label>
+                            <input type="text" id="reqNisn" required placeholder="Contoh: 0084910231" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono outline-none focus:border-primary-600">
+                        </div>
+                        <div id="wrapperKelasOrTahun">
+                            <!-- Diisi dinamis: Kelas/Jurusan atau Tahun Lulus -->
+                        </div>
+                    </div>
+
+                    <!-- Field 4: Tempat & Tanggal Lahir -->
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tempat & Tanggal Lahir</label>
+                        <input type="text" id="reqTtl" required placeholder="Contoh: Sabang, 14 Agustus 2008" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-primary-600">
+                    </div>
+
+                    <!-- Field Khusus Surat Keterangan Aktif -->
+                    <div id="fieldsSuratAktif" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Orang Tua / Wali</label>
+                                <input type="text" id="reqOrtu" placeholder="Nama lengkap Ayah/Ibu/Wali" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-primary-600">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Pekerjaan Orang Tua</label>
+                                <input type="text" id="reqPekerjaanOrtu" placeholder="Contoh: PNS / TNI / Polri / Wiraswasta" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-primary-600">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Field Khusus Surat Keterangan Tidak Menerbitkan SKHUN -->
+                    <div id="fieldsNonSkhun" class="hidden space-y-4">
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nomor Seri Ijazah</label>
+                            <input type="text" id="reqNoIjazah" placeholder="Contoh: M-SMA/K13-3/06/0041289" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-xs sm:text-sm outline-none focus:border-primary-600">
+                        </div>
+                    </div>
+
+                    <!-- Field Keperluan & WhatsApp -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Keperluan Surat</label>
+                            <select id="reqKeperluanSelect" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-primary-600">
+                                <!-- Opsi diisi dinamis -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">No. WhatsApp Aktif</label>
+                            <input type="tel" id="reqWhatsapp" required placeholder="Contoh: 081360951234" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-primary-600">
+                        </div>
+                    </div>
+
+                    <!-- Persyaratan & Simulasi Upload -->
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-dashed border-slate-300 dark:border-slate-700 space-y-1.5">
+                        <p class="text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                            <i data-lucide="paperclip" class="w-3.5 h-3.5 text-primary-600"></i>
+                            Lampiran Berkas Pendukung (<span id="reqSyaratHint">Kartu Pelajar / Kartu Keluarga</span>) — <span class="text-slate-400 font-normal">Opsional</span>
+                        </p>
+                        <input type="file" id="reqFile" accept=".pdf,.jpg,.jpeg,.png" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-950/10 file:text-blue-900 dark:file:bg-primary-500/20 dark:file:text-primary-300 cursor-pointer">
+                    </div>
+
+                    <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Nomor resi format <span class="font-mono font-semibold">TU-SMAN1SBG-2026-XXXX</span> otomatis terbit setelah dikirim.</p>
+                        <button type="submit" class="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-blue-950 hover:bg-blue-900 dark:bg-primary-600 dark:hover:bg-primary-500 text-white font-semibold shadow-lg flex items-center justify-center gap-2 transition">
+                            <i data-lucide="send" class="w-4 h-4 text-amber-400 dark:text-white"></i>
+                            <span>Kirim & Terbitkan Nomor Resi</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 6. LACAK STATUS BERKAS & PRATINJAU SURAT RESMI                        -->
+    <!-- ===================================================================== -->
+    <section id="lacak" class="py-16 sm:py-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <!-- Kolom Kiri: Form Pencarian Resi -->
+            <div class="lg:col-span-5 space-y-5">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-950/10 text-blue-900 dark:bg-primary-500/20 dark:text-primary-300">
+                    <i data-lucide="radar" class="w-3.5 h-3.5"></i>
+                    Tracking Real-Time
+                </span>
+                <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Lacak Status & Cetak Surat</h2>
+                <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Masukkan Nomor Resi pengajuan Anda untuk memantau progres verifikasi Tata Usaha SMAN 1 Sabang sekaligus mengunduh atau mencetak surat resmi ber-kop Dinas Pendidikan Aceh.
+                </p>
+
+                <form onsubmit="handleTrackSubmit(event)" class="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nomor Resi / Kode Pengajuan</label>
+                        <div class="relative">
+                            <i data-lucide="ticket" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                            <input type="text" id="trackingCodeInput" value="TU-SMAN1SBG-2026-1042" placeholder="Contoh: TU-SMAN1SBG-2026-1042" required class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-xs sm:text-sm uppercase outline-none focus:border-primary-600">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full py-3 rounded-xl bg-blue-950 hover:bg-blue-900 dark:bg-primary-600 dark:hover:bg-primary-500 text-white font-semibold text-sm shadow-md flex items-center justify-center gap-2 transition">
+                        <i data-lucide="search" class="w-4 h-4 text-amber-400 dark:text-white"></i>
+                        <span>Cek Progres Berkas</span>
+                    </button>
+
+                    <!-- Contoh Kode Resi Tersimpan -->
+                    <div class="pt-2 border-t border-slate-100 dark:border-slate-800">
+                        <p class="text-[11px] font-medium text-slate-500 mb-2">Klik nomor resi siap uji atau resi baru Anda:</p>
+                        <div id="sampleCodesList" class="flex flex-wrap gap-1.5">
+                            <!-- Diisi JS -->
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Kolom Kanan: Visualisasi Timeline Tracking -->
+            <div class="lg:col-span-7">
+                <div id="trackingResultCard" class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-lg">
+                    <!-- Dirender dinamis oleh JavaScript -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 7. INFORMASI JAM OPERASIONAL LOKET TU & KONTAK LOKASI (BENTO GRID)    -->
+    <!-- ===================================================================== -->
+    <section id="info-kontak" class="py-16 sm:py-20 bg-slate-100/80 dark:bg-slate-900/50 border-t border-slate-200/80 dark:border-slate-800">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+            <div class="text-center max-w-2xl mx-auto space-y-2">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-950/10 text-blue-900 dark:bg-amber-400/15 dark:text-amber-300">
+                    Informasi Layanan & Helpdesk
+                </span>
+                <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Jam Operasional Loket & Kontak Sekolah</h2>
+                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Informasi jadwal pelayanan langsung di ruang Tata Usaha serta kontak resmi Helpdesk SMA Negeri 1 Sabang.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Bento Card 1: Jam Operasional Loket TU + Indikator Status Real-Time WIB -->
+                <div class="lg:col-span-6 bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-6">
+                    <div class="space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-11 h-11 rounded-2xl bg-blue-950/10 dark:bg-primary-500/20 text-blue-900 dark:text-primary-400 flex items-center justify-center shrink-0">
+                                    <i data-lucide="clock" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white">Jam Operasional Loket TU</h3>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">Waktu Indonesia Barat (WIB)</p>
+                                </div>
+                            </div>
+                            <!-- Indikator Status Loket Otomatis -->
+                            <div id="loketStatusBadge" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span>Memuat Status...</span>
+                            </div>
+                        </div>
+
+                        <div class="divide-y divide-slate-100 dark:divide-slate-800 text-xs sm:text-sm pt-2">
+                            <div class="py-3 flex items-center justify-between">
+                                <span class="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                    <i data-lucide="calendar" class="w-4 h-4 text-slate-400"></i>
+                                    Senin – Kamis
+                                </span>
+                                <span class="font-mono font-bold text-slate-900 dark:text-white">07.30 – 13.30 WIB</span>
+                            </div>
+                            <div class="py-3 flex items-center justify-between">
+                                <span class="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                    <i data-lucide="calendar" class="w-4 h-4 text-slate-400"></i>
+                                    Jumat
+                                </span>
+                                <span class="font-mono font-bold text-slate-900 dark:text-white">07.30 – 11.45 WIB</span>
+                            </div>
+                            <div class="py-3 flex items-center justify-between">
+                                <span class="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                    <i data-lucide="calendar" class="w-4 h-4 text-slate-400"></i>
+                                    Sabtu
+                                </span>
+                                <span class="font-mono font-bold text-slate-900 dark:text-white">07.30 – 13.30 WIB</span>
+                            </div>
+                            <div class="py-3 flex items-center justify-between">
+                                <span class="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                    <i data-lucide="globe" class="w-4 h-4 text-emerald-500"></i>
+                                    Minggu & Hari Libur
+                                </span>
+                                <span class="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold text-xs">Portal Online 24 Jam</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 text-xs text-slate-600 dark:text-slate-300 flex items-center justify-between gap-2">
+                        <span>Waktu Sabang saat ini:</span>
+                        <span id="liveSabangClock" class="font-mono font-bold text-blue-900 dark:text-amber-400">--:-- WIB</span>
+                    </div>
+                </div>
+
+                <!-- Bento Card 2: Kontak & Lokasi Sekolah (Helpdesk Ibu Rakhma + Alamat + Maps) -->
+                <div class="lg:col-span-6 bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-6">
+                    <div class="space-y-5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-2xl bg-amber-400/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
+                                <i data-lucide="map-pin" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white">Kontak & Lokasi Sekolah</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">SMA Negeri 1 Sabang • Kota Sabang, Aceh</p>
+                            </div>
+                        </div>
+
+                        <!-- Alamat Lengkap + Salin & Google Maps -->
+                        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-3">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Alamat Lengkap Sekolah</span>
+                                    <p class="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white mt-1 leading-relaxed">
+                                        Jl. T. Nyak Arief Ie Meulee Sukajaya Sabang Kota Sabang, Aceh 23511
+                                    </p>
+                                </div>
+                                <button type="button" onclick="copyTextValue('Jl. T. Nyak Arief Ie Meulee Sukajaya Sabang Kota Sabang, Aceh 23511', 'Alamat SMAN 1 Sabang berhasil disalin!')" class="p-2 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-200 hover:text-primary-600 shrink-0" title="Salin Alamat">
+                                    <i data-lucide="copy" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <a href="https://maps.google.com/?q=SMA+Negeri+1+Sabang+Jl.+T.+Nyak+Arief+Ie+Meulee+Sukajaya+Sabang+Aceh+23511" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-900 dark:text-amber-400 hover:underline">
+                                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                                <span>Buka Lokasi di Google Maps</span>
+                            </a>
+                        </div>
+
+                        <!-- Helpdesk Tata Usaha Ibu Rakhma -->
+                        <div class="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-500/10 border border-emerald-200/80 dark:border-emerald-500/20 space-y-3">
+                            <div class="flex items-center justify-between gap-3">
+                                <div>
+                                    <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 block">Helpdesk Tata Usaha</span>
+                                    <p class="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white mt-0.5">+62 813-6095-1234 (Ibu Rakhma)</p>
+                                </div>
+                                <button type="button" onclick="copyTextValue('+62 813-6095-1234', 'Nomor WhatsApp Ibu Rakhma berhasil disalin!')" class="p-2 rounded-xl bg-white dark:bg-slate-800 border border-emerald-200 dark:border-slate-700 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 shrink-0" title="Salin Nomor Helpdesk">
+                                    <i data-lucide="copy" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <a href="https://wa.me/6281360951234?text=Assalamu'alaikum%20Ibu%20Rakhma%2C%20saya%20ingin%20bertanya%20terkait%20layanan%20administrasi%20Tata%20Usaha%20SMA%20Negeri%201%20Sabang." target="_blank" rel="noopener noreferrer" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition">
+                                <i data-lucide="message-circle" class="w-4 h-4"></i>
+                                <span>Hubungi via WhatsApp (Ibu Rakhma)</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 8. FOOTER INFORMASI LOKET & KONTAK SMAN 1 SABANG                      -->
+    <!-- ===================================================================== -->
+    <footer class="bg-slate-950 text-slate-300 pt-14 pb-8 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-10 pb-10 border-b border-slate-800/80">
+            <div class="space-y-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-950 p-1.5 border border-amber-400/40 flex items-center justify-center shrink-0">
+                        <svg viewBox="0 0 120 132" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M60 4 L112 24 L106 84 C102 106 82 120 60 128 C38 120 18 106 14 84 L8 24 Z" fill="#1e247e" stroke="#ffffff" stroke-width="5"/>
+                            <path d="M28 34 L58 38 L58 76 L28 72 Z" fill="#ffffff"/>
+                            <path d="M92 34 L62 38 L62 76 L92 72 Z" fill="#ffffff"/>
+                            <circle cx="60" cy="54" r="12" fill="#16a34a"/>
+                            <circle cx="60" cy="100" r="6" fill="#facc15"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="font-display font-bold text-lg text-white block leading-tight">SMA Negeri 1 Sabang</span>
+                        <span class="text-[11px] text-amber-400">Pemerintah Aceh • Dinas Pendidikan</span>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Unit Layanan Administrasi Tata Usaha SMA Negeri 1 Sabang. Melayani penerbitan Surat Keterangan Aktif dan Surat Keterangan Tidak Menerbitkan SKHUN secara cepat, transparan, dan bebas biaya.
+                </p>
+            </div>
+
+            <div class="space-y-2.5 text-xs">
+                <h4 class="font-display font-bold text-sm text-white uppercase tracking-wider mb-3">Jam Operasional Loket TU</h4>
+                <p class="flex justify-between text-slate-400"><span>Senin – Kamis</span><span class="text-white font-medium">07.30 – 13.30 WIB</span></p>
+                <p class="flex justify-between text-slate-400"><span>Jumat</span><span class="text-white font-medium">07.30 – 11.45 WIB</span></p>
+                <p class="flex justify-between text-slate-400"><span>Sabtu</span><span class="text-white font-medium">07.30 – 13.30 WIB</span></p>
+                <p class="flex justify-between text-slate-400"><span>Minggu & Hari Libur</span><span class="text-emerald-400 font-semibold">Portal Online 24 Jam</span></p>
+            </div>
+
+            <div class="space-y-2.5 text-xs">
+                <h4 class="font-display font-bold text-sm text-white uppercase tracking-wider mb-3">Kontak & Lokasi Sekolah</h4>
+                <p class="flex items-start gap-2.5 text-slate-400">
+                    <i data-lucide="map-pin" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
+                    <span>Jl. T. Nyak Arief Ie Meulee Sukajaya Sabang Kota Sabang, Aceh 23511</span>
+                </p>
+                <p class="flex items-center gap-2.5 text-slate-400">
+                    <i data-lucide="phone" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                    <a href="https://wa.me/6281360951234" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">Helpdesk Tata Usaha: +62 813-6095-1234 (Ibu Rakhma)</a>
+                </p>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <p>© 2026 Tata Usaha SMA Negeri 1 Sabang. Hak Cipta Dilindungi.</p>
+            <button onclick="resetPortalDemo()" class="text-slate-400 hover:text-white underline">Reset Simulasi Resi</button>
+        </div>
+    </footer>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL 1: BUKTI REGISTRASI & KODE RESI TRACKING                        -->
+    <!-- ===================================================================== -->
+    <div id="modalBuktiResi" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-2xl text-center space-y-5">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
+                <i data-lucide="check-circle-2" class="w-8 h-8"></i>
+            </div>
+            <div class="space-y-1">
+                <h3 class="font-display font-extrabold text-xl text-slate-900 dark:text-white">Permohonan Berhasil Tercatat!</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Simpan nomor resi Tata Usaha SMAN 1 Sabang berikut untuk pelacakan, konfirmasi ke Helpdesk, dan cetak surat.</p>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2">
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-slate-400">Nomor Resi Pelacakan</span>
+                <div class="flex items-center justify-center gap-2">
+                    <span id="generatedReceiptCode" class="font-mono text-base sm:text-lg font-extrabold text-blue-900 dark:text-amber-400 tracking-wider">TU-SMAN1SBG-2026-8841</span>
+                    <button onclick="copyReceiptCode()" class="p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-200 hover:text-primary-600" title="Salin Kode Resi">
+                        <i data-lucide="copy" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <p id="generatedReceiptService" class="text-xs font-medium text-slate-600 dark:text-slate-300">Surat Keterangan Aktif</p>
+            </div>
+
+            <div class="space-y-2.5">
+                <a id="waConfirmReceiptBtn" href="https://wa.me/6281360951234" target="_blank" rel="noopener noreferrer" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition">
+                    <i data-lucide="message-circle" class="w-4 h-4"></i>
+                    <span>Kirim Konfirmasi ke WA Ibu Rakhma</span>
+                </a>
+                <div class="flex flex-col sm:flex-row gap-2.5">
+                    <button onclick="goTrackNewReceipt()" class="flex-1 py-2.5 px-4 rounded-xl bg-blue-950 hover:bg-blue-900 dark:bg-primary-600 text-white text-xs sm:text-sm font-semibold transition">
+                        Lihat Status & Cetak Surat
+                    </button>
+                    <button onclick="closeModal('modalBuktiResi')" class="py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-semibold">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL 2: PRATINJAU & CETAK SURAT RESMI SMAN 1 SABANG                  -->
+    <!-- ===================================================================== -->
+    <div id="modalDocumentViewer" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-3xl w-full p-6 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 my-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 no-print">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="file-check-2" class="w-5 h-5 text-emerald-600"></i>
+                    <h3 class="font-display font-bold text-base">Pratinjau Surat Resmi — SMA Negeri 1 Sabang</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-blue-950 hover:bg-blue-900 dark:bg-primary-600 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                        <i data-lucide="printer" class="w-4 h-4 text-amber-400 dark:text-white"></i>
+                        <span>Cetak / Simpan PDF</span>
+                    </button>
+                    <button onclick="closeModal('modalDocumentViewer')" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lembar Dokumen Resmi Kop Pemerintah Aceh -->
+            <div id="printDocumentArea" class="bg-white text-slate-900 p-6 sm:p-10 rounded-2xl border border-slate-300 text-sm leading-relaxed font-serif">
+                <!-- Dirender via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- JAVASCRIPT LOGIC                                                      -->
+    <!-- ===================================================================== -->
+    <script>
+        // --- 1. KATALOG 2 LAYANAN SURAT RESMI SMAN 1 SABANG ---
+        const SERVICES_DATA = [
+            {
+                id: 'surat-aktif',
+                badge: 'Siswa Aktif (Kelas X, XI, XII)',
+                title: 'Surat Keterangan Aktif',
+                desc: 'Diterbitkan bagi peserta didik yang masih terdaftar aktif belajar di SMA Negeri 1 Sabang pada tahun pelajaran berjalan.',
+                useCases: ['Kebutuhan BPJS Kesehatan', 'Tunjangan Orang Tua (PNS / TNI / Polri)', 'Beasiswa PIP / KIP', 'Rekomendasi Lomba & Administrasi Lainnya'],
+                estimasi: '1 Hari Kerja',
+                syarat: 'Scan Kartu Pelajar / Kartu Keluarga (KK)',
+                icon: 'graduation-cap',
+                accent: 'blue'
+            },
+            {
+                id: 'surat-non-skhun',
+                badge: 'Alumni / Lulusan 2020 ke Atas',
+                title: 'Surat Keterangan Tidak Menerbitkan SKHUN',
+                desc: 'Surat keterangan resmi bagi alumni SMAN 1 Sabang lulusan mulai tahun 2020 ke atas sesuai kebijakan penghapusan UN/SKHUN Kemendikbudristek.',
+                useCases: ['Melamar Pekerjaan', 'Pemberkasan CPNS / PPPK / Kedinasan', 'Pendaftaran Seleksi TNI / Polri', 'Registrasi Perguruan Tinggi / Kuliah'],
+                estimasi: '1 Hari Kerja',
+                syarat: 'Scan Ijazah SMA Negeri 1 Sabang',
+                icon: 'file-badge',
+                accent: 'gold'
+            }
+        ];
+
+        // --- 2. DATA TRACKING SIMULASI REALISTIS SMAN 1 SABANG ---
+        const DEFAULT_TRACKING = {
+            'TU-SMAN1SBG-2026-1042': {
+                code: 'TU-SMAN1SBG-2026-1042',
+                serviceId: 'surat-aktif',
+                serviceName: 'Surat Keterangan Aktif',
+                applicant: 'Cut Meutia Zahra',
+                nisn: '0084910231',
+                kelasOrTahun: 'XII-IPA-1',
+                ttl: 'Sabang, 17 Agustus 2008',
+                ortu: 'Teuku Iskandar, S.E.',
+                pekerjaanOrtu: 'PNS Pemerintah Kota Sabang',
+                noIjazah: '',
+                purpose: 'Tunjangan Orang Tua (PNS/TNI/Polri)',
+                whatsapp: '081269112233',
+                submittedAt: '18 Nov 2026, 09:15 WIB',
+                agendaNo: '421.3/418/SMAN1-SBG/2026',
+                step: 4,
+                notes: 'Data siswa terverifikasi aktif di Dapodik SMAN 1 Sabang. Surat telah disahkan dan siap dicetak.'
+            },
+            'TU-SMAN1SBG-2026-1043': {
+                code: 'TU-SMAN1SBG-2026-1043',
+                serviceId: 'surat-non-skhun',
+                serviceName: 'Surat Keterangan Tidak Menerbitkan SKHUN',
+                applicant: 'Teuku Muhammad Rizki',
+                nisn: '0051294055',
+                kelasOrTahun: 'Tahun Lulus 2023',
+                ttl: 'Sabang, 22 Maret 2005',
+                ortu: '',
+                pekerjaanOrtu: '',
+                noIjazah: 'M-SMA/K13-3/06/0041289',
+                purpose: 'Pendaftaran Seleksi TNI / Polri',
+                whatsapp: '085277889900',
+                submittedAt: '19 Nov 2026, 08:40 WIB',
+                agendaNo: '421.3/425/SMAN1-SBG/2026',
+                step: 4,
+                notes: 'Nomor Seri Ijazah cocok dengan Buku Induk Alumni SMAN 1 Sabang Tahun 2023. Surat siap dicetak.'
+            }
+        };
+
+        let trackingStore = JSON.parse(localStorage.getItem('sman1sabang_tu_tracking_v2')) || DEFAULT_TRACKING;
+        let lastCreatedCode = 'TU-SMAN1SBG-2026-1042';
+
+        function saveTrackingStore() {
+            localStorage.setItem('sman1sabang_tu_tracking_v2', JSON.stringify(trackingStore));
+            renderSampleCodes();
+        }
+
+        function resetPortalDemo() {
+            localStorage.removeItem('sman1sabang_tu_tracking_v2');
+            trackingStore = JSON.parse(JSON.stringify(DEFAULT_TRACKING));
+            saveTrackingStore();
+            renderTrackingResult('TU-SMAN1SBG-2026-1042');
+            showToast('Data simulasi resi SMAN 1 Sabang dikembalikan ke awal.', 'info');
+        }
+
+        // --- 3. RENDER 2 KARTU LAYANAN UTAMA ---
+        function renderServices() {
+            const grid = document.getElementById('servicesGrid');
+            grid.innerHTML = SERVICES_DATA.map(s => {
+                const isGold = s.accent === 'gold';
+                const iconStyle = isGold
+                    ? 'bg-amber-400/20 text-amber-700 dark:bg-amber-400/20 dark:text-amber-300 border border-amber-400/40'
+                    : 'bg-blue-950/10 text-blue-900 dark:bg-primary-500/20 dark:text-primary-300 border border-blue-900/15';
+                const btnStyle = isGold
+                    ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold'
+                    : 'bg-blue-950 hover:bg-blue-900 dark:bg-primary-600 dark:hover:bg-primary-500 text-white font-semibold';
+
+                return `
+                <div onclick="selectServiceAndScroll('${s.id}')" class="cursor-pointer group bg-white dark:bg-slate-900 rounded-3xl p-7 sm:p-8 border-2 border-slate-200/80 dark:border-slate-800 hover:border-blue-900 dark:hover:border-amber-400/70 shadow-sm hover:shadow-2xl hover:shadow-blue-950/10 transition-all duration-300 flex flex-col justify-between">
+                    <div class="space-y-5">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="w-14 h-14 rounded-2xl ${iconStyle} flex items-center justify-center group-hover:scale-105 transition-transform">
+                                <i data-lucide="${s.icon}" class="w-7 h-7"></i>
+                            </div>
+                            <span class="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300">${s.badge}</span>
+                        </div>
+
+                        <div>
+                            <h3 class="font-display font-extrabold text-xl sm:text-2xl text-slate-900 dark:text-white group-hover:text-blue-900 dark:group-hover:text-amber-400 transition">${s.title}</h3>
+                            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">${s.desc}</p>
+                        </div>
+
+                        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-2">
+                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Peruntukan Layanan:</p>
+                            <ul class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-slate-700 dark:text-slate-300">
+                                ${s.useCases.map(u => `<li class="flex items-center gap-1.5"><i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-500 shrink-0"></i><span>${u}</span></li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 mt-6 border-t border-slate-100 dark:border-slate-800/80 space-y-4">
+                        <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                            <span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-4 h-4 text-emerald-500"></i> Estimasi: <strong>${s.estimasi}</strong></span>
+                            <span class="font-semibold text-emerald-600 dark:text-emerald-400">Biaya: Rp 0 (Gratis)</span>
+                        </div>
+                        <button type="button" class="w-full py-3.5 px-5 rounded-2xl ${btnStyle} text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition">
+                            <span>Ajukan Sekarang</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        // --- 4. PENGATURAN FORMULIR ON-PAGE DINAMIS ---
+        function selectServiceAndScroll(serviceId) {
+            switchFormService(serviceId);
+            document.getElementById('pengajuan').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function switchFormService(serviceId) {
+            const service = SERVICES_DATA.find(s => s.id === serviceId);
+            if (!service) return;
+
+            document.getElementById('selectedServiceId').value = service.id;
+            document.getElementById('bannerFormTitle').textContent = service.title;
+            document.getElementById('bannerFormDesc').textContent = service.desc;
+            document.getElementById('reqSyaratHint').textContent = service.syarat;
+
+            const tabAktif = document.getElementById('tabBtnAktif');
+            const tabNonSkhun = document.getElementById('tabBtnNonSkhun');
+            const wrapperKelasOrTahun = document.getElementById('wrapperKelasOrTahun');
+            const fieldsSuratAktif = document.getElementById('fieldsSuratAktif');
+            const fieldsNonSkhun = document.getElementById('fieldsNonSkhun');
+            const keperluanSelect = document.getElementById('reqKeperluanSelect');
+
+            if (service.id === 'surat-aktif') {
+                tabAktif.className = 'py-3 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition shadow-sm bg-blue-950 text-white dark:bg-primary-600';
+                tabNonSkhun.className = 'py-3 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white';
+
+                document.getElementById('labelNama').textContent = 'Nama Lengkap Siswa';
+                wrapperKelasOrTahun.innerHTML = `
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Kelas / Jurusan</label>
+                    <input type="text" id="reqKelasOrTahun" required placeholder="Contoh: XII-IPA-1 atau XI-IPS-2" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-primary-600">
+                `;
+                fieldsSuratAktif.classList.remove('hidden');
+                fieldsNonSkhun.classList.add('hidden');
+                document.getElementById('reqOrtu').required = true;
+                document.getElementById('reqPekerjaanOrtu').required = true;
+                document.getElementById('reqNoIjazah').required = false;
+
+                keperluanSelect.innerHTML = `
+                    <option value="Kebutuhan BPJS Kesehatan">Kebutuhan BPJS Kesehatan</option>
+                    <option value="Tunjangan Orang Tua (PNS / TNI / Polri)">Tunjangan Orang Tua (PNS / TNI / Polri)</option>
+                    <option value="Beasiswa PIP / KIP">Beasiswa PIP / KIP</option>
+                    <option value="Rekomendasi Lomba">Rekomendasi Lomba</option>
+                    <option value="Administrasi Lainnya">Administrasi Lainnya</option>
+                `;
+            } else {
+                tabNonSkhun.className = 'py-3 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition shadow-sm bg-amber-500 text-slate-950';
+                tabAktif.className = 'py-3 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white';
+
+                document.getElementById('labelNama').textContent = 'Nama Lengkap Alumni';
+                wrapperKelasOrTahun.innerHTML = `
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tahun Lulus</label>
+                    <select id="reqKelasOrTahun" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-primary-600">
+                        <option value="Tahun Lulus 2026">2026</option>
+                        <option value="Tahun Lulus 2025">2025</option>
+                        <option value="Tahun Lulus 2024">2024</option>
+                        <option value="Tahun Lulus 2023">2023</option>
+                        <option value="Tahun Lulus 2022">2022</option>
+                        <option value="Tahun Lulus 2021">2021</option>
+                        <option value="Tahun Lulus 2020">2020</option>
+                    </select>
+                `;
+                fieldsSuratAktif.classList.add('hidden');
+                fieldsNonSkhun.classList.remove('hidden');
+                document.getElementById('reqOrtu').required = false;
+                document.getElementById('reqPekerjaanOrtu').required = false;
+                document.getElementById('reqNoIjazah').required = true;
+
+                keperluanSelect.innerHTML = `
+                    <option value="Melamar Pekerjaan">Melamar Pekerjaan</option>
+                    <option value="Pemberkasan CPNS / PPPK / Kedinasan">Pemberkasan CPNS / PPPK / Kedinasan</option>
+                    <option value="Pendaftaran Seleksi TNI / Polri">Pendaftaran Seleksi TNI / Polri</option>
+                    <option value="Pendaftaran Kuliah / Perguruan Tinggi">Pendaftaran Kuliah / Perguruan Tinggi</option>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        function submitPengajuan(e) {
+            e.preventDefault();
+            const serviceId = document.getElementById('selectedServiceId').value;
+            const service = SERVICES_DATA.find(s => s.id === serviceId);
+            const randomNum = Math.floor(2000 + Math.random() * 7999);
+            const agendaSeq = Math.floor(430 + Math.random() * 500);
+            const newCode = `TU-SMAN1SBG-2026-${randomNum}`;
+
+            const newRecord = {
+                code: newCode,
+                serviceId: service.id,
+                serviceName: service.title,
+                applicant: document.getElementById('reqNama').value,
+                nisn: document.getElementById('reqNisn').value,
+                kelasOrTahun: document.getElementById('reqKelasOrTahun').value,
+                ttl: document.getElementById('reqTtl').value,
+                ortu: document.getElementById('reqOrtu').value || '-',
+                pekerjaanOrtu: document.getElementById('reqPekerjaanOrtu').value || '-',
+                noIjazah: document.getElementById('reqNoIjazah').value || '-',
+                purpose: document.getElementById('reqKeperluanSelect').value,
+                whatsapp: document.getElementById('reqWhatsapp').value,
+                submittedAt: '19 Nov 2026, Baru saja',
+                agendaNo: `421.3/${agendaSeq}/SMAN1-SBG/2026`,
+                step: 4,
+                notes: 'Permohonan telah tercatat di sistem Tata Usaha SMA Negeri 1 Sabang. Surat resmi ber-kop Dinas Pendidikan Aceh siap dicetak.'
+            };
+
+            trackingStore[newCode] = newRecord;
+            lastCreatedCode = newCode;
+            saveTrackingStore();
+
+            e.target.reset();
+            switchFormService(serviceId);
+
+            document.getElementById('generatedReceiptCode').textContent = newCode;
+            document.getElementById('generatedReceiptService').textContent = `${service.title} — ${newRecord.applicant}`;
+
+            const waMessage = encodeURIComponent(
+                `Assalamu'alaikum Ibu Rakhma (Helpdesk Tata Usaha SMAN 1 Sabang),\n\nSaya telah mengajukan permohonan surat melalui Portal Tata Usaha:\n• Nomor Resi: ${newCode}\n• Jenis Surat: ${service.title}\n• Nama: ${newRecord.applicant}\n• NISN: ${newRecord.nisn}\n• Keperluan: ${newRecord.purpose}\n\nMohon konfirmasinya. Terima kasih.`
+            );
+            document.getElementById('waConfirmReceiptBtn').href = `https://wa.me/6281360951234?text=${waMessage}`;
+
+            openModal('modalBuktiResi');
+        }
+
+        function copyReceiptCode() {
+            const code = document.getElementById('generatedReceiptCode').textContent;
+            copyTextValue(code, `Nomor resi ${code} berhasil disalin!`);
+        }
+
+        function copyTextValue(text, message) {
+            const tempInput = document.createElement('input');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast(message, 'success');
+        }
+
+        function goTrackNewReceipt() {
+            closeModal('modalBuktiResi');
+            quickTrackCode(lastCreatedCode);
+        }
+
+        // --- 5. TRACKING TIMELINE & PREVIEW SURAT RESMI ---
+        function renderSampleCodes() {
+            const container = document.getElementById('sampleCodesList');
+            const codes = Object.keys(trackingStore).slice(-4);
+            container.innerHTML = codes.map(code => `
+                <button type="button" onclick="quickTrackCode('${code}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-950 hover:text-white dark:bg-slate-800 dark:hover:bg-primary-600 text-[11px] font-mono font-semibold text-slate-700 dark:text-slate-300 transition">
+                    ${code}
+                </button>
+            `).join('');
+        }
+
+        function quickTrackCode(code) {
+            document.getElementById('trackingCodeInput').value = code;
+            renderTrackingResult(code);
+            document.getElementById('lacak').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function handleTrackSubmit(e) {
+            e.preventDefault();
+            const code = document.getElementById('trackingCodeInput').value.trim().toUpperCase();
+            renderTrackingResult(code);
+        }
+
+        function renderTrackingResult(code) {
+            const card = document.getElementById('trackingResultCard');
+            const data = trackingStore[code];
+
+            if (!data) {
+                card.innerHTML = `
+                    <div class="py-10 text-center space-y-3">
+                        <div class="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-500/15 text-rose-600 flex items-center justify-center mx-auto">
+                            <i data-lucide="file-x-2" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-display font-bold text-base text-slate-900 dark:text-white">Nomor Resi "${code}" Tidak Ditemukan</h3>
+                        <p class="text-xs text-slate-500 max-w-sm mx-auto">Pastikan penulisan kode resi benar (contoh: TU-SMAN1SBG-2026-1042 atau TU-SMAN1SBG-2026-1043).</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            const steps = [
+                { num: 1, title: 'Permohonan Diterima Portal TU', desc: data.submittedAt },
+                { num: 2, title: 'Validasi Buku Induk Siswa / Alumni', desc: 'Verifikasi data Dapodik & arsip SMA Negeri 1 Sabang' },
+                { num: 3, title: 'Penomoran Agenda & Pengesahan', desc: `No. Surat: ${data.agendaNo}` },
+                { num: 4, title: 'Surat Resmi Terbit & Siap Cetak', desc: 'Dilengkapi Kop Pemerintah Aceh — Dinas Pendidikan & QR Verifikasi' }
+            ];
+
+            card.innerHTML = `
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-slate-100 dark:border-slate-800">
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="font-mono text-xs sm:text-sm font-extrabold text-blue-900 dark:text-amber-400">${data.code}</span>
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">Selesai & Siap Cetak</span>
+                        </div>
+                        <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white mt-1">${data.serviceName}</h3>
+                    </div>
+                    <button onclick="openOfficialDoc('${data.code}')" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm flex items-center gap-2 self-start sm:self-auto transition">
+                        <i data-lucide="printer" class="w-4 h-4"></i>
+                        <span>Lihat & Cetak Surat</span>
+                    </button>
+                </div>
+
+                <!-- Identitas Ringkas -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 py-4 text-xs border-b border-slate-100 dark:border-slate-800">
+                    <div>
+                        <span class="text-slate-400 block">Nama Pemohon</span>
+                        <span class="font-semibold text-slate-800 dark:text-slate-200">${data.applicant}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">NISN</span>
+                        <span class="font-mono font-semibold text-slate-800 dark:text-slate-200">${data.nisn}</span>
+                    </div>
+                    <div class="col-span-2 sm:col-span-1">
+                        <span class="text-slate-400 block">Kelas / Tahun Lulus</span>
+                        <span class="font-semibold text-slate-800 dark:text-slate-200">${data.kelasOrTahun}</span>
+                    </div>
+                </div>
+
+                <!-- Timeline Steps -->
+                <div class="py-5 space-y-4">
+                    ${steps.map(st => {
+                        const done = st.num <= data.step;
+                        const active = st.num === data.step;
+                        return `
+                            <div class="flex items-start gap-3.5">
+                                <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${done ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'} ${active ? 'ring-4 ring-emerald-500/20' : ''}">
+                                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">${st.title}</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">${st.desc}</p>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+
+                <!-- Catatan Petugas -->
+                <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 text-xs text-slate-600 dark:text-slate-300 flex items-start gap-2.5">
+                    <i data-lucide="info" class="w-4 h-4 text-blue-900 dark:text-amber-400 shrink-0 mt-0.5"></i>
+                    <p>${data.notes}</p>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // --- 6. PRATINJAU CETAK SURAT RESMI KOP PEMERINTAH ACEH - SMAN 1 SABANG ---
+        function openOfficialDoc(code) {
+            const data = trackingStore[code];
+            if (!data) return;
+
+            const isAktif = data.serviceId === 'surat-aktif';
+
+            const isiRedaksi = isAktif ? `
+                <div class="text-center mb-6">
+                    <h3 class="text-base font-bold uppercase underline tracking-wide">SURAT KETERANGAN AKTIF SEKOLAH</h3>
+                    <p class="text-xs font-sans mt-1">Nomor : ${data.agendaNo}</p>
+                </div>
+
+                <div class="text-xs sm:text-sm space-y-4 mb-6 text-justify">
+                    <p>Kepala Sekolah Menengah Atas (SMA) Negeri 1 Sabang, Dinas Pendidikan Aceh dengan ini menerangkan bahwa:</p>
+                    <table class="w-full text-left ml-4">
+                        <tr><td class="py-1 w-48">Nama Lengkap</td><td>: <strong>${data.applicant}</strong></td></tr>
+                        <tr><td class="py-1">NISN</td><td>: ${data.nisn}</td></tr>
+                        <tr><td class="py-1">Tempat, Tanggal Lahir</td><td>: ${data.ttl}</td></tr>
+                        <tr><td class="py-1">Kelas / Jurusan</td><td>: ${data.kelasOrTahun}</td></tr>
+                        <tr><td class="py-1">Nama Orang Tua / Wali</td><td>: ${data.ortu}</td></tr>
+                        <tr><td class="py-1">Pekerjaan Orang Tua</td><td>: ${data.pekerjaanOrtu}</td></tr>
+                    </table>
+                    <p>Adalah benar peserta didik yang terdaftar aktif pada SMA Negeri 1 Sabang Tahun Pelajaran 2026/2027 dan berkelakuan baik.</p>
+                    <p>Surat keterangan ini diberikan kepada yang bersangkutan untuk keperluan: <strong>${data.purpose}</strong>.</p>
+                    <p>Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
+                </div>
+            ` : `
+                <div class="text-center mb-6">
+                    <h3 class="text-base font-bold uppercase underline tracking-wide">SURAT KETERANGAN TIDAK MENERBITKAN SKHUN</h3>
+                    <p class="text-xs font-sans mt-1">Nomor : ${data.agendaNo}</p>
+                </div>
+
+                <div class="text-xs sm:text-sm space-y-4 mb-6 text-justify">
+                    <p>Kepala Sekolah Menengah Atas (SMA) Negeri 1 Sabang, Dinas Pendidikan Aceh dengan ini menerangkan bahwa:</p>
+                    <table class="w-full text-left ml-4">
+                        <tr><td class="py-1 w-48">Nama Lengkap</td><td>: <strong>${data.applicant}</strong></td></tr>
+                        <tr><td class="py-1">NISN</td><td>: ${data.nisn}</td></tr>
+                        <tr><td class="py-1">Tempat, Tanggal Lahir</td><td>: ${data.ttl}</td></tr>
+                        <tr><td class="py-1">Status Kelulusan</td><td>: Lulus SMA Negeri 1 Sabang (${data.kelasOrTahun})</td></tr>
+                        <tr><td class="py-1">Nomor Seri Ijazah</td><td>: <strong>${data.noIjazah}</strong></td></tr>
+                    </table>
+                    <p>Berdasarkan kebijakan Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi Republik Indonesia mengenai penghapusan Ujian Nasional (UN) mulai Tahun Pelajaran 2019/2020 (lulusan tahun 2020 ke atas), maka SMA Negeri 1 Sabang <strong>tidak menerbitkan Sertifikat Hasil Ujian Nasional (SKHUN)</strong> bagi lulusan tersebut di atas.</p>
+                    <p>Surat keterangan ini diberikan sebagai pengganti lampiran SKHUN untuk keperluan: <strong>${data.purpose}</strong>.</p>
+                    <p>Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
+                </div>
+            `;
+
+            const area = document.getElementById('printDocumentArea');
+            area.innerHTML = `
+                <!-- KOP SURAT RESMI PEMERINTAH ACEH - DINAS PENDIDIKAN - SMA NEGERI 1 SABANG -->
+                <div class="flex items-center gap-4 border-b-4 border-double border-slate-900 pb-4 mb-6">
+                    <div class="w-20 h-20 shrink-0 flex items-center justify-center">
+                        <svg viewBox="0 0 120 132" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M60 4 L112 24 L106 84 C102 106 82 120 60 128 C38 120 18 106 14 84 L8 24 Z" fill="#1e247e" stroke="#111827" stroke-width="3"/>
+                            <path d="M26 32 L58 36 L58 76 L26 72 Z" fill="#ffffff" stroke="#111827" stroke-width="2"/>
+                            <path d="M94 32 L62 36 L62 76 L94 72 Z" fill="#ffffff" stroke="#111827" stroke-width="2"/>
+                            <path d="M40 42 C48 40 54 48 64 46 C74 44 82 52 78 62 C72 70 58 68 50 60 C44 54 38 48 40 42 Z" fill="#16a34a" stroke="#065f46" stroke-width="1.5"/>
+                            <line x1="82" y1="30" x2="54" y2="68" stroke="#facc15" stroke-width="3.5" stroke-linecap="round"/>
+                            <text x="60" y="90" text-anchor="middle" fill="#ffffff" font-size="7.5" font-weight="bold" font-family="sans-serif">SMA NEGERI 1 SABANG</text>
+                            <circle cx="44" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                            <circle cx="54" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                            <circle cx="64" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                            <circle cx="74" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                            <circle cx="59" cy="105" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1 text-center">
+                        <p class="text-sm font-bold uppercase tracking-wider">PEMERINTAH ACEH</p>
+                        <p class="text-sm font-bold uppercase tracking-wider">DINAS PENDIDIKAN</p>
+                        <h2 class="text-xl font-extrabold uppercase tracking-wide mt-0.5">SMA NEGERI 1 SABANG</h2>
+                        <p class="text-[11px] font-sans text-slate-700 mt-0.5">Jl. T. Nyak Arief Ie Meulee Sukajaya Sabang Kota Sabang, Aceh 23511</p>
+                        <p class="text-[11px] font-sans text-slate-700">Helpdesk Tata Usaha: +62 813-6095-1234 (Ibu Rakhma)</p>
+                    </div>
+                </div>
+
+                ${isiRedaksi}
+
+                <!-- TANDA TANGAN & QR VERIFIKASI -->
+                <div class="flex items-end justify-between pt-4 font-sans">
+                    <div class="flex items-center gap-3 p-2.5 border border-slate-300 rounded-xl bg-slate-50 max-w-[270px]">
+                        <svg viewBox="0 0 36 36" class="w-12 h-12 shrink-0 fill-slate-900">
+                            <rect x="2" y="2" width="10" height="10" fill="none" stroke="#0f172a" stroke-width="2"/>
+                            <rect x="5" y="5" width="4" height="4"/>
+                            <rect x="24" y="2" width="10" height="10" fill="none" stroke="#0f172a" stroke-width="2"/>
+                            <rect x="27" y="5" width="4" height="4"/>
+                            <rect x="2" y="24" width="10" height="10" fill="none" stroke="#0f172a" stroke-width="2"/>
+                            <rect x="5" y="27" width="4" height="4"/>
+                            <rect x="15" y="4" width="4" height="4"/>
+                            <rect x="15" y="12" width="6" height="6"/>
+                            <rect x="24" y="16" width="4" height="6"/>
+                            <rect x="16" y="24" width="6" height="4"/>
+                            <rect x="26" y="26" width="6" height="6"/>
+                        </svg>
+                        <div class="text-[10px] text-slate-600 leading-tight">
+                            <p class="font-bold text-slate-900">VERIFIKASI RESMI TU</p>
+                            <p class="font-mono font-bold text-blue-900 mt-0.5">${data.code}</p>
+                            <p class="mt-0.5">Terdaftar pada arsip digital SMA Negeri 1 Sabang.</p>
+                        </div>
+                    </div>
+
+                    <div class="text-xs font-serif text-left w-64">
+                        <p>Sabang, 19 November 2026</p>
+                        <p class="font-bold mb-14">Kepala SMA Negeri 1 Sabang,</p>
+                        <p class="font-bold underline">Drs. H. Zulkifli, M.Pd</p>
+                        <p>Pembina Utama Muda / IV.c</p>
+                        <p>NIP. 19680514 199412 1 002</p>
+                    </div>
+                </div>
+            `;
+            openModal('modalDocumentViewer');
+        }
+
+        // --- 7. INDIKATOR STATUS LOKET TU REAL-TIME (WIB / UTC+7) ---
+        function updateLoketStatusWIB() {
+            const now = new Date();
+            const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const wibDate = new Date(utcMs + (7 * 3600000));
+
+            const day = wibDate.getDay(); // 0 = Minggu, 1-4 = Sen-Kam, 5 = Jumat, 6 = Sabtu
+            const hours = wibDate.getHours();
+            const minutes = wibDate.getMinutes();
+            const totalMinutes = hours * 60 + minutes;
+
+            const pad = n => String(n).padStart(2, '0');
+            const clockEl = document.getElementById('liveSabangClock');
+            if (clockEl) {
+                clockEl.textContent = `${pad(hours)}:${pad(minutes)} WIB`;
+            }
+
+            const badgeEl = document.getElementById('loketStatusBadge');
+            if (!badgeEl) return;
+
+            let isOpen = false;
+            if (day >= 1 && day <= 4) {
+                // Senin - Kamis: 07.30 (450) - 13.30 (810)
+                isOpen = totalMinutes >= 450 && totalMinutes <= 810;
+            } else if (day === 5) {
+                // Jumat: 07.30 (450) - 11.45 (705)
+                isOpen = totalMinutes >= 450 && totalMinutes <= 705;
+            } else if (day === 6) {
+                // Sabtu: 07.30 (450) - 13.30 (810)
+                isOpen = totalMinutes >= 450 && totalMinutes <= 810;
+            }
+
+            if (isOpen) {
+                badgeEl.className = 'inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300';
+                badgeEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>Loket TU Buka</span>`;
+            } else {
+                badgeEl.className = 'inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300';
+                badgeEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Loket Tutup • Portal Online 24 Jam Aktif</span>`;
+            }
+        }
+
+        // --- 8. HERO SEARCH & UI UTILITIES ---
+        function handleHeroSearch(e) {
+            e.preventDefault();
+            const val = document.getElementById('heroSearchInput').value.trim();
+            if (!val) return;
+            if (val.toUpperCase().startsWith('TU-')) {
+                quickTrackCode(val.toUpperCase());
+            } else if (val.toLowerCase().includes('skhun')) {
+                selectServiceAndScroll('surat-non-skhun');
+            } else if (val.toLowerCase().includes('aktif')) {
+                selectServiceAndScroll('surat-aktif');
+            } else {
+                document.getElementById('layanan').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
+        }
+
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('sman1sabang_theme', html.classList.contains('dark') ? 'dark' : 'light');
+        }
+
+        function openModal(id) {
+            const m = document.getElementById(id);
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        function closeModal(id) {
+            const m = document.getElementById(id);
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        function showToast(msg, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const bg = type === 'info' ? 'bg-blue-950 dark:bg-primary-600' : 'bg-emerald-600';
+            const el = document.createElement('div');
+            el.className = `pointer-events-auto px-4 py-3 rounded-2xl shadow-lg text-white text-xs sm:text-sm font-medium flex items-center gap-2 transition-all duration-300 translate-y-2 opacity-0 ${bg}`;
+            el.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i><span>${msg}</span>`;
+            container.appendChild(el);
+            lucide.createIcons();
+            requestAnimationFrame(() => el.classList.remove('translate-y-2', 'opacity-0'));
+            setTimeout(() => {
+                el.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => el.remove(), 300);
+            }, 3000);
+        }
+
+        // --- INIT ---
+        window.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('sman1sabang_theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+            renderServices();
+            switchFormService('surat-aktif');
+            renderSampleCodes();
+            renderTrackingResult('TU-SMAN1SBG-2026-1042');
+            updateLoketStatusWIB();
+            setInterval(updateLoketStatusWIB, 30000);
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
