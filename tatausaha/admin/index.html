@@ -793,8 +793,43 @@
    <script>
       // --- KONEKSI KE DATABASE  GOOGLE SHIT ---
  
-       const API_URL = 'https://script.google.com/macros/s/AKfycbwExI47tNv9OFN8jlJ7IDnhZWjF10ygJlFzji9bciRxiwcuQILNQoK7GFK_pSO4tbPe/exec';
+       // 1. Tempel URL Web App (/exec) dari Google Apps Script Anda:
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwExI47tNv9OFN8jlJ7IDnhZWjF10ygJlFzji9bciRxiwcuQILNQoK7GFK_pSO4tbPe/exec';
 
+function isCloudConfigured() {
+  return GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL.startsWith('https://script.google.com/');
+}
+
+// 2. Tarik seluruh antrean terbaru dari Google Sheets (dipanggil saat login & tiap 25 detik)
+async function syncFromCloud() {
+  if (!isCloudConfigured()) return;
+  try {
+    const res = await fetch(GOOGLE_SCRIPT_URL);
+    const json = await res.json();
+    if (json.status === 'ok' && Array.isArray(json.data)) {
+      requestsList = json.data.map(item => normalizeRequestItem(item)).reverse();
+      persistSyncedData();
+      refreshAllViews();
+    }
+  } catch (err) {
+    console.warn('Sinkronisasi cloud tertunda (menggunakan cache lokal):', err);
+  }
+}
+
+// 3. Kirim data baru / pembaruan status ke Google Sheets
+async function pushToCloud(item, action = 'update') {
+  if (!isCloudConfigured()) return;
+  try {
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: action, item: item })
+    });
+  } catch (err) {
+    console.error('Gagal mengirim ke Google Sheets:', err);
+  }
+}
 // 1. Tarik seluruh pengajuan terbaru dari Google Sheets saat Admin dibuka
 async function syncFromCloud() {
     try {
