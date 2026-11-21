@@ -791,7 +791,39 @@
     <!-- JAVASCRIPT LOGIC                                                      -->
     <!-- ===================================================================== -->
    <script>
-        // --- 1. KONFIGURASI STORAGE SINKRON DENGAN PORTAL PUBLIK ---
+      // --- KONEKSI KE DATABASE  GOOGLE SHIT ---
+ 
+       const API_URL = 'https://script.google.com/macros/s/AKfycbwExI47tNv9OFN8jlJ7IDnhZWjF10ygJlFzji9bciRxiwcuQILNQoK7GFK_pSO4tbPe/exec';
+
+// 1. Tarik seluruh pengajuan terbaru dari Google Sheets saat Admin dibuka
+async function syncFromCloud() {
+    try {
+        const res = await fetch(API_URL);
+        const json = await res.json();
+        if (json.status === 'ok' && Array.isArray(json.data)) {
+            requestsList = json.data.map(item => normalizeRequestItem(item)).reverse();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(requestsList));
+            refreshAllViews();
+        }
+    } catch (err) {
+        console.warn('Mode offline / gagal memuat dari cloud:', err);
+    }
+}
+
+// 2. Kirim pembuatan / pembaruan data ke Google Sheets
+async function pushItemToCloud(item, action = 'create') {
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: action, item: item })
+        });
+    } catch (err) {
+        console.error('Gagal mengirim ke cloud:', err);
+    }
+}
+       // --- 1. KONFIGURASI STORAGE SINKRON DENGAN PORTAL PUBLIK ---
         const STORAGE_KEY = 'sman1sabang_tu_requests';
         const LEGACY_STORAGE_KEY = 'sman1sabang_tu_tracking_v2';
         const SETTINGS_KEY = 'sman1sabang_tu_settings';
