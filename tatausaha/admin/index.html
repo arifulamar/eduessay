@@ -1343,6 +1343,7 @@ async function pushItemToCloud(item, action = 'create') {
             requestsList[idx].step = 4;
             requestsList[idx].notes = `Diverifikasi dan disahkan oleh Staf Tata Usaha SMAN 1 Sabang. Surat resmi (${requestsList[idx].agendaNo}) siap dicetak/diambil.`;
             persistSyncedData();
+            pushToCloud(requestsList[idx], 'update');
             refreshAllViews();
             showToast(`Resi ${code} disetujui & siap dicetak!`, 'success');
         }
@@ -1402,6 +1403,7 @@ async function pushItemToCloud(item, action = 'create') {
             };
 
             persistSyncedData();
+            pushToCloud(requestsList[idx], 'update');
             refreshAllViews();
             closeModal('modalManageRequest');
             showToast(`Perubahan data & status ${code} berhasil disimpan.`, 'success');
@@ -1493,6 +1495,7 @@ async function pushItemToCloud(item, action = 'create') {
 
             requestsList.unshift(newItem);
             persistSyncedData();
+            pushToCloud(newItem, 'create');
             refreshAllViews();
             e.target.reset();
             toggleOfflineServiceFields();
@@ -1776,6 +1779,8 @@ async function pushItemToCloud(item, action = 'create') {
             updateAdminClockWIB();
             setInterval(updateAdminClockWIB, 30000);
             lucide.createIcons();
+            syncFromCloud();
+            setInterval(syncFromCloud, 20000); // Auto-refresh antrean tiap 20 detik
         });
     </script>
 
