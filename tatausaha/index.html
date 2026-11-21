@@ -684,16 +684,130 @@
     <!-- ===================================================================== -->
     <script>
 // --- TRIGGER TOMBOL PENGAJUAN ---
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwExI47tNv9OFN8jlJ7IDnhZWjF10ygJlFzji9bciRxiwcuQILNQoK7GFK_pSO4tbPe/exec';
+     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwExI47tNv9OFN8jlJ7IDnhZWjF10ygJlFzji9bciRxiwcuQILNQoK7GFK_pSO4tbPe/exec';
+  const STORAGE_KEY = 'sman1sabang_tu_requests';
 
-async function submitPublicRequestToCloud(newItem) {
-    await fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'create', item: newItem })
+  function isCloudConfigured() {
+    return typeof GOOGLE_SCRIPT_URL === 'string' && GOOGLE_SCRIPT_URL.startsWith('https://script.google.com/');
+  }
+
+  // 1. Atur tampilan & atribut required sesuai jenis surat (mencegah submit terblokir)
+  function togglePublicFields() {
+    const serviceEl = document.getElementById('pubServiceId');
+    if (!serviceEl) return;
+
+    const isAktif = serviceEl.value === 'surat-aktif';
+    const labelKelas = document.getElementById('pubLabelKelasTahun');
+    const inputKelas = document.getElementById('pubKelasTahun');
+    const boxAktif = document.getElementById('pubFieldsAktif');
+    const boxNonSkhun = document.getElementById('pubFieldsNonSkhun');
+
+    if (labelKelas) {
+      labelKelas.textContent = isAktif ? 'Kelas / Jurusan Sekarang *' : 'Tahun Lulus SMA *';
+    }
+    if (inputKelas) {
+      inputKelas.placeholder = isAktif ? 'Contoh: XII-IPA-1' : 'Contoh: Tahun Lulus 2023';
+    }
+    if (boxAktif) {
+      boxAktif.classList.toggle('hidden', !isAktif);
+      boxAktif.querySelectorAll('input').forEach(inp => inp.required = isAktif);
+    }
+    if (boxNonSkhun) {
+      boxNonSkhun.classList.toggle('hidden', isAktif);
+      boxNonSkhun.querySelectorAll('input').forEach(inp => inp.required = !isAktif);
+    }
+  }
+
+  // 2. Handler Submit Formulir Pengajuan Online
+  document.addEventListener('DOMContentLoaded', () => {
+    togglePublicFields();
+
+    const form = document.getElementById('publicRequestForm');
+    if (!form) {
+      console.error('Form #publicRequestForm tidak ditemukan di halaman.');
+      return;
+    }
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const btn = document.getElementById('pubSubmitBtn');
+      const originalText = btn ? btn.textContent : 'Kirim Permohonan & Dapatkan Resi';
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Memproses Permohonan...';
+      }
+
+      try {
+        const serviceId = document.getElementById('pubServiceId').value;
+        const randNum = Math.floor(1050 + Math.random() * 8900);
+        const resiCode = `TU-SMAN1SBG-2026-${randNum}`;
+        const nowStr = new Date().toLocaleDateString('id-ID', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        });
+
+        const newItem = {
+          code: resiCode,
+          serviceId: serviceId,
+          serviceName: serviceId === 'surat-aktif'
+            ? 'Surat Keterangan Aktif'
+            : 'Surat Keterangan Tidak Menerbitkan SKHUN',
+          applicant: (document.getElementById('pubApplicant')?.value || '').trim(),
+          nisn: (document.getElementById('pubNisn')?.value || '').trim(),
+          kelasOrTahun: (document.getElementById('pubKelasTahun')?.value || '').trim(),
+          ttl: (document.getElementById('pubTtl')?.value || '').trim(),
+          ortu: (document.getElementById('pubOrtu')?.value || '-').trim() || '-',
+          pekerjaanOrtu: (document.getElementById('pubPekerjaanOrtu')?.value || '-').trim() || '-',
+          noIjazah: (document.getElementById('pubNoIjazah')?.value || '-').trim() || '-',
+          purpose: (document.getElementById('pubPurpose')?.value || '').trim(),
+          whatsapp: (document.getElementById('pubWhatsapp')?.value || '').trim(),
+          submittedAt: nowStr,
+          agendaNo: `421.3/DRAFT-${randNum}/SMAN1-SBG/2026`,
+          status: 'Menunggu Verifikasi',
+          notes: 'Permohonan masuk melalui Portal Online Tata Usaha SMAN 1 Sabang.'
+        };
+
+        // Simpan ke localStorage terlebih dahulu agar tidak pernah hilang
+        const localArr = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        localArr.unshift(newItem);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(localArr));
+
+        // Tampilkan Nomor Resi ke layar seketika
+        const resiTextEl = document.getElementById('generatedResiText');
+        const receiptBoxEl = document.getElementById('receiptBox');
+        if (resiTextEl) resiTextEl.textContent = resiCode;
+        if (receiptBoxEl) {
+          receiptBoxEl.classList.remove('hidden');
+          receiptBoxEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          alert(`Permohonan berhasil dikirim!\nNomor Resi Anda: ${resiCode}`);
+        }
+
+        // Kirim ke Google Sheets Cloud di latar belakang
+        if (isCloudConfigured()) {
+          fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'create', item: newItem })
+          }).catch(err => console.warn('Gagal kirim ke Google Sheets:', err));
+        }
+
+        form.reset();
+        togglePublicFields();
+      } catch (err) {
+        console.error('Error saat submit formulir:', err);
+        alert('Terjadi kesalahan saat memproses data: ' + err.message);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+      }
     });
-}
+  });
 // --- cek nomor resi surat ---
         async function trackReceiptFromCloud(resiCode) {
     const res = await fetch(API_URL);
