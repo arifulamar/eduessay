@@ -800,20 +800,39 @@ function isCloudConfigured() {
   return GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL.startsWith('https://script.google.com/');
 }
 
-// 2. Tarik seluruh antrean terbaru dari Google Sheets (dipanggil saat login & tiap 25 detik)
+// Tarik data terbaru dari Google Sheets saat Admin dibuka & tiap 20 detik
 async function syncFromCloud() {
-  if (!isCloudConfigured()) return;
-  try {
-    const res = await fetch(GOOGLE_SCRIPT_URL);
-    const json = await res.json();
-    if (json.status === 'ok' && Array.isArray(json.data)) {
-      requestsList = json.data.map(item => normalizeRequestItem(item)).reverse();
-      persistSyncedData();
-      refreshAllViews();
+    if (!GOOGLE_SCRIPT_URL || !GOOGLE_SCRIPT_URL.startsWith('https://script.google.com/')) return;
+    try {
+        const res = await fetch(GOOGLE_SCRIPT_URL + '?t=' + Date.now());
+        const json = await res.json();
+        if (json.status === 'ok' && Array.isArray(json.data)) {
+            // Gabungkan data dari Google Sheets agar tampil di tabel Admin
+            requestsList = json.data
+                .filter(item => item && item.code)
+                .map(item => normalizeRequestItem(item))
+                .reverse();
+            persistSyncedData();
+            refreshAllViews();
+        }
+    } catch (err) {
+        console.warn('Gagal sinkronisasi dari Google Sheets:', err);
     }
-  } catch (err) {
-    console.warn('Sinkronisasi cloud tertunda (menggunakan cache lokal):', err);
-  }
+}
+
+// Kirim pembaruan status / nomor agenda / input loket ke Google Sheets
+async function pushToCloud(item, action = 'update') {
+    if (!GOOGLE_SCRIPT_URL || !GOOGLE_SCRIPT_URL.startsWith('https://script.google.com/')) return;
+    try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: action, item: item })
+        });
+    } catch (err) {
+        console.error('Gagal mengirim update ke Google Sheets:', err);
+    }
 }
 
 // 3. Kirim data baru / pembaruan status ke Google Sheets
