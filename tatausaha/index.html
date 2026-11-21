@@ -72,10 +72,13 @@
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 antialiased transition-colors duration-200">
 
   <!-- NAVBAR -->
-  <header class="sticky top-0 z-30 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 no-print">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-      <a href="#" class="flex items-center gap-3 group">
-        <div class="w-11 h-11 rounded-2xl bg-white dark:bg-slate-800 p-1 flex items-center justify-center shadow-md border border-slate-200 dark:border-slate-700 shrink-0">
+  <!-- NAVBAR RESPONSIF & PROPORSIONAL -->
+  <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 no-print">
+    <div class="max-w-6xl mx-auto px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4">
+      
+      <!-- Logo & Judul Instansi (Anti-Terpotong di Mobile) -->
+      <a href="#" class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 group">
+        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-800 p-1 flex items-center justify-center shadow-sm border border-slate-200 dark:border-slate-700 shrink-0">
           <img src="logosman1sabang.png" alt="Logo SMAN 1 Sabang" class="w-full h-full object-contain"
                onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='logosman1sabang.jfif';}else{this.style.display='none';this.nextElementSibling.style.display='block';}" />
           <svg style="display:none;" viewBox="0 0 120 132" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -83,34 +86,42 @@
             <text x="60" y="74" text-anchor="middle" fill="#ffffff" font-size="14" font-weight="bold">SMAN 1</text>
           </svg>
         </div>
-        <div>
-          <span class="font-extrabold text-sm sm:text-base tracking-tight text-slate-900 dark:text-white block leading-tight">
+        <div class="min-w-0 flex-1">
+          <span class="font-extrabold text-[13px] sm:text-base tracking-tight text-slate-900 dark:text-white block leading-snug truncate">
             Tata Usaha SMAN 1 Sabang
           </span>
-          <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-            Dinas Pendidikan Aceh • Layanan Mandiri Online
+          <span class="text-[10px] sm:text-[11px] font-medium text-slate-500 dark:text-slate-400 block truncate">
+            Dinas Pendidikan Aceh<span class="hidden md:inline"> • Layanan Mandiri Online</span>
           </span>
         </div>
       </a>
 
-      <div class="flex items-center gap-2 sm:gap-3">
-        <span id="cloudStatusBadge" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+      <!-- Menu Aksi (Single-Line & Proporsional) -->
+      <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+        <span id="cloudStatusBadge" class="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 whitespace-nowrap">
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Online Cloud
         </span>
-        <a href="#lacak" class="px-3 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-          Lacak Resi
+
+        <a href="#lacak"
+          class="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap transition">
+          Lacak<span class="hidden sm:inline"> Resi</span>
         </a>
-        <a href="admin/index.html" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-950 text-white hover:bg-blue-900 dark:bg-primary-600 transition">
-          Login Staf TU
+
+        <a href="admin/index.html"
+          class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold bg-blue-950 text-white hover:bg-blue-900 dark:bg-primary-600 dark:hover:bg-primary-500 whitespace-nowrap shadow-sm transition">
+          <span class="sm:hidden">Admin TU</span>
+          <span class="hidden sm:inline">Login Staf TU</span>
         </a>
-        <button id="themeToggle" type="button" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800">
-          <svg class="w-4 h-4 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-          <svg class="w-4 h-4 hidden dark:block text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+
+        <button id="themeToggle" type="button" title="Ubah Tema"
+          class="p-1.5 sm:p-2 rounded-lg sm:rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0 transition">
+          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 hidden dark:block text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
         </button>
       </div>
+
     </div>
   </header>
-
   <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-12 no-print">
 
     <!-- HERO SECTION -->
