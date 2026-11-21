@@ -683,6 +683,26 @@
     <!-- JAVASCRIPT LOGIC                                                      -->
     <!-- ===================================================================== -->
     <script>
+// --- TRIGGER TOMBOL PENGAJUAN ---
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwExI47tNv9OFN8jlJ7IDnhZWjF10ygJlFzji9bciRxiwcuQILNQoK7GFK_pSO4tbPe/exec';
+
+async function submitPublicRequestToCloud(newItem) {
+    await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'create', item: newItem })
+    });
+}
+// --- cek nomor resi surat ---
+        async function trackReceiptFromCloud(resiCode) {
+    const res = await fetch(API_URL);
+    const json = await res.json();
+    if (json.status === 'ok') {
+        return json.data.find(r => r.code.toUpperCase() === resiCode.toUpperCase());
+    }
+    return null;
+}
         // --- 1. KATALOG 2 LAYANAN SURAT RESMI SMAN 1 SABANG ---
         const SERVICES_DATA = [
             {
