@@ -1527,7 +1527,7 @@
             const bodyHtml = isAktif ? `
                 <div class="text-center mb-6">
                     <h3 class="text-base font-bold uppercase underline tracking-wide">SURAT KETERANGAN</h3>
-                    <p style="text-align:center; margin-bottom:16px; font-size:12pt;"">Nomor : ${data.agendaNo}</p>
+                    <p style="text-align:center; margin-bottom:16px; font-size:12pt;">Nomor : ${data.agendaNo}</p>
                 </div>
                 <p style="text-align:justify; margin-bottom:16px; font-size:12pt;">Saya yang bertanda tangan di bawah ini:</p>
         <table style="width:100%; margin-left:20px; margin-bottom:16px; font-size:12pt;">
@@ -1549,22 +1549,26 @@
                 </div>
             ` : `
                 <div class="text-center mb-6">
-                    <h3 class="text-base font-bold uppercase underline tracking-wide">SURAT KETERANGAN TIDAK MENERBITKAN SKHUN</h3>
-                    <p class="text-xs font-sans mt-1">Nomor : ${data.agendaNo}</p>
+                    <h3 class="text-base font-bold uppercase underline tracking-wide">SURAT KETERANGAN</h3>
+                    <p style="text-align:center; margin-bottom:16px; font-size:12pt;">Nomor : ${data.agendaNo}</p>
                 </div>
-
+<p style="text-align:justify; margin-bottom:16px; font-size:12pt;">Saya yang bertanda tangan di bawah ini:</p>
+        <table style="width:100%; margin-left:20px; margin-bottom:16px; font-size:12pt;">
+          <tr><td class="py-1 w-48" style="text-indent: 20px;">Nama</td><td>: Helmi, S.Pd, I</td></tr>
+          <tr><td class="py-1" style="text-indent: 20px;">Jabatan</td><td>: Kepala Sekolah</td></tr>
+        </table>
                 <div class="text-xs sm:text-sm space-y-4 mb-6 text-justify">
-                    <p>Kepala Sekolah Menengah Atas (SMA) Negeri 1 Sabang, Dinas Pendidikan Aceh dengan ini menerangkan bahwa:</p>
-                    <table class="w-full text-left ml-4">
-                        <tr><td class="py-1 w-48">Nama Lengkap</td><td>: <strong>${data.applicant}</strong></td></tr>
-                        <tr><td class="py-1">NISN</td><td>: ${data.nisn}</td></tr>
-                        <tr><td class="py-1">Tempat, Tanggal Lahir</td><td>: ${data.ttl}</td></tr>
-                        <tr><td class="py-1">Status Kelulusan</td><td>: Lulus SMA Negeri 1 Sabang (${data.kelasOrTahun})</td></tr>
-                        <tr><td class="py-1">Nomor Seri Ijazah</td><td>: <strong>${data.noIjazah}</strong></td></tr>
+                    <p style="text-align:justify; margin-bottom:16px; font-size:12pt;">Dengan ini menerangkan bahwa:</p>
+                    <table style="width:100%; margin-left:20px; margin-bottom:16px; font-size:12pt;">
+                        <tr><td class="py-1 w-48" style="text-indent: 20px;">Nama Lengkap</td><td>: <strong>${data.applicant}</strong></td></tr>
+                        <tr><td class="py-1" style="text-indent: 20px;">NISN</td><td>: ${data.nisn}</td></tr>
+                        <tr><td class="py-1" style="text-indent: 20px;">Tempat, Tanggal Lahir</td><td>: ${data.ttl}</td></tr>
+                        <tr><td class="py-1" style="text-indent: 20px;">Nama Orang Tua</td><td>: ${data.ortu}</td></tr>
+
                     </table>
-                    <p>Berdasarkan kebijakan Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi Republik Indonesia mengenai penghapusan Ujian Nasional (UN) mulai Tahun Pelajaran 2019/2020 (lulusan tahun 2020 ke atas), maka SMA Negeri 1 Sabang <strong>tidak menerbitkan Sertifikat Hasil Ujian Nasional (SKHUN)</strong> bagi lulusan tersebut di atas.</p>
-                    <p>Surat keterangan ini diberikan sebagai pengganti lampiran SKHUN untuk keperluan: <strong>${data.purpose}</strong>.</p>
-                    <p>Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
+                    <p style="text-align:justify; margin-bottom:16px; font-size:12pt; text-indent: 40px; line-height: 2;">Benar nama tersebut di atas adalah lulusan SMA Negeri 1 Sabang Tahun Pelajaran ${letterSettings.academicYear},  yang pada tahun tersebut Pemerintah hanya menerbitkan IJAZAH dan tidak menerbitkan Surat Keterangan Hasil Ujian Nasional (SKHUN).</p>
+                    
+                    <p style="text-align:justify; margin-bottom:16px; font-size:12pt; text-indent: 40px; line-height: 2;">Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya dan atas kerjasamanya kami ucapkan terima kasih.</p>
                 </div>
             `;
 
