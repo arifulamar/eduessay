@@ -1525,43 +1525,45 @@
             }
 
             const bodyHtml = isAktif ? `
-        <div style="text-align:center; margin-bottom:20px;">
-          <div style="font-size:14pt; font-weight:bold; text-decoration:underline;">SURAT KETERANGAN</div>
-          <div style="font-size:12pt; margin-top:2px;">Nomor : ${data.agendaNo}</div>
-        </div>
-        <p style="text-align:justify; margin-bottom:14px;">Saya yang bertanda tangan di bawah ini:</p>
-        <table style="width:100%; margin-left:20px; margin-bottom:16px; font-size:12pt;">
-          <tr><td style="padding:3px 0;">Nama</td><td>: Helmi, S.Pd, I</td></tr>
-          <tr><td style="padding:3px 0;">Jabatan</td><td>: Kepala Sekolah</td></tr>
-        </table>
-        <p style="text-align:justify; margin-bottom:14px;">Dengan ini menerangkan bahwa:</p>
-        <table style="width:100%; margin-left:20px; margin-bottom:16px; font-size:12pt;">
-          <tr><td style="width:200px;padding:3px 0;">Nama Lengkap</td><td>: ${data.applicant}</td></tr>
-          <tr><td style="padding:3px 0;">NISN</td><td>: ${data.nisn}</td></tr>
-          <tr><td style="padding:3px 0;">Tempat, Tanggal Lahir</td><td>: ${data.ttl}</td></tr>
-          <tr><td style="padding:3px 0;">Kelas / Jurusan</td><td>: ${data.kelasOrTahun}</td></tr>
-         
-        </table>
-        <p style="text-align:justify; text-indent:32px; margin-bottom:14px;">Benar peserta didik tersebut adalah siswa SMA Negeri 1 Sabang Tahun Pelajaran ${cfg.academicYear}, dan masih <strong>Aktif</strong> sampai sekarang.</p>
-      
-        <p style="text-align:justify; text-indent:32px; margin-bottom:24px;">Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya dan atas kerjasamanya kami ucapkan terima kasih.</p>
-      ` : `
-        <div style="text-align:center; margin-bottom:20px;">
-          <div style="font-size:14pt; font-weight:bold; text-decoration:underline;">SURAT KETERANGAN TIDAK MENERBITKAN SKHUN</div>
-          <div style="font-size:12pt; margin-top:2px;">Nomor : ${data.agendaNo}</div>
-        </div>
-        <p style="text-align:justify; margin-bottom:14px;">Kepala Sekolah Menengah Atas (SMA) Negeri 1 Sabang, Dinas Pendidikan Aceh dengan ini menerangkan bahwa:</p>
-        <table style="width:100%; margin-left:20px; margin-bottom:16px; font-size:12pt;">
-          <tr><td style="width:200px; padding:3px 0;">Nama Lengkap</td><td>: <strong>${data.applicant}</strong></td></tr>
-          <tr><td style="padding:3px 0;">NISN</td><td>: ${data.nisn}</td></tr>
-          <tr><td style="padding:3px 0;">Tempat, Tanggal Lahir</td><td>: ${data.ttl}</td></tr>
-          <tr><td style="padding:3px 0;">Status Kelulusan</td><td>: Lulus SMA Negeri 1 Sabang (${data.kelasOrTahun})</td></tr>
-          <tr><td style="padding:3px 0;">Nomor Seri Ijazah</td><td>: <strong>${data.noIjazah}</strong></td></tr>
-        </table>
-        <p style="text-align:justify; text-indent:32px; margin-bottom:14px;">Berdasarkan kebijakan Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi Republik Indonesia mengenai penghapusan Ujian Nasional (UN) mulai Tahun Pelajaran 2019/2020 (lulusan tahun 2020 ke atas), maka SMA Negeri 1 Sabang <strong>tidak menerbitkan Sertifikat Hasil Ujian Nasional (SKHUN)</strong> bagi lulusan tersebut di atas.</p>
-        <p style="text-align:justify; text-indent:32px; margin-bottom:14px;">Surat keterangan ini diberikan sebagai pengganti lampiran SKHUN untuk keperluan: <strong>${data.purpose}</strong>.</p>
-        <p style="text-align:justify; text-indent:32px; margin-bottom:24px;">Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
-      `;
+                <div class="text-center mb-6">
+                    <h3 class="text-base font-bold uppercase underline tracking-wide">SURAT KETERANGAN AKTIF SEKOLAH</h3>
+                    <p class="text-xs font-sans mt-1">Nomor : ${data.agendaNo}</p>
+                </div>
+
+                <div class="text-xs sm:text-sm space-y-4 mb-6 text-justify">
+                    <p>Kepala Sekolah Menengah Atas (SMA) Negeri 1 Sabang, Dinas Pendidikan Aceh dengan ini menerangkan bahwa:</p>
+                    <table class="w-full text-left ml-4">
+                        <tr><td class="py-1 w-48">Nama Lengkap</td><td>: <strong>${data.applicant}</strong></td></tr>
+                        <tr><td class="py-1">NISN</td><td>: ${data.nisn}</td></tr>
+                        <tr><td class="py-1">Tempat, Tanggal Lahir</td><td>: ${data.ttl}</td></tr>
+                        <tr><td class="py-1">Kelas / Jurusan</td><td>: ${data.kelasOrTahun}</td></tr>
+                        <tr><td class="py-1">Nama Orang Tua / Wali</td><td>: ${data.ortu}</td></tr>
+                        <tr><td class="py-1">Pekerjaan Orang Tua</td><td>: ${data.pekerjaanOrtu}</td></tr>
+                    </table>
+                    <p>Adalah benar peserta didik yang terdaftar aktif pada SMA Negeri 1 Sabang Tahun Pelajaran ${letterSettings.academicYear} dan berkelakuan baik.</p>
+                    <p>Surat keterangan ini diberikan kepada yang bersangkutan untuk keperluan: <strong>${data.purpose}</strong>.</p>
+                    <p>Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
+                </div>
+            ` : `
+                <div class="text-center mb-6">
+                    <h3 class="text-base font-bold uppercase underline tracking-wide">SURAT KETERANGAN TIDAK MENERBITKAN SKHUN</h3>
+                    <p class="text-xs font-sans mt-1">Nomor : ${data.agendaNo}</p>
+                </div>
+
+                <div class="text-xs sm:text-sm space-y-4 mb-6 text-justify">
+                    <p>Kepala Sekolah Menengah Atas (SMA) Negeri 1 Sabang, Dinas Pendidikan Aceh dengan ini menerangkan bahwa:</p>
+                    <table class="w-full text-left ml-4">
+                        <tr><td class="py-1 w-48">Nama Lengkap</td><td>: <strong>${data.applicant}</strong></td></tr>
+                        <tr><td class="py-1">NISN</td><td>: ${data.nisn}</td></tr>
+                        <tr><td class="py-1">Tempat, Tanggal Lahir</td><td>: ${data.ttl}</td></tr>
+                        <tr><td class="py-1">Status Kelulusan</td><td>: Lulus SMA Negeri 1 Sabang (${data.kelasOrTahun})</td></tr>
+                        <tr><td class="py-1">Nomor Seri Ijazah</td><td>: <strong>${data.noIjazah}</strong></td></tr>
+                    </table>
+                    <p>Berdasarkan kebijakan Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi Republik Indonesia mengenai penghapusan Ujian Nasional (UN) mulai Tahun Pelajaran 2019/2020 (lulusan tahun 2020 ke atas), maka SMA Negeri 1 Sabang <strong>tidak menerbitkan Sertifikat Hasil Ujian Nasional (SKHUN)</strong> bagi lulusan tersebut di atas.</p>
+                    <p>Surat keterangan ini diberikan sebagai pengganti lampiran SKHUN untuk keperluan: <strong>${data.purpose}</strong>.</p>
+                    <p>Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
+                </div>
+            `;
 
             const area = document.getElementById('printDocumentArea');
             area.classList.add('f4-sheet');
