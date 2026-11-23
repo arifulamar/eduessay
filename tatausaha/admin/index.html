@@ -1526,19 +1526,22 @@
 
             const bodyHtml = isAktif ? `
                 <div class="text-center mb-6">
-                    <h3 class="text-base font-bold uppercase underline tracking-wide">SURAT KETERANGAN AKTIF SEKOLAH</h3>
+                    <h3 class="text-base font-bold uppercase underline tracking-wide">SURAT KETERANGAN</h3>
                     <p class="text-xs font-sans mt-1">Nomor : ${data.agendaNo}</p>
                 </div>
-
+                <p style="text-align:justify; margin-bottom:14px;">Saya yang bertanda tangan di bawah ini:</p>
+        <table style="width:100%; margin-left:20px; margin-bottom:16px; font-size:12pt;">
+          <tr><td style="padding:3px 0;">Nama</td><td>: Helmi, S.Pd, I</td></tr>
+          <tr><td style="padding:3px 0;">Jabatan</td><td>: Kepala Sekolah</td></tr>
+        </table>
                 <div class="text-xs sm:text-sm space-y-4 mb-6 text-justify">
-                    <p>Kepala Sekolah Menengah Atas (SMA) Negeri 1 Sabang, Dinas Pendidikan Aceh dengan ini menerangkan bahwa:</p>
+                    <p>Dengan ini menerangkan bahwa:</p>
                     <table class="w-full text-left ml-4">
                         <tr><td class="py-1 w-48">Nama Lengkap</td><td>: <strong>${data.applicant}</strong></td></tr>
                         <tr><td class="py-1">NISN</td><td>: ${data.nisn}</td></tr>
                         <tr><td class="py-1">Tempat, Tanggal Lahir</td><td>: ${data.ttl}</td></tr>
                         <tr><td class="py-1">Kelas / Jurusan</td><td>: ${data.kelasOrTahun}</td></tr>
-                        <tr><td class="py-1">Nama Orang Tua / Wali</td><td>: ${data.ortu}</td></tr>
-                        <tr><td class="py-1">Pekerjaan Orang Tua</td><td>: ${data.pekerjaanOrtu}</td></tr>
+
                     </table>
                     <p>Adalah benar peserta didik yang terdaftar aktif pada SMA Negeri 1 Sabang Tahun Pelajaran ${letterSettings.academicYear} dan berkelakuan baik.</p>
                     <p>Surat keterangan ini diberikan kepada yang bersangkutan untuk keperluan: <strong>${data.purpose}</strong>.</p>
