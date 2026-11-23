@@ -576,14 +576,14 @@
 
                             <!-- Field Khusus Non-SKHUN -->
                             <div id="offFieldsNonSkhun" class="hidden">
-                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nomor Seri Ijazah</label>
-                                <input type="text" id="offNoIjazah" placeholder="Contoh: M-SMA/K13-3/06/0041289" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono outline-none focus:border-blue-800">
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Orang Tua</label>
+                                <input type="text" id="offOrtu" placeholder="Contoh: Gibran" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono outline-none focus:border-blue-800">
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Keperluan Surat</label>
-                                    <input type="text" id="offKeperluan" required placeholder="Contoh: Tunjangan PNS / Melamar Pekerjaan" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Alamat</label>
+                                    <input type="text" id="offKeperluan" required placeholder="Contoh: Bakaran Batu" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
                                 </div>
                                 <div>
                                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">No. WhatsApp Pemohon</label>
@@ -1564,6 +1564,7 @@
                         <tr><td class="py-1" style="text-indent: 20px;">NISN</td><td>: ${data.nisn}</td></tr>
                         <tr><td class="py-1" style="text-indent: 20px;">Tempat, Tanggal Lahir</td><td>: ${data.ttl}</td></tr>
                         <tr><td class="py-1" style="text-indent: 20px;">Nama Orang Tua</td><td>: ${data.ortu}</td></tr>
+                        <tr><td class="py-1" style="text-indent: 20px;">Alamat</td><td>: ${data.purpose}</td></tr>
 
                     </table>
                     <p style="text-align:justify; margin-bottom:16px; font-size:12pt; text-indent: 40px; line-height: 2;">Benar nama tersebut di atas adalah lulusan SMA Negeri 1 Sabang Tahun Pelajaran ${letterSettings.academicYear},  yang pada tahun tersebut Pemerintah hanya menerbitkan IJAZAH dan tidak menerbitkan Surat Keterangan Hasil Ujian Nasional (SKHUN).</p>
