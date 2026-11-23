@@ -1527,7 +1527,7 @@
             const bodyHtml = isAktif ? `
                 <div class="text-center mb-6">
                     <h3 class="text-base font-bold uppercase underline tracking-wide">SURAT KETERANGAN</h3>
-                    <p class="text-xs font-sans mt-1">Nomor : ${data.agendaNo}</p>
+                    <p style="text-align:center; margin-bottom:16px; font-size:12pt;"">Nomor : ${data.agendaNo}</p>
                 </div>
                 <p style="text-align:justify; margin-bottom:16px; font-size:12pt;">Saya yang bertanda tangan di bawah ini:</p>
         <table style="width:100%; margin-left:20px; margin-bottom:16px; font-size:12pt;">
@@ -1664,11 +1664,11 @@
                     </div>
 
                     <div class="relative text-xs font-serif text-left w-64">
-                        <p>Sabang, 19 November 2026</p>
-                        <p class="font-bold mb-16">Kepala SMA Negeri 1 Sabang,</p>
-                        <p class="font-bold underline">${letterSettings.kepsekName}</p>
-                        <p>${letterSettings.kepsekRank}</p>
-                        <p>NIP. ${letterSettings.kepsekNip}</p>
+                        <p style="margin-bottom:16px; font-size:12pt;">Sabang, 19 November 2026</p>
+                        <p class="font-bold mb-16" style="margin-bottom:16px; font-size:12pt;">Kepala SMA Negeri 1 Sabang,</p>
+                        <p class="font-bold underline" style="margin-bottom:16px; font-size:12pt;">${letterSettings.kepsekName}</p>
+                        <p style="margin-bottom:16px; font-size:12pt;">${letterSettings.kepsekRank}</p>
+                        <p style="margin-bottom:16px; font-size:12pt;">NIP. ${letterSettings.kepsekNip}</p>
                     </div>
                 </div>
             `;
