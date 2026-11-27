@@ -1471,7 +1471,7 @@
         nisn: getVal('offNisn'),
         kelasOrTahun: getVal('offKelasTahun'),
         ttl: getVal('offTtl'),
-        ortu: getVal('offOrtu') || '-',
+        ortu: getVal('offOrtu'),
         pekerjaanOrtu: getVal('offPekerjaanOrtu') || '-',
         noIjazah: getVal('offNoIjazah') || '-',
         purpose: getVal('offKeperluan'),
@@ -1481,7 +1481,7 @@
         status: status,
         step: statusToStep(status),
         notes: 'Diinput langsung melalui Loket Pelayanan Offline Tata Usaha SMA Negeri 1 Sabang.',
-        alamat: getVal('offAlamat') || '-'
+        alamat: getVal('offAlamat'),
     };
 
     requestsList.unshift(newItem);
@@ -1576,7 +1576,7 @@
                         <tr><td class="py-1" style="text-indent: 20px;">NISN</td><td>: ${data.nisn}</td></tr>
                         <tr><td class="py-1" style="text-indent: 20px;">Tempat, Tanggal Lahir</td><td>: ${data.ttl}</td></tr>
                         <tr><td class="py-1" style="text-indent: 20px;">Nama Orang Tua</td><td>: ${data.ortu}</td></tr>
-                        <tr><td class="py-1" style="text-indent: 20px;">Alamat</td><td>: ${data.purpose}</td></tr>
+                        <tr><td class="py-1" style="text-indent: 20px;">Alamat</td><td>: ${data.alamat}</td></tr>
 
                     </table>
                     <p style="text-align:justify; margin-bottom:16px; font-size:12pt; text-indent: 40px; line-height: 2;">Benar nama tersebut di atas adalah lulusan SMA Negeri 1 Sabang Tahun Pelajaran ${letterSettings.academicYear},  yang pada tahun tersebut Pemerintah hanya menerbitkan IJAZAH dan tidak menerbitkan Surat Keterangan Hasil Ujian Nasional (SKHUN).</p>
