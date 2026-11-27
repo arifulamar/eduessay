@@ -1443,48 +1443,57 @@
         }
 
         function handleOfflineSubmit(e) {
-            e.preventDefault();
-            const serviceId = document.getElementById('offServiceId').value;
-            const status = document.getElementById('offStatus').value;
-            const randomNum = Math.floor(2000 + Math.random() * 7999);
-            const newCode = `TU-SMAN1SBG-2026-${randomNum}`;
+    e.preventDefault();
+    const getVal = (id) => (document.getElementById(id)?.value || '').trim();
 
-            letterSettings.lastAgenda += 1;
-            localStorage.setItem(SETTINGS_KEY, JSON.stringify(letterSettings));
-            populateSettingsForm();
+    const serviceId = getVal('offServiceId') || 'surat-aktif';
+    const status = getVal('offStatus') || 'Selesai / Siap Diambil';
+    const randomNum = Math.floor(2000 + Math.random() * 7999);
+    const newCode = `TU-SMAN1SBG-2026-${randomNum}`;
 
-            const newItem = {
-                code: newCode,
-                serviceId: serviceId,
-                serviceName: serviceId === 'surat-aktif' ? 'Surat Keterangan Aktif' : 'Surat Keterangan Tidak Menerbitkan SKHUN',
-                applicant: document.getElementById('offNama').value.trim(),
-                nisn: document.getElementById('offNisn').value.trim(),
-                kelasOrTahun: document.getElementById('offKelasTahun').value.trim(),
-                ttl: document.getElementById('offTtl').value.trim(),
-                ortu: document.getElementById('offOrtu').value.trim() || '-',
-                pekerjaanOrtu: document.getElementById('offPekerjaanOrtu').value.trim() || '-',
-                noIjazah: document.getElementById('offNoIjazah').value.trim() || '-',
-                purpose: document.getElementById('offKeperluan').value.trim(),
-                whatsapp: document.getElementById('offWhatsapp').value.trim(),
-                submittedAt: '19 Nov 2026 (Loket TU)',
-                agendaNo: `421.3/${letterSettings.lastAgenda}/SMAN1-SBG/2026`,
-                status: status,
-                step: statusToStep(status),
-                notes: 'Diinput langsung melalui Loket Pelayanan Offline Tata Usaha SMA Negeri 1 Sabang.',
-                alamat: (document.getElementById('offAlamat')?.value || '').trim() || '-'
-            
-            };
+    letterSettings.lastAgenda += 1;
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(letterSettings));
+    populateSettingsForm();
 
-            requestsList.unshift(newItem);
-            persistSyncedData();
-            pushToCloud(newItem, 'create');
-            refreshAllViews();
-            e.target.reset();
-            toggleOfflineServiceFields();
+    const nowStr = new Date().toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
 
-            showToast(`Permohonan loket berhasil dicatat dengan resi ${newCode}`, 'success');
-            openOfficialDoc(newCode);
-        }
+    const newItem = {
+        code: newCode,
+        serviceId: serviceId,
+        serviceName: serviceId === 'surat-aktif'
+            ? 'Surat Keterangan Aktif'
+            : 'Surat Keterangan Tidak Menerbitkan SKHUN',
+        applicant: getVal('offNama'),
+        nisn: getVal('offNisn'),
+        kelasOrTahun: getVal('offKelasTahun'),
+        ttl: getVal('offTtl'),
+        ortu: getVal('offOrtu') || '-',
+        pekerjaanOrtu: getVal('offPekerjaanOrtu') || '-',
+        noIjazah: getVal('offNoIjazah') || '-',
+        purpose: getVal('offKeperluan'),
+        whatsapp: getVal('offWhatsapp'),
+        submittedAt: nowStr,
+        agendaNo: `421.3/${letterSettings.lastAgenda}/SMAN1-SBG/2026`,
+        status: status,
+        step: statusToStep(status),
+        notes: 'Diinput langsung melalui Loket Pelayanan Offline Tata Usaha SMA Negeri 1 Sabang.',
+        alamat: getVal('offAlamat') || '-'
+    };
+
+    requestsList.unshift(newItem);
+    persistSyncedData();
+    pushToCloud(newItem, 'create');
+    refreshAllViews();
+    e.target.reset();
+    toggleOfflineServiceFields();
+
+    showToast(`Permohonan loket berhasil dicatat dengan resi ${newCode}`, 'success');
+    openOfficialDoc(newCode);
+}
 
         // --- 9. PENGATURAN KOP & PENANDATANGAN ---
         function populateSettingsForm() {
