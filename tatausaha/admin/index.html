@@ -50,11 +50,11 @@
             background-image: radial-gradient(rgba(250, 204, 21, 0.12) 1px, transparent 1px);
             background-size: 24px 24px;
         }
-        /* Pengaturan Cetak A4 Resmi */
+        /* Pengaturan Cetak F4 Resmi */
         @media print {
             @page {
-                size: A4 portrait;
-                margin: 14mm 18mm;
+                size: 215mm 330mm;
+                margin: 12mm 18mm 15mm 18mm;
             }
             body * {
                 visibility: hidden;
@@ -139,7 +139,7 @@
                 </div>
 
                 <div id="loginErrorMsg" class="hidden p-3 rounded-xl bg-rose-50 dark:bg-rose-500/15 border border-rose-200 dark:border-rose-500/30 text-xs text-rose-700 dark:text-rose-300 font-medium">
-                    Username atau kata sandi tidak sesuai. Gunakan akun demo di bawah ini.
+                    Username atau kata sandi tidak sesuai.
                 </div>
 
                 <button type="submit" class="w-full py-3.5 rounded-xl bg-blue-950 hover:bg-blue-900 dark:bg-primary-600 dark:hover:bg-primary-500 text-white font-bold shadow-lg flex items-center justify-center gap-2 transition">
@@ -147,22 +147,6 @@
                     <span>Masuk ke Dasbor Admin</span>
                 </button>
             </form>
-
-            <!-- Kotak Akun Demo & Masuk Cepat -->
-      <!--      <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 space-y-3">
-                <div class="flex items-center justify-between text-xs">
-                    <span class="font-bold text-slate-700 dark:text-slate-200">Akun Demo Staf TU:</span>
-                    <button type="button" onclick="fillDemoCredentials()" class="text-blue-900 dark:text-amber-400 font-semibold hover:underline">Isi Otomatis</button>
-                </div>
-                <div class="grid grid-cols-2 gap-2 text-[11px] font-mono bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200/70 dark:border-slate-700">
-                    <div><span class="text-slate-400 block font-sans">Username</span><strong class="text-slate-800 dark:text-slate-200">admin_tu</strong></div>
-                    <div><span class="text-slate-400 block font-sans">Password</span><strong class="text-slate-800 dark:text-slate-200">sman1sabang2026</strong></div>
-                </div>
-                <button type="button" onclick="quickDemoLogin()" class="w-full py-2.5 rounded-xl bg-amber-400/20 hover:bg-amber-400/30 text-amber-900 dark:text-amber-300 border border-amber-400/40 text-xs font-bold flex items-center justify-center gap-1.5 transition">
-                    <i data-lucide="zap" class="w-3.5 h-3.5"></i>
-                    <span>Masuk Cepat Demo (1 Klik)</span>
-                </button>
-            </div> -->
 
             <div class="flex items-center justify-between pt-1 text-xs text-slate-500">
                 <a href="../index.html" class="inline-flex items-center gap-1.5 hover:text-blue-900 dark:hover:text-amber-400 font-medium">
@@ -192,7 +176,7 @@
                 <div class="flex items-center justify-between gap-2 pb-4 border-b border-blue-900">
                     <div class="flex items-center gap-3">
                         <div class="w-11 h-11 rounded-2xl bg-white/10 p-1.5 border border-amber-400/50 flex items-center justify-center shrink-0">
-                            <img src="logosman1sabang.png" alt="Logo SMAN 1 Sabang" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <img src="../logosman1sabang.png" alt="Logo SMAN 1 Sabang" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                             <svg style="display:none;" viewBox="0 0 120 132" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M60 4 L112 24 L106 84 C102 106 82 120 60 128 C38 120 18 106 14 84 L8 24 Z" fill="#1e247e" stroke="#ffffff" stroke-width="4"/>
                                 <path d="M26 32 L58 36 L58 76 L26 72 Z" fill="#ffffff" stroke="#111827" stroke-width="2"/>
@@ -467,7 +451,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
                             <div class="md:col-span-5 relative">
                                 <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-                                <input type="text" id="filterSearchInput" oninput="renderRequestsTable()" placeholder="Cari Nama, NISN, atau Resi (TU-SMAN1SBG-...)" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs sm:text-sm outline-none focus:border-blue-800">
+                                <input type="text" id="filterSearchInput" oninput="renderRequestsTable()" placeholder="Cari Nama, NISN, Alamat, atau Resi..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs sm:text-sm outline-none focus:border-blue-800">
                             </div>
                             <div class="md:col-span-4">
                                 <select id="filterServiceSelect" onchange="renderRequestsTable()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs sm:text-sm outline-none focus:border-blue-800">
@@ -495,7 +479,7 @@
                                 <thead>
                                     <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                         <th class="py-3.5 px-4">No. Resi & Waktu</th>
-                                        <th class="py-3.5 px-4">Pemohon & NISN</th>
+                                        <th class="py-3.5 px-4">Pemohon, NISN & Alamat</th>
                                         <th class="py-3.5 px-4">Jenis Surat & Keperluan</th>
                                         <th class="py-3.5 px-4">No. Surat Resmi</th>
                                         <th class="py-3.5 px-4">Status</th>
@@ -566,7 +550,7 @@
                             <div id="offFieldsAktif" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Orang Tua / Wali</label>
-                                    <input type="text" id="offOrtu" placeholder="Nama lengkap Ayah/Ibu/Wali" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                                    <input type="text" id="offOrtuAktif" placeholder="Nama lengkap Ayah/Ibu/Wali" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
                                 </div>
                                 <div>
                                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Pekerjaan Orang Tua</label>
@@ -575,20 +559,31 @@
                             </div>
 
                             <!-- Field Khusus Non-SKHUN -->
-                            <div id="offFieldsNonSkhun" class="hidden">
-                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Orang Tua </label>
-                                <input type="text" id="offOrtu" placeholder="Contoh: Gibran" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono outline-none focus:border-blue-800">
+                            <div id="offFieldsNonSkhun" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Orang Tua / Wali</label>
+                                    <input type="text" id="offOrtuNonSkhun" placeholder="Nama lengkap Ayah / Wali" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nomor Seri Ijazah</label>
+                                    <input type="text" id="offNoIjazah" placeholder="Contoh: M-SMA/K13-3/06/0041289" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono outline-none focus:border-blue-800">
+                                </div>
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Alamat</label>
-                                    <input type="text" id="offAlamat" required placeholder="Contoh: Bakaran Batu" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Alamat Lengkap</label>
+                                    <input type="text" id="offAlamat" required placeholder="Contoh: Gampong Ie Meulee, Sabang" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
                                 </div>
                                 <div>
                                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">No. WhatsApp Pemohon</label>
                                     <input type="tel" id="offWhatsapp" required placeholder="Contoh: 081360951234" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
                                 </div>
+                            </div>
+
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Keperluan Surat</label>
+                                <input type="text" id="offKeperluan" required placeholder="Contoh: Tunjangan Orang Tua / Seleksi TNI-Polri / Melamar Kerja" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
                             </div>
 
                             <div class="pt-3 flex justify-end">
@@ -608,7 +603,7 @@
                     <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-6">
                         <div class="border-b border-slate-100 dark:border-slate-800 pb-4">
                             <h3 class="font-display font-extrabold text-xl text-slate-900 dark:text-white">Pengaturan Kop & Penandatangan Surat</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Konfigurasi pejabat penandatangan dan nomor agenda otomatis pada lembar cetak A4 SMA Negeri 1 Sabang.</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Konfigurasi pejabat penandatangan dan nomor agenda otomatis pada lembar cetak F4 SMA Negeri 1 Sabang.</p>
                         </div>
 
                         <form onsubmit="saveLetterSettings(event)" class="space-y-4 text-xs sm:text-sm">
@@ -647,7 +642,7 @@
 
                             <div class="pt-3 flex flex-wrap items-center justify-between gap-3">
                                 <button type="button" onclick="resetDemoDatabase()" class="px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30 text-xs font-bold transition">
-                                    Reset Data Demo Awal
+                                    Reset Cache & Tarik Sheet
                                 </button>
                                 <button type="submit" class="px-6 py-3 rounded-2xl bg-blue-950 hover:bg-blue-900 dark:bg-primary-600 text-white font-bold shadow-md transition">
                                     Simpan Pengaturan Surat
@@ -721,7 +716,7 @@
                 <div id="editFieldsAktif" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Orang Tua / Wali</label>
-                        <input type="text" id="editReqOrtu" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                        <input type="text" id="editReqOrtuAktif" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pekerjaan Orang Tua</label>
@@ -729,20 +724,31 @@
                     </div>
                 </div>
 
-                <div id="editFieldsNonSkhun" class="hidden">
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Orang Tua/Wali</label>
-                    <input type="text" id="editReqOrtu" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono outline-none focus:border-blue-800">
+                <div id="editFieldsNonSkhun" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Orang Tua / Wali</label>
+                        <input type="text" id="editReqOrtuNonSkhun" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Seri Ijazah</label>
+                        <input type="text" id="editReqNoIjazah" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono outline-none focus:border-blue-800">
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Alamat</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Alamat Lengkap</label>
                         <input type="text" id="editReqAlamat" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. WhatsApp Pemohon</label>
                         <input type="text" id="editReqWhatsapp" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
                     </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keperluan Surat</label>
+                    <input type="text" id="editReqPurpose" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-blue-800">
                 </div>
 
                 <div>
@@ -770,7 +776,7 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODAL 2: PRATINJAU & CETAK SURAT RESMI A4 SMAN 1 SABANG               -->
+    <!-- MODAL 2: PRATINJAU & CETAK SURAT RESMI F4 SMAN 1 SABANG               -->
     <!-- ===================================================================== -->
     <div id="modalDocumentViewer" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm overflow-y-auto">
         <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-3xl w-full p-6 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 my-auto">
@@ -790,7 +796,7 @@
                 </div>
             </div>
 
-            <!-- Lembar Cetak Resmi A4 -->
+            <!-- Lembar Cetak Resmi F4 -->
             <div id="printDocumentArea" class="bg-white text-slate-900 p-7 sm:p-10 rounded-2xl border border-slate-300 text-sm leading-relaxed font-serif">
                 <!-- Dirender via JS -->
             </div>
@@ -800,12 +806,20 @@
     <!-- ===================================================================== -->
     <!-- JAVASCRIPT LOGIC                                                      -->
     <!-- ===================================================================== -->
-   <script>
+    <script>
         // --- KONEKSI KE DATABASE GOOGLE SHEETS ---
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwExI47tNv9OFN8jlJ7IDnhZWjF10ygJlFzji9bciRxiwcuQILNQoK7GFK_pSO4tbPe/exec';
 
         function isCloudConfigured() {
             return GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL.startsWith('https://script.google.com/');
+        }
+
+        function formatIndonesianDate(dateObj = new Date()) {
+            return dateObj.toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
         }
 
         // Tarik data terbaru dari Google Sheets saat Admin dibuka & tiap 20 detik
@@ -883,11 +897,12 @@
                 noIjazah: '',
                 purpose: 'Tunjangan Orang Tua (PNS / TNI / Polri)',
                 whatsapp: '081269112233',
-                submittedAt: '18 Nov 2026, 09:15 WIB',
+                submittedAt: '18 November 2026',
                 agendaNo: '421.3/145/SMAN1-SBG/2026',
                 status: 'Selesai / Siap Diambil',
                 step: 4,
-                notes: 'Data siswa terverifikasi aktif di Dapodik SMAN 1 Sabang. Surat telah disahkan dan siap dicetak.'
+                notes: 'Data siswa terverifikasi aktif di Dapodik SMAN 1 Sabang. Surat telah disahkan dan siap dicetak.',
+                alamat: 'Gampong Ie Meulee, Kec. Sukajaya, Sabang'
             },
             {
                 code: 'TU-SMAN1SBG-2026-1043',
@@ -897,54 +912,17 @@
                 nisn: '0051294055',
                 kelasOrTahun: 'Tahun Lulus 2023',
                 ttl: 'Sabang, 22 Maret 2005',
-                ortu: '',
+                ortu: 'Teuku Bahagia',
                 pekerjaanOrtu: '',
                 noIjazah: 'M-SMA/K13-3/06/0041289',
                 purpose: 'Pendaftaran Seleksi TNI / Polri',
                 whatsapp: '085277889900',
-                submittedAt: '19 Nov 2026, 08:40 WIB',
+                submittedAt: '19 November 2026',
                 agendaNo: '421.3/146/SMAN1-SBG/2026',
                 status: 'Selesai / Siap Diambil',
                 step: 4,
-                notes: 'Nomor Seri Ijazah cocok dengan Buku Induk Alumni SMAN 1 Sabang Tahun 2023. Surat siap dicetak.'
-            },
-            {
-                code: 'TU-SMAN1SBG-2026-1044',
-                serviceId: 'surat-aktif',
-                serviceName: 'Surat Keterangan Aktif',
-                applicant: 'Nabila Putri Syahira',
-                nisn: '0093120488',
-                kelasOrTahun: 'XI-IPS-2',
-                ttl: 'Sabang, 05 November 2009',
-                ortu: 'Muhammad Yusuf',
-                pekerjaanOrtu: 'TNI Angkatan Laut',
-                noIjazah: '',
-                purpose: 'Kebutuhan BPJS Kesehatan',
-                whatsapp: '081360958811',
-                submittedAt: '19 Nov 2026, 10:12 WIB',
-                agendaNo: '421.3/147/SMAN1-SBG/2026',
-                status: 'Diproses Staf TU',
-                step: 3,
-                notes: 'Berkas kartu keluarga dan NISN telah sesuai. Menunggu penandatanganan Kepala Sekolah.'
-            },
-            {
-                code: 'TU-SMAN1SBG-2026-1045',
-                serviceId: 'surat-non-skhun',
-                serviceName: 'Surat Keterangan Tidak Menerbitkan SKHUN',
-                applicant: 'Fajar Maulana',
-                nisn: '0048871290',
-                kelasOrTahun: 'Tahun Lulus 2022',
-                ttl: 'Banda Aceh, 11 Januari 2004',
-                ortu: '',
-                pekerjaanOrtu: '',
-                noIjazah: 'M-SMA/K13-3/06/0039812',
-                purpose: 'Melamar Pekerjaan',
-                whatsapp: '082274119022',
-                submittedAt: '19 Nov 2026, 14:20 WIB',
-                agendaNo: '421.3/148/SMAN1-SBG/2026',
-                status: 'Menunggu Verifikasi',
-                step: 1,
-                notes: 'Permohonan baru masuk melalui Portal Online Tata Usaha SMAN 1 Sabang.'
+                notes: 'Nomor Seri Ijazah cocok dengan Buku Induk Alumni SMAN 1 Sabang Tahun 2023. Surat siap dicetak.',
+                alamat: 'Gampong Kuta Ateuh, Kec. Sukakarya, Sabang'
             }
         ];
 
@@ -957,10 +935,6 @@
             const style = document.createElement('style');
             style.id = 'f4-dynamic-style';
             style.textContent = `
-                @page {
-                    size: 215mm 330mm;
-                    margin: 12mm 18mm 15mm 18mm;
-                }
                 #printDocumentArea.f4-sheet {
                     width: 215mm !important;
                     min-height: 330mm !important;
@@ -1055,12 +1029,12 @@
                 noIjazah: String(item.noIjazah || '-'),
                 purpose: String(item.purpose || '-'),
                 whatsapp: String(item.whatsapp || '081360951234'),
-                submittedAt: String(item.submittedAt || '19 Nov 2026'),
+                submittedAt: String(item.submittedAt || formatIndonesianDate()),
                 agendaNo: String(item.agendaNo || '421.3/149/SMAN1-SBG/2026'),
                 status: status,
                 step: statusToStep(status),
                 notes: String(item.notes || ''),
-                alamat: String(item.alamat || '-'),
+                alamat: String(item.alamat || '-')
             };
         }
 
@@ -1104,19 +1078,6 @@
                 document.getElementById('loginScreen').classList.remove('hidden');
                 document.getElementById('adminDashboard').classList.add('hidden');
             }
-        }
-
-        function fillDemoCredentials() {
-            document.getElementById('loginUsername').value = 'admin_tu';
-            document.getElementById('loginPassword').value = 'sman1sabang2026';
-            document.getElementById('loginErrorMsg').classList.add('hidden');
-        }
-
-        function quickDemoLogin() {
-            fillDemoCredentials();
-            sessionStorage.setItem(AUTH_KEY, 'true');
-            checkAuthState();
-            showToast('Selamat datang kembali, Staf Tata Usaha SMAN 1 Sabang!', 'success');
         }
 
         function handleAdminLogin(e) {
@@ -1214,7 +1175,7 @@
                             ${getStatusBadgeHtml(r.status)}
                         </div>
                         <p class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">${r.applicant} <span class="font-normal text-slate-500">(${r.kelasOrTahun})</span></p>
-                        <p class="text-xs text-slate-500">${r.serviceName} • ${r.purpose}</p>
+                        <p class="text-xs text-slate-500">${r.serviceName} • ${r.alamat && r.alamat !== '-' ? r.alamat : r.purpose}</p>
                     </div>
                     <div class="flex items-center gap-2">
                         <button onclick="openManageModal('${r.code}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-blue-950 hover:text-white dark:bg-slate-800 dark:hover:bg-primary-600 text-xs font-semibold transition">
@@ -1254,7 +1215,8 @@
                 const matchSearch = !q ||
                     r.applicant.toLowerCase().includes(q) ||
                     r.nisn.toLowerCase().includes(q) ||
-                    r.code.toLowerCase().includes(q);
+                    r.code.toLowerCase().includes(q) ||
+                    (r.alamat && r.alamat.toLowerCase().includes(q));
                 const matchService = serviceFilter === 'ALL' || r.serviceId === serviceFilter;
                 const matchStatus = statusFilter === 'ALL' || r.status === statusFilter;
                 return matchSearch && matchService && matchStatus;
@@ -1281,6 +1243,7 @@
                     <td class="py-3.5 px-4 align-top">
                         <p class="font-bold text-slate-900 dark:text-white">${r.applicant}</p>
                         <p class="text-[11px] font-mono text-slate-500">NISN: ${r.nisn} • ${r.kelasOrTahun}</p>
+                        ${r.alamat && r.alamat !== '-' ? `<p class="text-[11px] text-slate-400 mt-0.5">Alamat: ${r.alamat}</p>` : ''}
                     </td>
                     <td class="py-3.5 px-4 align-top">
                         <span class="inline-block font-semibold text-slate-800 dark:text-slate-200">${r.serviceName}</span>
@@ -1340,14 +1303,14 @@
             document.getElementById('editReqNisn').value = item.nisn;
             document.getElementById('editReqTtl').value = item.ttl;
             document.getElementById('editReqKelasTahun').value = item.kelasOrTahun;
-            document.getElementById('editReqOrtu').value = item.ortu;
-            document.getElementById('editReqPekerjaanOrtu').value = item.pekerjaanOrtu;
-            document.getElementById('editReqNoIjazah').value = item.noIjazah;
+            document.getElementById('editReqOrtuAktif').value = item.ortu && item.ortu !== '-' ? item.ortu : '';
+            document.getElementById('editReqOrtuNonSkhun').value = item.ortu && item.ortu !== '-' ? item.ortu : '';
+            document.getElementById('editReqPekerjaanOrtu').value = item.pekerjaanOrtu && item.pekerjaanOrtu !== '-' ? item.pekerjaanOrtu : '';
+            document.getElementById('editReqNoIjazah').value = item.noIjazah && item.noIjazah !== '-' ? item.noIjazah : '';
+            document.getElementById('editReqAlamat').value = item.alamat && item.alamat !== '-' ? item.alamat : '';
             document.getElementById('editReqPurpose').value = item.purpose;
             document.getElementById('editReqWhatsapp').value = item.whatsapp;
             document.getElementById('editReqNotes').value = item.notes;
-            document.getElementById('editReqAlamat').value = item.notes;
-            
 
             if (item.serviceId === 'surat-aktif') {
                 document.getElementById('editFieldsAktif').classList.remove('hidden');
@@ -1366,9 +1329,14 @@
             const idx = requestsList.findIndex(r => r.code === code);
             if (idx === -1) return;
 
+            const currentItem = requestsList[idx];
             const newStatus = document.getElementById('editReqStatus').value;
+            const ortuValue = currentItem.serviceId === 'surat-aktif'
+                ? document.getElementById('editReqOrtuAktif').value.trim()
+                : document.getElementById('editReqOrtuNonSkhun').value.trim();
+
             requestsList[idx] = {
-                ...requestsList[idx],
+                ...currentItem,
                 status: newStatus,
                 step: statusToStep(newStatus),
                 agendaNo: document.getElementById('editReqAgendaNo').value.trim(),
@@ -1376,13 +1344,13 @@
                 nisn: document.getElementById('editReqNisn').value.trim(),
                 ttl: document.getElementById('editReqTtl').value.trim(),
                 kelasOrTahun: document.getElementById('editReqKelasTahun').value.trim(),
-                ortu: document.getElementById('editReqOrtu').value.trim(),
-                pekerjaanOrtu: document.getElementById('editReqPekerjaanOrtu').value.trim(),
-                noIjazah: document.getElementById('editReqNoIjazah').value.trim(),
+                ortu: ortuValue || '-',
+                pekerjaanOrtu: document.getElementById('editReqPekerjaanOrtu').value.trim() || '-',
+                noIjazah: document.getElementById('editReqNoIjazah').value.trim() || '-',
+                alamat: document.getElementById('editReqAlamat').value.trim() || '-',
                 purpose: document.getElementById('editReqPurpose').value.trim(),
                 whatsapp: document.getElementById('editReqWhatsapp').value.trim(),
                 notes: document.getElementById('editReqNotes').value.trim()
-                alamat: document.getElementById('editReqAlamat').value.trim()
             };
 
             persistSyncedData();
@@ -1446,57 +1414,55 @@
         }
 
         function handleOfflineSubmit(e) {
-    e.preventDefault();
-    const getVal = (id) => (document.getElementById(id)?.value || '').trim();
+            e.preventDefault();
+            const getVal = (id) => (document.getElementById(id)?.value || '').trim();
 
-    const serviceId = getVal('offServiceId') || 'surat-aktif';
-    const status = getVal('offStatus') || 'Selesai / Siap Diambil';
-    const randomNum = Math.floor(2000 + Math.random() * 7999);
-    const newCode = `TU-SMAN1SBG-2026-${randomNum}`;
+            const serviceId = getVal('offServiceId') || 'surat-aktif';
+            const status = getVal('offStatus') || 'Selesai / Siap Diambil';
+            const randomNum = Math.floor(2000 + Math.random() * 7999);
+            const newCode = `TU-SMAN1SBG-2026-${randomNum}`;
 
-    letterSettings.lastAgenda += 1;
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(letterSettings));
-    populateSettingsForm();
+            letterSettings.lastAgenda += 1;
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(letterSettings));
+            populateSettingsForm();
 
-    const nowStr = new Date().toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    });
+            const ortuVal = serviceId === 'surat-aktif'
+                ? getVal('offOrtuAktif')
+                : getVal('offOrtuNonSkhun');
 
-    const newItem = {
-        code: newCode,
-        serviceId: serviceId,
-        serviceName: serviceId === 'surat-aktif'
-            ? 'Surat Keterangan Aktif'
-            : 'Surat Keterangan Tidak Menerbitkan SKHUN',
-        applicant: getVal('offNama'),
-        nisn: getVal('offNisn'),
-        kelasOrTahun: getVal('offKelasTahun'),
-        ttl: getVal('offTtl'),
-        ortu: getVal('offOrtu'),
-        pekerjaanOrtu: getVal('offPekerjaanOrtu') || '-',
-        noIjazah: getVal('offNoIjazah') || '-',
-        purpose: getVal('offKeperluan'),
-        whatsapp: getVal('offWhatsapp'),
-        submittedAt: nowStr,
-        agendaNo: `421.3/${letterSettings.lastAgenda}/SMAN1-SBG/2026`,
-        status: status,
-        step: statusToStep(status),
-        notes: 'Diinput langsung melalui Loket Pelayanan Offline Tata Usaha SMA Negeri 1 Sabang.',
-        alamat: getVal('offAlamat'),
-    };
+            const newItem = {
+                code: newCode,
+                serviceId: serviceId,
+                serviceName: serviceId === 'surat-aktif'
+                    ? 'Surat Keterangan Aktif'
+                    : 'Surat Keterangan Tidak Menerbitkan SKHUN',
+                applicant: getVal('offNama'),
+                nisn: getVal('offNisn'),
+                kelasOrTahun: getVal('offKelasTahun'),
+                ttl: getVal('offTtl'),
+                ortu: ortuVal || '-',
+                pekerjaanOrtu: getVal('offPekerjaanOrtu') || '-',
+                noIjazah: getVal('offNoIjazah') || '-',
+                purpose: getVal('offKeperluan'),
+                whatsapp: getVal('offWhatsapp'),
+                submittedAt: formatIndonesianDate(),
+                agendaNo: `421.3/${letterSettings.lastAgenda}/SMAN1-SBG/2026`,
+                status: status,
+                step: statusToStep(status),
+                notes: 'Diinput langsung melalui Loket Pelayanan Offline Tata Usaha SMA Negeri 1 Sabang.',
+                alamat: getVal('offAlamat') || '-'
+            };
 
-    requestsList.unshift(newItem);
-    persistSyncedData();
-    pushToCloud(newItem, 'create');
-    refreshAllViews();
-    e.target.reset();
-    toggleOfflineServiceFields();
+            requestsList.unshift(newItem);
+            persistSyncedData();
+            pushToCloud(newItem, 'create');
+            refreshAllViews();
+            e.target.reset();
+            toggleOfflineServiceFields();
 
-    showToast(`Permohonan loket berhasil dicatat dengan resi ${newCode}`, 'success');
-    openOfficialDoc(newCode);
-}
+            showToast(`Permohonan loket berhasil dicatat dengan resi ${newCode}`, 'success');
+            openOfficialDoc(newCode);
+        }
 
         // --- 9. PENGATURAN KOP & PENANDATANGAN ---
         function populateSettingsForm() {
@@ -1528,8 +1494,8 @@
             if (!data) return;
 
             const isAktif = data.serviceId === 'surat-aktif';
+            const tanggalSurat = formatIndonesianDate();
 
-            // Sesuaikan lebar dialog modalDocumentViewer agar muat kertas F4 dengan rapi
             const modalViewer = document.getElementById('modalDocumentViewer');
             if (modalViewer) {
                 const dialogBox = modalViewer.firstElementChild;
@@ -1545,10 +1511,10 @@
                     <p style="text-align:center; margin-bottom:16px; font-size:12pt;">Nomor : ${data.agendaNo}</p>
                 </div>
                 <p style="text-align:justify; margin-bottom:16px; font-size:12pt;">Saya yang bertanda tangan di bawah ini:</p>
-        <table style="width:100%; margin-left:20px; margin-bottom:16px; font-size:12pt;">
-          <tr><td class="py-1 w-48" style="text-indent: 20px;">Nama</td><td>: Helmi, S.Pd, I</td></tr>
-          <tr><td class="py-1" style="text-indent: 20px;">Jabatan</td><td>: Kepala Sekolah</td></tr>
-        </table>
+                <table style="width:100%; margin-left:20px; margin-bottom:16px; font-size:12pt;">
+                    <tr><td class="py-1 w-48" style="text-indent: 20px;">Nama</td><td>: ${letterSettings.kepsekName}</td></tr>
+                    <tr><td class="py-1" style="text-indent: 20px;">Jabatan</td><td>: Kepala Sekolah</td></tr>
+                </table>
                 <div class="text-xs sm:text-sm space-y-4 mb-6 text-justify">
                     <p style="text-align:justify; margin-bottom:16px; font-size:12pt;">Dengan ini menerangkan bahwa:</p>
                     <table style="width:100%; margin-left:20px; margin-bottom:16px; font-size:12pt;">
@@ -1556,10 +1522,9 @@
                         <tr><td class="py-1" style="text-indent: 20px;">NISN</td><td>: ${data.nisn}</td></tr>
                         <tr><td class="py-1" style="text-indent: 20px;">Tempat, Tanggal Lahir</td><td>: ${data.ttl}</td></tr>
                         <tr><td class="py-1" style="text-indent: 20px;">Kelas / Jurusan</td><td>: ${data.kelasOrTahun}</td></tr>
-
+                        ${data.alamat && data.alamat !== '-' ? `<tr><td class="py-1" style="text-indent: 20px;">Alamat</td><td>: ${data.alamat}</td></tr>` : ''}
                     </table>
                     <p style="text-align:justify; margin-bottom:16px; font-size:12pt; text-indent: 40px; line-height: 2;">Benar peserta didik tersebut adalah siswa SMA Negeri 1 Sabang Tahun Pelajaran ${letterSettings.academicYear}, dan masih <strong>Aktif</strong> sampai sekarang.</p>
-                    
                     <p style="text-align:justify; margin-bottom:16px; font-size:12pt; text-indent: 40px; line-height: 2;">Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya dan atas kerjasamanya kami ucapkan terima kasih.</p>
                 </div>
             ` : `
@@ -1567,11 +1532,11 @@
                     <h3 class="text-base font-bold uppercase underline tracking-wide">SURAT KETERANGAN</h3>
                     <p style="text-align:center; margin-bottom:16px; font-size:12pt;">Nomor : ${data.agendaNo}</p>
                 </div>
-<p style="text-align:justify; margin-bottom:16px; font-size:12pt;">Saya yang bertanda tangan di bawah ini:</p>
-        <table style="width:100%; margin-left:20px; margin-bottom:16px; font-size:12pt;">
-          <tr><td class="py-1 w-48" style="text-indent: 20px;">Nama</td><td>: Helmi, S.Pd, I</td></tr>
-          <tr><td class="py-1" style="text-indent: 20px;">Jabatan</td><td>: Kepala Sekolah</td></tr>
-        </table>
+                <p style="text-align:justify; margin-bottom:16px; font-size:12pt;">Saya yang bertanda tangan di bawah ini:</p>
+                <table style="width:100%; margin-left:20px; margin-bottom:16px; font-size:12pt;">
+                    <tr><td class="py-1 w-48" style="text-indent: 20px;">Nama</td><td>: ${letterSettings.kepsekName}</td></tr>
+                    <tr><td class="py-1" style="text-indent: 20px;">Jabatan</td><td>: Kepala Sekolah</td></tr>
+                </table>
                 <div class="text-xs sm:text-sm space-y-4 mb-6 text-justify">
                     <p style="text-align:justify; margin-bottom:16px; font-size:12pt;">Dengan ini menerangkan bahwa:</p>
                     <table style="width:100%; margin-left:20px; margin-bottom:16px; font-size:12pt;">
@@ -1580,10 +1545,8 @@
                         <tr><td class="py-1" style="text-indent: 20px;">Tempat, Tanggal Lahir</td><td>: ${data.ttl}</td></tr>
                         <tr><td class="py-1" style="text-indent: 20px;">Nama Orang Tua</td><td>: ${data.ortu}</td></tr>
                         <tr><td class="py-1" style="text-indent: 20px;">Alamat</td><td>: ${data.alamat}</td></tr>
-
                     </table>
-                    <p style="text-align:justify; margin-bottom:16px; font-size:12pt; text-indent: 40px; line-height: 2;">Benar nama tersebut di atas adalah lulusan SMA Negeri 1 Sabang Tahun Pelajaran ${letterSettings.academicYear},  yang pada tahun tersebut Pemerintah hanya menerbitkan IJAZAH dan tidak menerbitkan Surat Keterangan Hasil Ujian Nasional (SKHUN).</p>
-                    
+                    <p style="text-align:justify; margin-bottom:16px; font-size:12pt; text-indent: 40px; line-height: 2;">Benar nama tersebut di atas adalah lulusan SMA Negeri 1 Sabang Tahun Pelajaran ${letterSettings.academicYear}, yang pada tahun tersebut Pemerintah hanya menerbitkan IJAZAH dan tidak menerbitkan Surat Keterangan Hasil Ujian Nasional (SKHUN).</p>
                     <p style="text-align:justify; margin-bottom:16px; font-size:12pt; text-indent: 40px; line-height: 2;">Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya dan atas kerjasamanya kami ucapkan terima kasih.</p>
                 </div>
             `;
@@ -1591,11 +1554,10 @@
             const area = document.getElementById('printDocumentArea');
             area.classList.add('f4-sheet');
             area.innerHTML = `
-                <!-- KOP SURAT RESMI: KIRI LOGO PEMERINTAH ACEH | TENGAH TEKS DINAS & SEKOLAH | KANAN LOGO SMAN 1 SABANG -->
+                <!-- KOP SURAT RESMI -->
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 8px;">
-                    <!-- Logo Kiri: Pemerintah Aceh (Pancacita) -->
                     <div style="width: 105px; height: 115px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                        <img src="pancacita.png" alt="Logo Pemerintah Aceh"
+                        <img src="../pancacita.png" alt="Logo Pemerintah Aceh"
                              style="width: 105px; height: 115px; object-fit: contain;"
                              onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='pancacita.png';}else{this.style.display='none';this.nextElementSibling.style.display='block';}">
                         <svg style="display:none; width: 72px; height: 84px;" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
@@ -1604,19 +1566,11 @@
                             <path d="M188 162 L145 144 L114 158 L114 195 L190 195 Z" fill="#0b7a3e"/>
                             <rect x="92" y="65" width="16" height="105" fill="#0b7a3e"/>
                             <rect x="97" y="72" width="6" height="92" fill="#facc15"/>
-                            <path d="M36 58 L100 32 L164 58" fill="none" stroke="#eab308" stroke-width="5"/>
-                            <line x1="36" y1="58" x2="26" y2="122" stroke="#eab308" stroke-width="3"/>
-                            <line x1="36" y1="58" x2="46" y2="122" stroke="#eab308" stroke-width="3"/>
-                            <polygon points="22,122 50,122 45,134 27,134" fill="#eab308"/>
-                            <line x1="164" y1="58" x2="154" y2="122" stroke="#eab308" stroke-width="3"/>
-                            <line x1="164" y1="58" x2="174" y2="122" stroke="#eab308" stroke-width="3"/>
-                            <polygon points="150,122 178,122 173,134 155,134" fill="#eab308"/>
                             <rect x="10" y="178" width="180" height="18" fill="#0b7a3e"/>
                             <text x="100" y="191" font-family="Arial" font-size="13" font-weight="bold" fill="#facc15" text-anchor="middle">PANCACITA</text>
                         </svg>
                     </div>
 
-                    <!-- Teks Kop Tengah -->
                     <div style="flex: 1; text-align: center; color: #000000; line-height: 1.25;">
                         <div style="font-family: Arial, Helvetica, sans-serif; font-size: 16pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;">
                             DINAS PENDIDIKAN
@@ -1635,27 +1589,17 @@
                         </div>
                     </div>
 
-                    <!-- Logo Kanan: SMA Negeri 1 Sabang -->
                     <div style="width: 105px; height: 115px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                        <img src="logosman1sabang.png" alt="Logo SMAN 1 Sabang"
+                        <img src="../logosman1sabang.png" alt="Logo SMAN 1 Sabang"
                              style="width: 115px; height: 125px; object-fit: contain;"
-                             onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='logosman1sabang.png';}else if(this.dataset.tried==='1'){this.dataset.tried='2';this.src='logosman1sabang.jfif';}else{this.style.display='none';this.nextElementSibling.style.display='block';}">
+                             onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='logosman1sabang.png';}else{this.style.display='none';this.nextElementSibling.style.display='block';}">
                         <svg style="display:none; width: 74px; height: 84px;" viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg">
                             <path d="M60 6 L108 26 C108 78 94 108 60 126 C26 108 12 78 12 26 Z" fill="#1e298b" stroke="#111827" stroke-width="4"/>
-                            <path d="M26 32 L58 36 L58 76 L26 72 Z" fill="#ffffff" stroke="#111827" stroke-width="2"/>
-                            <path d="M94 32 L62 36 L62 76 L94 72 Z" fill="#ffffff" stroke="#111827" stroke-width="2"/>
-                            <path d="M40 42 C48 40 54 48 64 46 C74 44 82 52 78 62 C72 70 58 68 50 60 C44 54 38 48 40 42 Z" fill="#16a34a" stroke="#065f46" stroke-width="1.5"/>
-                            <line x1="82" y1="30" x2="54" y2="68" stroke="#facc15" stroke-width="3.5" stroke-linecap="round"/>
                             <text x="60" y="90" text-anchor="middle" fill="#ffffff" font-size="7.5" font-weight="bold" font-family="sans-serif">SMA NEGERI 1 SABANG</text>
-                            <circle cx="44" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
-                            <circle cx="54" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
-                            <circle cx="64" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
-                            <circle cx="74" cy="100" r="4.5" fill="none" stroke="#facc15" stroke-width="2"/>
                         </svg>
                     </div>
                 </div>
 
-                <!-- Garis Hitam Tebal Pemisah Kop (Sesuai Contoh) -->
                 <div style="border-bottom: 5px solid #000000; margin-bottom: 22px;"></div>
 
                 ${bodyHtml}
@@ -1684,7 +1628,7 @@
                     </div>
 
                     <div class="relative text-xs font-serif text-left w-64">
-                        <p style="margin-bottom:10px; font-size:12pt;">Sabang, 19 November 2026</p>
+                        <p style="margin-bottom:10px; font-size:12pt;">Sabang, ${tanggalSurat}</p>
                         <p class="font-bold mb-16" style="margin-bottom:100px; font-size:12pt;">Kepala SMA Negeri 1 Sabang,</p>
                         <p class="font-bold underline" style="margin-bottom:10px; font-size:12pt;">${letterSettings.kepsekName}</p>
                         <p style="margin-bottom:10px; font-size:12pt;">${letterSettings.kepsekRank}</p>
@@ -1698,9 +1642,9 @@
 
         // --- 11. EXPORT CSV & JSON ---
         function exportDataCSV() {
-            const headers = ['No Resi', 'Tanggal Pengajuan', 'Jenis Surat', 'Nama Pemohon', 'NISN', 'Kelas/Tahun Lulus', 'Keperluan', 'WhatsApp', 'No Surat Resmi', 'Status'];
+            const headers = ['No Resi', 'Tanggal Pengajuan', 'Jenis Surat', 'Nama Pemohon', 'NISN', 'Kelas/Tahun Lulus', 'Alamat', 'Keperluan', 'WhatsApp', 'No Surat Resmi', 'Status'];
             const rows = requestsList.map(r => [
-                r.code, r.submittedAt, r.serviceName, r.applicant, `'${r.nisn}`, r.kelasOrTahun, r.purpose, `'${r.whatsapp}`, r.agendaNo, r.status
+                r.code, r.submittedAt, r.serviceName, r.applicant, `'${r.nisn}`, r.kelasOrTahun, r.alamat, r.purpose, `'${r.whatsapp}`, r.agendaNo, r.status
             ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(','));
 
             const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows].join('\n');
@@ -1782,7 +1726,7 @@
             setInterval(updateAdminClockWIB, 30000);
             lucide.createIcons();
             syncFromCloud();
-            setInterval(syncFromCloud, 20000); // Auto-refresh antrean tiap 20 detik
+            setInterval(syncFromCloud, 20000);
         });
     </script>
 
