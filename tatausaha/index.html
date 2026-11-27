@@ -71,12 +71,11 @@
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 antialiased transition-colors duration-200">
 
-  <!-- NAVBAR -->
   <!-- NAVBAR RESPONSIF & PROPORSIONAL -->
   <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 no-print">
     <div class="max-w-6xl mx-auto px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4">
       
-      <!-- Logo & Judul Instansi (Anti-Terpotong di Mobile) -->
+      <!-- Logo & Judul Instansi -->
       <a href="#" class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 group">
         <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-800 p-1 flex items-center justify-center shadow-sm border border-slate-200 dark:border-slate-700 shrink-0">
           <img src="logosman1sabang.png" alt="Logo SMAN 1 Sabang" class="w-full h-full object-contain"
@@ -96,7 +95,7 @@
         </div>
       </a>
 
-      <!-- Menu Aksi (Single-Line & Proporsional) -->
+      <!-- Menu Aksi -->
       <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
         <span id="cloudStatusBadge" class="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 whitespace-nowrap">
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Online Cloud
@@ -122,6 +121,7 @@
 
     </div>
   </header>
+
   <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-12 no-print">
 
     <!-- HERO SECTION -->
@@ -239,7 +239,7 @@
         <div id="pubFieldsAktif" class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-bold mb-1.5">Nama Orang Tua / Wali *</label>
-            <input type="text" id="pubOrtu" placeholder="Contoh: Teuku Iskandar, S.E."
+            <input type="text" id="pubOrtuAktif" placeholder="Contoh: Teuku Iskandar, S.E."
               class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm" />
           </div>
           <div>
@@ -249,16 +249,28 @@
           </div>
         </div>
 
-        <!-- Khusus Surat Non-SKHUN -->
-        <div id="pubFieldsNonSkhun" class="hidden sm:col-span-2">
-          <label class="block text-xs font-bold mb-1.5">No Seri Ijazah *</label>
-          <input type="text" id="pubNoIjazah" placeholder="Contoh: SMA-123"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm" />
+        <!-- Khusus Surat Non-SKHUN (No Seri Ijazah, Nama Orang Tua & Alamat) -->
+        <div id="pubFieldsNonSkhun" class="hidden sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold mb-1.5">No Seri Ijazah *</label>
+            <input type="text" id="pubNoIjazah" placeholder="Contoh: M-SMA/K13-3/06/0041289"
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1.5">Nama Orang Tua / Wali *</label>
+            <input type="text" id="pubOrtuNonSkhun" placeholder="Contoh: Teuku Bahagia"
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm" />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold mb-1.5">Alamat Lengkap *</label>
+            <input type="text" id="pubAlamat" placeholder="Contoh: Jl. T. Nyak Arief, Gampong Ie Meulee, Sabang"
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm" />
+          </div>
         </div>
 
         <div>
           <label class="block text-xs font-bold mb-1.5">Keperluan *</label>
-          <input type="text" id="pubPurpose" required placeholder="Contoh: Daftar P3K"
+          <input type="text" id="pubPurpose" required placeholder="Contoh: Daftar P3K / Tunjangan Orang Tua"
             class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm" />
         </div>
 
@@ -381,17 +393,14 @@
   </div>
 
   <script>
-    // =========================================================================
-    // TEMPELKAN URL WEB APP GOOGLE APPS SCRIPT (/exec) ANDA DI BAWAH INI:
-    // =========================================================================
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwExI47tNv9OFN8jlJ7IDnhZWjF10ygJlFzji9bciRxiwcuQILNQoK7GFK_pSO4tbPe/exec';
 
     const STORAGE_KEY = 'sman1sabang_tu_requests';
     const SETTINGS_KEY = 'sman1sabang_tu_settings';
 
     const DEFAULT_SETTINGS = {
-      kepsekName: 'Drs. H. Zulkifli, M.Pd',
-      kepsekNip: '19680514 199412 1 002',
+      kepsekName: 'Helmi, S.Pd, I',
+      kepsekNip: '19810120 200504 1 002',
       kepsekRank: 'Pembina Utama Muda / IV.c',
       academicYear: '2026/2027'
     };
@@ -410,15 +419,24 @@
         noIjazah: '',
         purpose: 'Tunjangan Orang Tua (PNS / TNI / Polri)',
         whatsapp: '081269112233',
-        submittedAt: '18 Nov 2026, 09:15 WIB',
+        submittedAt: '18 November 2026',
         agendaNo: '421.3/145/SMAN1-SBG/2026',
         status: 'Selesai / Siap Diambil',
-        notes: 'Data siswa terverifikasi aktif di Dapodik SMAN 1 Sabang. Surat telah disahkan dan siap dicetak.'
+        notes: 'Data siswa terverifikasi aktif di Dapodik SMAN 1 Sabang. Surat telah disahkan dan siap dicetak.',
+        alamat: 'Gampong Ie Meulee, Kec. Sukajaya, Sabang'
       }
     ];
 
     function isCloudConfigured() {
       return GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL.startsWith('https://script.google.com/');
+    }
+
+    function formatIndonesianDate(dateObj = new Date()) {
+      return dateObj.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
     }
 
     function togglePublicFields() {
@@ -428,6 +446,12 @@
       document.getElementById('pubKelasTahun').placeholder = isAktif ? 'Contoh: XII-IPA-1' : 'Contoh: Tahun Lulus 2023';
       document.getElementById('pubFieldsAktif').classList.toggle('hidden', !isAktif);
       document.getElementById('pubFieldsNonSkhun').classList.toggle('hidden', isAktif);
+
+      document.getElementById('pubOrtuAktif').required = isAktif;
+      document.getElementById('pubPekerjaanOrtu').required = isAktif;
+      document.getElementById('pubNoIjazah').required = !isAktif;
+      document.getElementById('pubOrtuNonSkhun').required = !isAktif;
+      document.getElementById('pubAlamat').required = !isAktif;
     }
 
     function selectServiceAndScroll(serviceId) {
@@ -445,26 +469,36 @@
       btn.textContent = 'Mengirim ke Server TU...';
 
       const serviceId = document.getElementById('pubServiceId').value;
+      const isAktif = serviceId === 'surat-aktif';
       const randNum = Math.floor(1050 + Math.random() * 8900);
-      const nowStr = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+      const nowStr = formatIndonesianDate();
+
+      const ortuVal = isAktif
+        ? document.getElementById('pubOrtuAktif').value.trim()
+        : document.getElementById('pubOrtuNonSkhun').value.trim();
+
+      const alamatVal = isAktif
+        ? '-'
+        : document.getElementById('pubAlamat').value.trim();
 
       const newItem = {
         code: `TU-SMAN1SBG-2026-${randNum}`,
         serviceId: serviceId,
-        serviceName: serviceId === 'surat-aktif' ? 'Surat Keterangan Aktif' : 'Surat Keterangan Tidak Menerbitkan SKHUN',
+        serviceName: isAktif ? 'Surat Keterangan Aktif' : 'Surat Keterangan Tidak Menerbitkan SKHUN',
         applicant: document.getElementById('pubApplicant').value.trim(),
         nisn: document.getElementById('pubNisn').value.trim(),
         kelasOrTahun: document.getElementById('pubKelasTahun').value.trim(),
         ttl: document.getElementById('pubTtl').value.trim(),
-        ortu: document.getElementById('pubOrtu').value.trim() || '-',
-        pekerjaanOrtu: document.getElementById('pubPekerjaanOrtu').value.trim() || '-',
-        noIjazah: document.getElementById('pubNoIjazah').value.trim() || '-',
+        ortu: ortuVal || '-',
+        pekerjaanOrtu: isAktif ? (document.getElementById('pubPekerjaanOrtu').value.trim() || '-') : '-',
+        noIjazah: isAktif ? '-' : (document.getElementById('pubNoIjazah').value.trim() || '-'),
         purpose: document.getElementById('pubPurpose').value.trim(),
         whatsapp: document.getElementById('pubWhatsapp').value.trim(),
         submittedAt: nowStr,
         agendaNo: `421.3/DRAFT-${randNum}/SMAN1-SBG/2026`,
         status: 'Menunggu Verifikasi',
-        notes: 'Permohonan masuk melalui Portal Online Tata Usaha SMAN 1 Sabang.'
+        notes: 'Permohonan masuk melalui Portal Online Tata Usaha SMAN 1 Sabang.',
+        alamat: alamatVal || '-'
       };
 
       // 1. Simpan lokal sebagai cadangan
@@ -472,7 +506,7 @@
       localArr.unshift(newItem);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(localArr));
 
-      // 2. Kirim ke Google Sheets Cloud jika URL sudah dipasang
+      // 2. Kirim ke Google Sheets Cloud
       if (isCloudConfigured()) {
         try {
           await fetch(GOOGLE_SCRIPT_URL, {
@@ -519,7 +553,7 @@
 
       if (isCloudConfigured()) {
         try {
-          const res = await fetch(GOOGLE_SCRIPT_URL);
+          const res = await fetch(GOOGLE_SCRIPT_URL + '?t=' + Date.now());
           const json = await res.json();
           if (json.status === 'ok' && Array.isArray(json.data)) {
             found = json.data.find(r => String(r.code).toUpperCase() === targetCode);
@@ -574,36 +608,38 @@
         </div>
         <p style="text-align:justify; margin-bottom:14px;">Saya yang bertanda tangan di bawah ini:</p>
         <table style="width:100%; margin-left:20px; margin-bottom:16px; font-size:12pt;">
-          <tr><td style="padding:3px 0;">Nama</td><td>: Helmi, S.Pd, I</td></tr>
+          <tr><td style="width:200px; padding:3px 0;">Nama</td><td>: ${cfg.kepsekName}</td></tr>
           <tr><td style="padding:3px 0;">Jabatan</td><td>: Kepala Sekolah</td></tr>
         </table>
         <p style="text-align:justify; margin-bottom:14px;">Dengan ini menerangkan bahwa:</p>
         <table style="width:100%; margin-left:20px; margin-bottom:16px; font-size:12pt;">
-          <tr><td style="width:200px;padding:3px 0;">Nama Lengkap</td><td>: ${data.applicant}</td></tr>
+          <tr><td style="width:200px; padding:3px 0;">Nama Lengkap</td><td>: <strong>${data.applicant}</strong></td></tr>
           <tr><td style="padding:3px 0;">NISN</td><td>: ${data.nisn}</td></tr>
           <tr><td style="padding:3px 0;">Tempat, Tanggal Lahir</td><td>: ${data.ttl}</td></tr>
           <tr><td style="padding:3px 0;">Kelas / Jurusan</td><td>: ${data.kelasOrTahun}</td></tr>
-         
         </table>
         <p style="text-align:justify; text-indent:32px; margin-bottom:14px;">Benar peserta didik tersebut adalah siswa SMA Negeri 1 Sabang Tahun Pelajaran ${cfg.academicYear}, dan masih <strong>Aktif</strong> sampai sekarang.</p>
-      
         <p style="text-align:justify; text-indent:32px; margin-bottom:24px;">Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya dan atas kerjasamanya kami ucapkan terima kasih.</p>
       ` : `
         <div style="text-align:center; margin-bottom:20px;">
-          <div style="font-size:14pt; font-weight:bold; text-decoration:underline;">SURAT KETERANGAN TIDAK MENERBITKAN SKHUN</div>
+          <div style="font-size:14pt; font-weight:bold; text-decoration:underline;">SURAT KETERANGAN</div>
           <div style="font-size:12pt; margin-top:2px;">Nomor : ${data.agendaNo}</div>
         </div>
-        <p style="text-align:justify; margin-bottom:14px;">Kepala Sekolah Menengah Atas (SMA) Negeri 1 Sabang, Dinas Pendidikan Aceh dengan ini menerangkan bahwa:</p>
+        <p style="text-align:justify; margin-bottom:14px;">Saya yang bertanda tangan di bawah ini:</p>
+        <table style="width:100%; margin-left:20px; margin-bottom:16px; font-size:12pt;">
+          <tr><td style="width:200px; padding:3px 0;">Nama</td><td>: ${cfg.kepsekName}</td></tr>
+          <tr><td style="padding:3px 0;">Jabatan</td><td>: Kepala Sekolah</td></tr>
+        </table>
+        <p style="text-align:justify; margin-bottom:14px;">Dengan ini menerangkan bahwa:</p>
         <table style="width:100%; margin-left:20px; margin-bottom:16px; font-size:12pt;">
           <tr><td style="width:200px; padding:3px 0;">Nama Lengkap</td><td>: <strong>${data.applicant}</strong></td></tr>
           <tr><td style="padding:3px 0;">NISN</td><td>: ${data.nisn}</td></tr>
           <tr><td style="padding:3px 0;">Tempat, Tanggal Lahir</td><td>: ${data.ttl}</td></tr>
-          <tr><td style="padding:3px 0;">Status Kelulusan</td><td>: Lulus SMA Negeri 1 Sabang (${data.kelasOrTahun})</td></tr>
-          <tr><td style="padding:3px 0;">Nomor Seri Ijazah</td><td>: <strong>${data.noIjazah}</strong></td></tr>
+          <tr><td style="padding:3px 0;">Nama Orang Tua</td><td>: ${data.ortu || '-'}</td></tr>
+          <tr><td style="padding:3px 0;">Alamat</td><td>: ${data.alamat || '-'}</td></tr>
         </table>
-        <p style="text-align:justify; text-indent:32px; margin-bottom:14px;">Berdasarkan kebijakan Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi Republik Indonesia mengenai penghapusan Ujian Nasional (UN) mulai Tahun Pelajaran 2019/2020 (lulusan tahun 2020 ke atas), maka SMA Negeri 1 Sabang <strong>tidak menerbitkan Sertifikat Hasil Ujian Nasional (SKHUN)</strong> bagi lulusan tersebut di atas.</p>
-        <p style="text-align:justify; text-indent:32px; margin-bottom:14px;">Surat keterangan ini diberikan sebagai pengganti lampiran SKHUN untuk keperluan: <strong>${data.purpose}</strong>.</p>
-        <p style="text-align:justify; text-indent:32px; margin-bottom:24px;">Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
+        <p style="text-align:justify; text-indent:32px; margin-bottom:14px;">Benar nama tersebut di atas adalah lulusan SMA Negeri 1 Sabang Tahun Pelajaran ${cfg.academicYear}, yang pada tahun tersebut Pemerintah hanya menerbitkan IJAZAH dan tidak menerbitkan Surat Keterangan Hasil Ujian Nasional (SKHUN).</p>
+        <p style="text-align:justify; text-indent:32px; margin-bottom:24px;">Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya dan atas kerjasamanya kami ucapkan terima kasih.</p>
       `;
 
       document.getElementById('publicPrintArea').innerHTML = `
@@ -663,6 +699,7 @@
       document.documentElement.classList.toggle('dark');
     });
 
+    togglePublicFields();
     updateLoketWIB();
   </script>
 </body>
