@@ -1469,8 +1469,9 @@
                 agendaNo: `421.3/${letterSettings.lastAgenda}/SMAN1-SBG/2026`,
                 status: status,
                 step: statusToStep(status),
-                notes: 'Diinput langsung melalui Loket Pelayanan Offline Tata Usaha SMA Negeri 1 Sabang.'
-                alamat: document.getElementById ('offAlamat').value.trim(),
+                notes: 'Diinput langsung melalui Loket Pelayanan Offline Tata Usaha SMA Negeri 1 Sabang.',
+                alamat: (document.getElementById('offAlamat')?.value || '').trim() || '-'
+            
             };
 
             requestsList.unshift(newItem);
