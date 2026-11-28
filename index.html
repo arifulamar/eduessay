@@ -1,161 +1,426 @@
-<!doctype html>
-<html lang="id">
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
 <head>
-<meta charset="utf-8">
-<title>Eduessay — Ujian Online</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#673ab7">
-<meta name="mobile-web-app-capable" content="yes">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon.svg">
-<link rel="apple-touch-icon" href="icon.svg">
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
-<style>
-:root{--bg:#f0ebf8;--card:#fff;--tx:#202124;--mut:#5f6368;--pri:#673ab7;--bd:#dadce0;--ok:#188038;--bad:#d93025;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1e1a29;--card:#2b2838;--tx:#e8eaed;--mut:#9aa0a6;--pri:#b39ddb;--bd:#4a4658;--ok:#81c995;--bad:#f28b82}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.w{max-width:960px;margin:0 auto;padding:16px}.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:18px 20px;margin-bottom:14px}.top{border-top:8px solid var(--pri)}
-h1{font-size:25px;margin:0 0 6px;font-weight:650}h2{font-size:18px;margin:0 0 8px;font-weight:600}.mut{color:var(--mut);font-size:13px}
-input,textarea,select{width:100%;font:inherit;color:inherit;background:transparent;border:1px solid var(--bd);border-radius:8px;padding:10px;margin:5px 0;outline:0}
-input:focus,textarea:focus,select:focus{border-color:var(--pri)}textarea{resize:vertical}
-.btn{background:var(--pri);color:#fff;border:0;border-radius:8px;padding:10px 16px;font:inherit;cursor:pointer}.btn:disabled{opacity:.55;cursor:wait}.btn.g{background:transparent;color:var(--pri);border:1px solid var(--bd)}.btn.r{background:transparent;color:var(--bad);border:1px solid var(--bd)}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.sp{flex:1}.bar{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--bd);padding:12px 16px}.bar .in{max-width:960px;margin:0 auto;display:flex;align-items:center;gap:10px}
-.tag{font-size:12px;background:var(--bg);border-radius:20px;padding:3px 10px;color:var(--mut)}.err{color:var(--bad);font-size:13px;margin-top:8px}.ok{color:var(--ok)}.tm{font-weight:700;color:var(--pri)}
-.canvas-wrap{border:1px solid var(--bd);border-radius:10px;overflow:hidden;background:#fff;margin-top:8px}.draw-tools{display:flex;gap:6px;flex-wrap:wrap;padding:8px;background:var(--bg);border-bottom:1px solid var(--bd)}.draw-tools .btn{padding:6px 10px;font-size:13px}.draw-tools .active{outline:2px solid var(--pri);outline-offset:1px}
-.answer-canvas{display:block;width:100%;height:auto;aspect-ratio:5/6;touch-action:none;cursor:crosshair;background:#fff}.hint{font-size:12px;color:var(--mut);margin-top:6px}.question{scroll-margin-top:70px}
-@media(max-width:520px){.school-header{width:calc(100% - 20px);margin:12px auto}.w{padding:10px}.card{padding:15px}.bar{padding:10px}}
-.school-header{width:calc(100% - 32px);max-width:960px;margin:30px auto 18px;background:var(--card);text-align:center;border:1px solid var(--bd);border-radius:14px;overflow:hidden}.school-header img{display:block;width:100%;height:auto;margin:0 auto}
-
-/* Homepage Educonnect */
-.home-hero{position:relative;display:grid;grid-template-columns:1.25fr .75fr;gap:22px;align-items:center;overflow:hidden;padding:clamp(24px,5vw,54px);margin:18px 0 16px;border-radius:24px;background:linear-gradient(135deg,#211344 0%,#4d2b91 58%,#7045bd 100%);color:#fff;box-shadow:0 18px 45px rgba(54,31,105,.16)}
-.hero-copy{position:relative;z-index:1}.school-logo{display:block;width:76px;height:76px;object-fit:contain;background:#fff;border-radius:16px;padding:5px;margin-bottom:16px;box-shadow:0 8px 22px rgba(0,0,0,.18)}.eyebrow{display:inline-block;font-size:11px;font-weight:800;letter-spacing:1.7px;color:#d8c8ff}.hero-copy h1{max-width:650px;margin:14px 0;font-size:clamp(30px,4.2vw,48px);line-height:1.12;letter-spacing:-1.2px}.hero-copy>p{max-width:590px;color:#e6def6;font-size:16px;line-height:1.7}.home-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.home-actions a{text-decoration:none;display:inline-flex;align-items:center;gap:10px;font-weight:650}.home-primary{background:#fff;color:#45218b}.home-secondary{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.35)}.home-note{margin-top:16px;color:#d7cbed;font-size:12px;max-width:520px}.hero-art{height:245px;position:relative;display:flex;align-items:center;justify-content:center}.art-orbit{position:absolute;border:1px solid rgba(255,255,255,.25);border-radius:50%;width:230px;height:230px}.orbit-two{width:180px;height:180px;border-style:dashed}.art-paper{position:relative;width:142px;height:184px;border-radius:13px;background:#fff;color:#45218b;padding:20px;transform:rotate(7deg);box-shadow:0 18px 35px rgba(0,0,0,.25)}.paper-mark{font-size:26px;font-weight:900;margin-bottom:22px}.paper-line{height:7px;background:#e6e0f1;border-radius:8px;margin:12px 0;width:75%}.paper-line.long{width:100%}.paper-line.short{width:55%}.paper-check{position:absolute;right:-18px;bottom:15px;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:#25b77a;color:#fff;font-size:25px;font-weight:800;border:4px solid #fff}.art-badge{position:absolute;bottom:12px;right:4%;padding:9px 14px;border-radius:30px;background:#fff;color:#45218b;font-size:12px;font-weight:800;box-shadow:0 8px 20px rgba(0,0,0,.15)}.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0 34px}.feature-card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px}.feature-icon{font-size:25px;margin-bottom:8px}.feature-card h2{font-size:16px;margin:0 0 6px}.feature-card p{font-size:13px;color:var(--mut);margin:0;line-height:1.6}.exam-heading{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:10px 0 14px}.exam-heading h2{font-size:23px;margin:4px 0}.exam-count{font-size:12px;color:var(--mut);background:var(--card);border:1px solid var(--bd);padding:7px 11px;border-radius:20px;white-space:nowrap}.exam-card{display:flex;gap:15px;align-items:flex-start}.exam-symbol{width:46px;height:46px;flex:0 0 46px;border-radius:13px;background:var(--bg);display:grid;place-items:center;font-size:22px}.exam-info{flex:1;min-width:0}.exam-info h2{margin:0 0 5px}.exam-info>p{margin:5px 0 10px}.empty-exams{text-align:center;padding:30px}.home-footer{text-align:center;color:var(--mut);font-size:12px;padding:28px 10px 12px}
-@media(max-width:680px){.home-hero{grid-template-columns:1fr;padding:25px 22px;border-radius:18px}.hero-art{height:165px}.art-orbit{width:160px;height:160px}.orbit-two{width:125px;height:125px}.art-paper{transform:scale(.78) rotate(7deg)}.art-badge{right:8%;bottom:0}.feature-grid{grid-template-columns:1fr;gap:9px;margin-bottom:26px}.feature-card{display:grid;grid-template-columns:42px 1fr;column-gap:10px;padding:14px}.feature-icon{grid-row:span 2;margin:0}.feature-card h2{align-self:end}.exam-heading{align-items:start;flex-direction:column}.exam-card{gap:10px}.home-actions a{width:100%;justify-content:center}}
-/* Homepage tanpa header sekolah dan navbar */
-body.home-page .school-header,body.home-page .bar{display:none!important}
-body.home-page .w{padding-top:24px}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduConnect — Ekosistem Digital SMA Negeri 1 Sabang</title>
+  <meta name="description" content="Portal terpadu layanan administrasi Tata Usaha, Presensi Digital, Asisten AI Pembelajaran, dan Penyusun Jadwal SMA Negeri 1 Sabang." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#1d4ed8',
+              700: '#1e3a8a',
+              800: '#172554',
+            }
+          }
+        }
+      }
+    };
+  </script>
 </head>
-<body>
-<div class="school-header"><img src="https://raw.githubusercontent.com/Arifulamar/eduessay/main/header-ujian.png" alt="Kop surat SMA Negeri 1 Sabang"></div>
-<div class="bar"><div class="in"><strong style="font-size:18px">📝 Eduessay</strong><span class="sp"></span><span class="tag">Mode Siswa</span></div></div>
-<div class="w" id="app"><div class="card">Memuat ujian…</div></div>
-<script>
-const S={db:null,auth:null,uid:null,forms:[],view:'home',id:null,ans:{},nm:'',kelas:'',tick:null,started:false,strokes:{},tools:{}};
-const $=s=>document.querySelector(s),app=$('#app');
-const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
-const F=id=>S.forms.find(f=>f.id===id);
-function go(h){location.hash=h;route()}
-function route(){clearInterval(S.tick);const h=location.hash.slice(1);if(h.startsWith('f-')){S.view='take';S.id=h.slice(2)}else{S.view='home';S.id=null;S.started=false}render()}
-window.addEventListener('hashchange',route);
-function init(){
- try{
-  firebase.initializeApp(FIREBASE_CONFIG);S.auth=firebase.auth();S.db=firebase.firestore();
-  S.auth.onAuthStateChanged(async user=>{
-   if(!user){try{await S.auth.signInAnonymously()}catch(e){app.innerHTML='<div class="card top"><h1>Tidak dapat terhubung</h1><p>'+esc(e.message)+'</p><p class="mut">Pastikan Anonymous Authentication aktif di Firebase.</p></div>'}return}
-   S.uid=user.uid;loadForms();
-  });
- }catch(e){app.innerHTML='<div class="card top">Gagal memuat aplikasi: '+esc(e.message||e)+'</div>'}
-}
-async function loginTeacher(){
- const btn=document.querySelector('.home-primary');
- if(btn){btn.disabled=true;btn.dataset.label=btn.innerHTML;btn.textContent='Menghubungkan ke Google…'}
- try{
-  if(!S.auth)throw new Error('Autentikasi belum siap. Muat ulang halaman lalu coba lagi.');
-  const current=S.auth.currentUser;
-  if(current&&!current.isAnonymous){location.href='guru/';return}
-  const provider=new firebase.auth.GoogleAuthProvider();
-  provider.setCustomParameters({prompt:'select_account'});
-  const result=await S.auth.signInWithPopup(provider);
-  if(result.user&&!result.user.isAnonymous)location.href='guru/';
-  else throw new Error('Login Google belum berhasil.');
- }catch(e){
-  alert('Login Google gagal: '+(e.code||'')+' — '+e.message);
-  if(btn){btn.disabled=false;btn.innerHTML=btn.dataset.label||'Masuk Guru dengan Google'}
- }
-}
-function loadForms(){
- S.db.collection('forms').where('open','==',true).onSnapshot(s=>{S.forms=s.docs.map(d=>({id:d.id,...d.data()}));route()},e=>{app.innerHTML='<div class="card top"><h2>Gagal memuat ujian</h2><p>'+esc(e.message)+'</p></div>'});
-}
-function render(){if(S.view==='take')renderTake();else renderHome()}
-function renderHome(){
- document.body.classList.add('home-page');
- const forms=S.forms.filter(f=>f.open).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
- let h='<section class="home-hero"><div class="hero-copy"><img class="school-logo" src="logosman1sabang.png" alt="Logo SMA Negeri 1 Sabang"><span class="eyebrow">PLATFORM PEMBELAJARAN DIGITAL</span><h1>Belajar, mengajar, dan menguji kemampuan dalam satu tempat.</h1><p>Educonnect membantu guru mengelola ujian online dan memudahkan siswa mengerjakan soal secara praktis, tertib, dan fleksibel.</p><div class="home-actions"><button class="btn home-primary" type="button" onclick="loginTeacher()">Masuk Guru dengan Google <span aria-hidden="true">↗</span></button><a class="btn home-secondary" href="#daftar-ujian">Lihat Ujian Siswa</a></div><div class="home-note">Guru masuk menggunakan akun Google yang telah terdaftar. Akun guru baru menunggu persetujuan administrator.</div></div><div class="hero-art" aria-hidden="true"><div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div><div class="art-paper"><div class="paper-mark">E</div><div class="paper-line long"></div><div class="paper-line"></div><div class="paper-line short"></div><div class="paper-check">✓</div></div><div class="art-badge">✦ Educonnect</div></div></section>';
- h+='<section class="feature-grid"><article class="feature-card"><div class="feature-icon">✍️</div><h2>Ujian Online</h2><p>Kerjakan soal esai, pilihan ganda, dan jawaban singkat melalui perangkat Anda.</p></article><article class="feature-card"><div class="feature-icon">🎓</div><h2>Ruang Guru</h2><p>Guru dapat membuat ujian, mengatur soal, dan memantau tanggapan siswa.</p></article><article class="feature-card"><div class="feature-icon">📱</div><h2>Fleksibel</h2><p>Akses platform melalui komputer, tablet, maupun ponsel.</p></article></section>';
- h+='<section id="daftar-ujian" class="exam-heading"><div><span class="eyebrow">UNTUK SISWA</span><h2>Ujian yang tersedia</h2><p class="mut">Pilih ujian yang sedang dibuka oleh guru Anda.</p></div><span class="exam-count">'+forms.length+' ujian tersedia</span></section>';
- if(!forms.length)h+='<div class="card empty-exams"><h2>Belum ada ujian yang dibuka</h2><p class="mut">Silakan periksa kembali nanti atau hubungi guru/pengawas.</p></div>';
- forms.forEach(f=>{const done=ls.get('done_'+f.id);h+='<div class="card exam-card"><div class="exam-symbol">📝</div><div class="exam-info"><h2>'+esc(f.title||'Ujian tanpa judul')+'</h2><p class="mut">'+(f.questions||[]).length+' soal · '+(f.duration?f.duration+' menit':'tanpa batas waktu')+'</p>'+(f.desc?'<p>'+esc(f.desc)+'</p>':'')+'<div class="row">'+(done?'<span class="ok">✓ Sudah dikirim dari perangkat ini</span>':'<button class="btn" onclick="go(\'f-'+f.id+'\')">Mulai ujian</button>')+'</div></div></div>'});
- h+='<footer class="home-footer">© '+new Date().getFullYear()+' Educonnect · Mendukung pembelajaran digital</footer>';
- app.innerHTML=h;
-}
-function draftKey(){return 'draft_'+S.id}
-function readDraft(){let d={};try{d=JSON.parse(ls.get(draftKey())||'{}')}catch(e){}S.ans=d.a||{};S.nm=d.n||'';S.kelas=d.k||''}
-function saveDraft(){ls.set(draftKey(),JSON.stringify({a:S.ans,n:S.nm,k:S.kelas}))}
-function answerEmpty(q){
- const a=S.ans[q.id];if(a===undefined||a===null||a==='')return true;
- if((q.type==='para'||q.type==='essay_hand')&&typeof a==='object')return !(String(a.text||'').trim()||a.drawing);
- if(Array.isArray(a))return !a.length;return false;
-}
-function renderTake(){
- document.body.classList.remove('home-page');
- const f=F(S.id);if(!f){app.innerHTML='<div class="card"><h2>Ujian tidak ditemukan</h2><button class="btn g" onclick="go(\'\')">Kembali</button></div>';return}
- if(!f.open){app.innerHTML='<div class="card top"><h2>Ujian ditutup</h2><button class="btn g" onclick="go(\'\')">Kembali</button></div>';return}
- if(ls.get('done_'+f.id)){app.innerHTML='<div class="card top"><h1>'+esc(f.title)+'</h1><p class="ok">✓ Jawaban dari perangkat ini sudah dikirim.</p><button class="btn g" onclick="go(\'\')">Kembali ke beranda</button></div>';return}
- readDraft();S.started=true;
- let h='<div class="card top"><div class="row"><button class="btn g" onclick="go(\'\')">← Kembali</button><span class="sp"></span>'+(f.duration?'<span class="tag">Sisa waktu: <b class="tm" id="tm">--:--</b></span>':'')+'</div><h1 style="margin-top:12px">'+esc(f.title)+'</h1><p>'+esc(f.desc||'Kerjakan semua soal dengan teliti.')+'</p><p class="mut">* Wajib diisi. Untuk soal esai, Anda dapat mengetik, menulis tangan, atau menggunakan keduanya.</p></div>';
- h+='<div class="card"><h2>Identitas Siswa *</h2><label for="nm">Nama Lengkap *</label><input id="nm" placeholder="Nama lengkap" value="'+esc(S.nm)+'" oninput="identityChanged()"><label for="kelas">Kelas *</label><input id="kelas" placeholder="Contoh: XII IPA 1" value="'+esc(S.kelas)+'" oninput="identityChanged()"></div>';
- (f.questions||[]).forEach((q,i)=>{const a=S.ans[q.id];h+='<div class="card question" id="q'+i+'"><h2>'+(i+1)+'. '+esc(q.text)+(q.required?' <span style="color:var(--bad)">*</span>':'')+'</h2>'+(q.image?'<img class="question-image" src="'+q.image+'" alt="Gambar soal '+(i+1)+'" style="display:block;max-width:100%;max-height:520px;object-fit:contain;margin:12px 0;border-radius:8px">':'')+'<div class="mut">'+q.points+' poin</div>';
-  if(q.type==='para'||q.type==='essay_text'){
-   const val=typeof a==='object'&&a?a.text||'':typeof a==='string'?a:'';
-   h+='<label class="mut">Jawaban esai (teks)</label><textarea rows="5" placeholder="Ketik jawaban di sini..." oninput="setEssayText(\''+q.id+'\',this.value)">'+esc(val)+'</textarea>';
-   }else if(q.type==='essay_hand'){h+='<label class="mut">Jawaban esai (tulisan tangan)</label><div class="canvas-wrap"><div class="draw-tools"><button class="btn g active" id="pen-'+q.id+'" onclick="setTool(\''+q.id+'\',\'pen\')">✎ Pena</button><button class="btn g" id="erase-'+q.id+'" onclick="setTool(\''+q.id+'\',\'erase\')">Penghapus</button><button class="btn g" onclick="undoStroke(\''+q.id+'\')">↶ Undo</button><button class="btn r" onclick="clearCanvas(\''+q.id+'\')">Hapus semua</button></div><canvas class="answer-canvas" id="cv-'+q.id+'" width="1000" height="1200" aria-label="Kanvas tulisan tangan"></canvas></div><p class="hint">Gunakan jari, stylus, atau mouse. Goresan tersimpan otomatis di perangkat ini.</p>';
-  }else if(q.type==='short')h+='<input value="'+esc(a||'')+'" placeholder="Jawaban singkat" oninput="setAnswer(\''+q.id+'\',this.value)">';
-  else if(q.type==='drop')h+='<select onchange="setAnswer(\''+q.id+'\',this.value===\'\'?undefined:+this.value)"><option value="">Pilih jawaban…</option>'+(q.options||[]).map((o,j)=>'<option value="'+j+'"'+(a===j?' selected':'')+'>'+esc(o)+'</option>').join('')+'</select>';
-  else (q.options||[]).forEach((o,j)=>{const c=q.type==='check'?(a||[]).includes(j):a===j;h+='<label style="display:block;padding:7px 0"><input style="width:auto" type="'+(q.type==='check'?'checkbox':'radio')+'" name="r'+i+'" '+(c?'checked':'')+' onchange="choiceAnswer(\''+q.id+'\','+j+',this.checked,\''+q.type+'\')"> '+esc(o)+'</label>'});
-  h+='</div>';
- });
- h+='<div class="card"><button class="btn" id="sb" onclick="submitExam(false)">Kirim Jawaban</button><div id="se" class="err"></div><p class="hint">Pastikan semua jawaban sudah benar sebelum dikirim.</p></div>';app.innerHTML=h;
- (f.questions||[]).filter(q=>q.type==='essay_hand'||q.type==='para').forEach(q=>initCanvas(q.id,S.ans[q.id]?.drawing));
- if(f.duration){const k='st_'+f.id;let st=+ls.get(k)||0;if(!st){st=Date.now();ls.set(k,st)}const end=st+f.duration*60000;const tick=()=>{const r=Math.max(0,end-Date.now()),el=$('#tm');if(el)el.textContent=String(Math.floor(r/60000)).padStart(2,'0')+':'+String(Math.floor(r%60000/1000)).padStart(2,'0');if(r<=0){clearInterval(S.tick);submitExam(true)}};tick();S.tick=setInterval(tick,1000)}
-}
-function identityChanged(){S.nm=$('#nm').value;S.kelas=$('#kelas').value;saveDraft()}
-function setAnswer(id,v){S.ans[id]=v;saveDraft()}
-function setEssayText(id,v){S.ans[id]=v;saveDraft()}
-function choiceAnswer(id,j,on,type){if(type==='check'){const a=new Set(S.ans[id]||[]);on?a.add(j):a.delete(j);S.ans[id]=[...a].sort((x,y)=>x-y)}else S.ans[id]=j;saveDraft()}
-function initCanvas(id,data){
- const c=$('#cv-'+id);if(!c)return;const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);ctx.lineCap='round';ctx.lineJoin='round';S.strokes[id]=[];
- if(data){const im=new Image();im.onload=()=>ctx.drawImage(im,0,0,c.width,c.height);im.src=data}
- const point=e=>{const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*c.width/r.width,y:(e.clientY-r.top)*c.height/r.height}};
- let drawing=false;
- c.addEventListener('pointerdown',e=>{e.preventDefault();c.setPointerCapture(e.pointerId);drawing=true;S.strokes[id].push(ctx.getImageData(0,0,c.width,c.height));const p=point(e);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.strokeStyle=(S.tools[id]?.mode==='erase'?'#fff':'#202124');ctx.lineWidth=S.tools[id]?.mode==='erase'?28:2;ctx.lineTo(p.x+.1,p.y+.1);ctx.stroke()});
- c.addEventListener('pointermove',e=>{if(!drawing)return;e.preventDefault();const p=point(e);ctx.strokeStyle=(S.tools[id]==='erase'?'#fff':'#202124');ctx.lineWidth=S.tools[id]?.mode==='erase'?28:2;ctx.lineTo(p.x,p.y);ctx.stroke()});
- const end=()=>{if(!drawing)return;drawing=false;ctx.closePath();persistCanvas(id,c)};
- c.addEventListener('pointerup',end);c.addEventListener('pointercancel',end);c.addEventListener('pointerleave',e=>{if(e.buttons===0)end()});
-}
-function persistCanvas(id,c){S.ans[id]={drawing:c.toDataURL('image/jpeg',.68)};saveDraft()}
-function setTool(id,tool){S.tools[id]=S.tools[id]||{size:1};S.tools[id].mode=tool;$('#pen-'+id)?.classList.toggle('active',tool==='pen');$('#erase-'+id)?.classList.toggle('active',tool==='erase')}
-function setPenSize(id,v){S.tools[id]={mode:'pen',size:+v||3}}
-function undoStroke(id){const c=$('#cv-'+id),ctx=c?.getContext('2d'),stack=S.strokes[id];if(!c||!stack?.length)return;ctx.putImageData(stack.pop(),0,0);persistCanvas(id,c)}
-function clearCanvas(id){const c=$('#cv-'+id);if(!c)return;if(!confirm('Hapus seluruh tulisan tangan pada soal ini?'))return;const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);S.strokes[id]=[];persistCanvas(id,c)}
-const empty=v=>v===undefined||v===null||v===''||(Array.isArray(v)&&!v.length);
-async function submitExam(auto){
- const f=F(S.id);S.nm=$('#nm')?.value.trim()||'';S.kelas=$('#kelas')?.value.trim()||'';
- if(!auto){if(!S.nm||!S.kelas){$('#se').textContent='Isi nama lengkap dan kelas.';return}const bad=(f.questions||[]).findIndex(q=>q.required&&answerEmpty(q));if(bad>=0){$('#se').textContent='Soal nomor '+(bad+1)+' wajib dijawab.';$('#q'+bad).scrollIntoView({behavior:'smooth',block:'center'});return}if(!confirm('Kirim semua jawaban sekarang? Jawaban tidak dapat diubah setelah dikirim.'))return}
- const b=$('#sb');if(b)b.disabled=true;
- try{
-  const answers={};(f.questions||[]).forEach(q=>{if(!answerEmpty(q))answers[q.id]=S.ans[q.id]});
-  const rec={name:S.nm||'(tanpa nama)',className:S.kelas,answers,submittedAt:Date.now(),auto:!!auto};
-  await S.db.collection('responses').doc(S.uid+'_'+f.id).set({formId:f.id,studentUid:S.uid,name:rec.name,className:rec.className,answers:rec.answers,submittedAt:rec.submittedAt,auto:rec.auto},{merge:false});
-  ls.set('done_'+f.id,'1');ls.del(draftKey());ls.del('st_'+f.id);clearInterval(S.tick);S.started=false;
-  app.innerHTML='<div class="card top"><h1>'+esc(f.title)+'</h1><p class="ok">✓ Jawaban berhasil dikirim'+(auto?' karena waktu ujian habis':'')+'. Terima kasih.</p><button class="btn" onclick="go(\'\')">Kembali ke beranda</button></div>';
- }catch(e){if(b)b.disabled=false;$('#se').textContent='Gagal mengirim jawaban: '+(e.message||e)+'. Periksa koneksi internet dan izin Firestore.'}
-}
-init();
-if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
-</script>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 antialiased transition-colors duration-200 selection:bg-amber-300 selection:text-slate-950">
+
+  <!-- NAVBAR -->
+  <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+      
+      <!-- Brand Logo -->
+      <a href="/" class="flex items-center gap-3 min-w-0">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white dark:bg-slate-800 p-1.5 flex items-center justify-center shadow-sm border border-slate-200 dark:border-slate-700 shrink-0">
+          <img src="/tatausaha/logosman1sabang.png" alt="Logo SMAN 1 Sabang" class="w-full h-full object-contain"
+               onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='/tatausaha/logosman1sabang.jfif';}else{this.style.display='none';this.nextElementSibling.style.display='block';}" />
+          <svg style="display:none;" viewBox="0 0 120 132" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <path d="M60 4 L112 24 L106 84 C102 106 82 120 60 128 C38 120 18 106 14 84 L8 24 Z" fill="#1e247e" stroke="#ffffff" stroke-width="4"/>
+            <text x="60" y="74" text-anchor="middle" fill="#ffffff" font-size="14" font-weight="bold">SMAN 1</text>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-base sm:text-lg tracking-tight text-slate-900 dark:text-white truncate">
+              EduConnect
+            </span>
+            <span class="hidden sm:inline-flex px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-blue-950 text-amber-300 dark:bg-primary-600 dark:text-white">
+              SMAN 1 Sabang
+            </span>
+          </div>
+          <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400 block truncate">
+            Portal Terpadu Layanan Digital Sekolah
+          </span>
+        </div>
+      </a>
+
+      <!-- Right Controls -->
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <a href="#layanan" class="hidden md:inline-block px-3 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+          Semua Modul
+        </a>
+        <a href="#panduan-peran" class="hidden md:inline-block px-3 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+          Akses Peran
+        </a>
+        <a href="/tatausaha/#lacak" class="px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+          Lacak Surat
+        </a>
+        <button id="themeToggle" type="button" title="Ubah Tema Tampilan"
+          class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+          <svg class="w-4 h-4 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+          <svg class="w-4 h-4 hidden dark:block text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-14">
+
+    <!-- HERO SECTION + SEARCH -->
+    <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-950 via-blue-900 to-slate-900 text-white p-6 sm:p-11 shadow-xl">
+      <!-- Dekorasi Latar Belakang Halus -->
+      <div class="pointer-events-none absolute -right-20 -top-20 w-80 h-80 rounded-full bg-blue-500/15 blur-3xl"></div>
+      <div class="pointer-events-none absolute -left-16 -bottom-24 w-72 h-72 rounded-full bg-amber-400/10 blur-3xl"></div>
+
+      <div class="relative z-10 max-w-3xl space-y-5">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs font-semibold text-amber-300">
+          <span id="schoolClockDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="schoolClockText">Memuat waktu WIB...</span>
+        </div>
+
+        <h1 class="text-2xl sm:text-4xl lg:text-[42px] font-extrabold tracking-tight leading-[1.15]">
+          Satu Gerbang Digital untuk Belajar, Presensi, Jadwal & Administrasi
+        </h1>
+
+        <p class="text-sm sm:text-base text-blue-100/90 leading-relaxed max-w-2xl">
+          Selamat datang di <strong>educonnect.my.id</strong> — pusat layanan terintegrasi SMA Negeri 1 Sabang yang memudahkan siswa, guru, dan tenaga kependidikan mengakses aplikasi sekolah dari satu tempat.
+        </p>
+
+        <!-- Bilah Pencarian Cepat Modul -->
+        <div class="pt-1 max-w-xl">
+          <div class="relative flex items-center">
+            <svg class="w-4 h-4 text-slate-400 absolute left-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input type="text" id="moduleSearchInput" oninput="filterModules(this.value)"
+              placeholder="Cari layanan... (contoh: surat aktif, absen, AI belajar, jadwal)"
+              class="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-white text-slate-900 placeholder-slate-400 text-xs sm:text-sm font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-400" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GRID 4 APLIKASI UTAMA -->
+    <section id="layanan" class="scroll-mt-24 space-y-5">
+      <div class="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">Ekosistem Aplikasi EduConnect</h2>
+          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Pilih modul layanan sesuai kebutuhan Anda.</p>
+        </div>
+        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">4 Modul Terintegrasi</span>
+      </div>
+
+      <div id="modulesGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- 1. TATA USAHA (/tatausaha) -->
+        <article data-keywords="tata usaha surat keterangan aktif skhun alumni ijazah resi administrasi"
+          class="module-card group bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-7 shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700 transition flex flex-col justify-between gap-6">
+          <div class="space-y-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/70 text-blue-900 dark:text-blue-300 flex items-center justify-center border border-blue-100 dark:border-blue-900">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+              </div>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Aktif Berjalan
+              </span>
+            </div>
+
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white group-hover:text-blue-800 dark:group-hover:text-blue-400 transition">
+                  Layanan Tata Usaha
+                </h3>
+                <code class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">/tatausaha</code>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                Pengajuan Surat Keterangan Aktif siswa, Surat Keterangan Tidak Menerbitkan SKHUN bagi alumni, pelacakan nomor resi online, serta pencetakan dokumen resmi berkop sekolah.
+              </p>
+            </div>
+          </div>
+
+          <div class="pt-2 flex flex-wrap items-center gap-2.5">
+            <a href="/tatausaha/"
+              class="flex-1 text-center py-3 px-4 rounded-xl bg-blue-950 hover:bg-blue-900 dark:bg-primary-600 dark:hover:bg-primary-500 text-white font-bold text-xs sm:text-sm transition">
+              Buka Portal Tata Usaha →
+            </a>
+            <a href="/tatausaha/admin/"
+              class="py-3 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs transition"
+              title="Login Staf Tata Usaha">
+              Staf TU
+            </a>
+          </div>
+        </article>
+
+        <!-- 2. RAKAN BELAJAR (/rakanbelajar) -->
+        <article data-keywords="rakan belajar ai kecerdasan buatan materi soal latihan belajar guru siswa modul"
+          class="module-card group bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-7 shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-700 transition flex flex-col justify-between gap-6">
+          <div class="space-y-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 flex items-center justify-center border border-indigo-100 dark:border-indigo-900">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                </svg>
+              </div>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
+                AI Pembelajaran
+              </span>
+            </div>
+
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition">
+                  Rakan Belajar AI
+                </h3>
+                <code class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">/rakanbelajar</code>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                Asisten belajar berbasis kecerdasan buatan untuk membantu siswa memahami konsep pelajaran, berlatih soal asesmen/UTBK, serta membantu guru menyusun bahan ajar interaktif.
+              </p>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <a href="/rakanbelajar/"
+              class="block w-full text-center py-3 px-4 rounded-xl bg-indigo-700 hover:bg-indigo-600 text-white font-bold text-xs sm:text-sm transition">
+              Mulai Belajar dengan AI →
+            </a>
+          </div>
+        </article>
+
+        <!-- 3. PRESENSIA (/presensia) -->
+        <article data-keywords="presensia presensi absensi kehadiran barcode qr kartu pelajar siswa guru terlambat"
+          class="module-card group bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-7 shadow-sm hover:shadow-md hover:border-teal-300 dark:hover:border-teal-700 transition flex flex-col justify-between gap-6">
+          <div class="space-y-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-teal-50 dark:bg-teal-950/70 text-teal-700 dark:text-teal-300 flex items-center justify-center border border-teal-100 dark:border-teal-900">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                </svg>
+              </div>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300">
+                Presensi Digital
+              </span>
+            </div>
+
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-teal-400 transition">
+                  Presensia
+                </h3>
+                <code class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">/presensia</code>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                Sistem pencatatan kehadiran digital berbasis pemindaian QR/Barcode kartu pelajar untuk memantau kedisiplinan, rekap absensi harian per kelas, dan laporan bulanan secara cepat.
+              </p>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <a href="/presensia/"
+              class="block w-full text-center py-3 px-4 rounded-xl bg-teal-700 hover:bg-teal-600 text-white font-bold text-xs sm:text-sm transition">
+              Buka Sistem Presensia →
+            </a>
+          </div>
+        </article>
+
+        <!-- 4. ROSTER MAKER (/rostermaker) -->
+        <article data-keywords="roster maker jadwal pelajaran kurikulum jam mengajar guru bentrok kelas"
+          class="module-card group bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-7 shadow-sm hover:shadow-md hover:border-amber-300 dark:hover:border-amber-700 transition flex flex-col justify-between gap-6">
+          <div class="space-y-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 flex items-center justify-center border border-amber-100 dark:border-amber-900">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+              </div>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+                Penjadwalan
+              </span>
+            </div>
+
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white group-hover:text-amber-700 dark:group-hover:text-amber-400 transition">
+                  Roster Maker
+                </h3>
+                <code class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">/rostermaker</code>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                Sistem penyusun jadwal pelajaran sekolah otomatis untuk mengatur distribusi jam mengajar guru, validasi anti-bentrok antar-kelas, dan ekspor roster siap cetak.
+              </p>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <a href="/rostermaker/"
+              class="block w-full text-center py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs sm:text-sm transition">
+              Kelola Jadwal Pelajaran →
+            </a>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- Pesan Jika Pencarian Tidak Cocok -->
+      <div id="emptySearchState" class="hidden text-center py-10 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
+        <p class="text-sm font-bold text-slate-700 dark:text-slate-200">Layanan tidak ditemukan untuk kata kunci tersebut.</p>
+        <button type="button" onclick="resetModuleSearch()" class="mt-2 text-xs font-bold text-blue-700 dark:text-amber-400 underline">
+          Tampilkan Semua Modul
+        </button>
+      </div>
+    </section>
+
+    <!-- AKSES CEPAT BERDASARKAN PERAN -->
+    <section id="panduan-peran" class="scroll-mt-24 space-y-5">
+      <div>
+        <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">Pintasan Berdasarkan Pengguna</h2>
+        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Navigasi cepat sesuai peran Anda di lingkungan sekolah.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Siswa & Alumni -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm space-y-3">
+          <span class="inline-block px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-blue-50 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300">
+            Siswa & Alumni
+          </span>
+          <ul class="space-y-2 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300">
+            <li><a href="/rakanbelajar/" class="hover:text-blue-700 dark:hover:text-amber-400 flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800"><span>Tanya Materi & Latihan Soal AI</span><span>→</span></a></li>
+            <li><a href="/tatausaha/#ajukan" class="hover:text-blue-700 dark:hover:text-amber-400 flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800"><span>Ajukan Surat Keterangan Aktif</span><span>→</span></a></li>
+            <li><a href="/tatausaha/#ajukan" class="hover:text-blue-700 dark:hover:text-amber-400 flex items-center justify-between py-1"><span>Ajukan Ket. Non-SKHUN (Alumni)</span><span>→</span></a></li>
+          </ul>
+        </div>
+
+        <!-- Guru & Kurikulum -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm space-y-3">
+          <span class="inline-block px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-teal-50 text-teal-800 dark:bg-teal-950/60 dark:text-teal-300">
+            Guru & Wali Kelas
+          </span>
+          <ul class="space-y-2 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300">
+            <li><a href="/presensia/" class="hover:text-teal-700 dark:hover:text-amber-400 flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800"><span>Pantau Rekap Kehadiran Kelas</span><span>→</span></a></li>
+            <li><a href="/rostermaker/" class="hover:text-teal-700 dark:hover:text-amber-400 flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800"><span>Cek & Susun Jadwal Mengajar</span><span>→</span></a></li>
+            <li><a href="/rakanbelajar/" class="hover:text-teal-700 dark:hover:text-amber-400 flex items-center justify-between py-1"><span>Asisten AI Perangkat Ajar</span><span>→</span></a></li>
+          </ul>
+        </div>
+
+        <!-- Staf TU & Operator -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm space-y-3">
+          <span class="inline-block px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+            Staf TU & Operator
+          </span>
+          <ul class="space-y-2 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300">
+            <li><a href="/tatausaha/admin/" class="hover:text-amber-700 dark:hover:text-amber-400 flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800"><span>Verifikasi & Cetak Surat F4</span><span>→</span></a></li>
+            <li><a href="/presensia/" class="hover:text-amber-700 dark:hover:text-amber-400 flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800"><span>Dashboard Pemindai Barcode</span><span>→</span></a></li>
+            <li><a href="/rostermaker/" class="hover:text-amber-700 dark:hover:text-amber-400 flex items-center justify-between py-1"><span>Distribusi Roster Kurikulum</span><span>→</span></a></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/60 mt-10">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div>
+        <p class="text-sm font-extrabold text-slate-900 dark:text-white">EduConnect — SMA Negeri 1 Sabang</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          Jl. T. Nyak Arief, Gampong Ie Meulee, Kec. Sukajaya, Kota Sabang, Aceh 23521
+        </p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3 text-xs font-bold">
+        <a href="https://wa.me/6281360951234" target="_blank" rel="noopener noreferrer"
+          class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition">
+          Helpdesk WhatsApp TU
+        </a>
+        <a href="/tatausaha/" class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+          Portal TU
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Pencarian / Filter Modul
+    function filterModules(query) {
+      const q = query.trim().toLowerCase();
+      const cards = document.querySelectorAll('.module-card');
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const keywords = (card.dataset.keywords || '') + ' ' + card.textContent.toLowerCase();
+        const match = !q || keywords.includes(q);
+        card.classList.toggle('hidden', !match);
+        if (match) visibleCount++;
+      });
+
+      document.getElementById('emptySearchState').classList.toggle('hidden', visibleCount > 0);
+    }
+
+    function resetModuleSearch() {
+      const input = document.getElementById('moduleSearchInput');
+      input.value = '';
+      filterModules('');
+      input.focus();
+    }
+
+    // Jam & Status Operasional WIB
+    function updateSchoolClockWIB() {
+      const now = new Date();
+      const wib = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (7 * 3600000));
+      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+      const dayName = days[wib.getDay()];
+      const dateStr = `${wib.getDate()} ${months[wib.getMonth()]} ${wib.getFullYear()}`;
+      const hh = String(wib.getHours()).padStart(2, '0');
+      const mm = String(wib.getMinutes()).padStart(2, '0');
+
+      const day = wib.getDay();
+      const mins = wib.getHours() * 60 + wib.getMinutes();
+      let isSchoolHours = false;
+      if ((day >= 1 && day <= 4) || day === 6) isSchoolHours = mins >= 450 && mins <= 810;
+      else if (day === 5) isSchoolHours = mins >= 450 && mins <= 705;
+
+      const txt = document.getElementById('schoolClockText');
+      const dot = document.getElementById('schoolClockDot');
+
+      if (isSchoolHours) {
+        txt.textContent = `${dayName}, ${dateStr} • ${hh}:${mm} WIB (Jam Layanan Aktif)`;
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+      } else {
+        txt.textContent = `${dayName}, ${dateStr} • ${hh}:${mm} WIB (Akses Online 24 Jam)`;
+        dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+      }
+    }
+
+    // Toggle Dark / Light Mode
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+    });
+
+    updateSchoolClockWIB();
+    setInterval(updateSchoolClockWIB, 30000);
+  </script>
 </body>
 </html>
